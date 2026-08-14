@@ -1,0 +1,108 @@
+---
+config:
+  theme: redux
+---
+erDiagram
+    USUARIO ||--o| PACIENTE : "especializa"
+    USUARIO ||--o| ADMINISTRADOR : "especializa"
+
+    
+    PACIENTE ||--o{ REGISTRO_DIARIO : "cadastra"
+    PACIENTE ||--o{ CONSULTA : "agenda"
+    
+   
+    REGISTRO_DIARIO ||--o{ REGISTRO_SINTOMA : "lista"
+    
+    APOIO ||--o{ GRADE_FUNCIONAMENTO : "abre_em"
+    
+    ARTIGO ||--o{ ARTIGO_CATEGORIA : "classificado"
+    CATEGORIA ||--o{ ARTIGO_CATEGORIA : "agrupa"
+    ADMINISTRADOR ||--o{ ARTIGO : "publica"
+
+    USUARIO {
+        uuid id PK
+        string nome
+        string email
+        string login
+        string senha_hash
+        string telefone
+        date data_nascimento
+        timestamp data_criacao
+        timestamp ultimo_acesso
+    }
+
+    PACIENTE {
+        uuid usuario_id PK, FK
+        string logradouro
+        string numero
+        string bairro
+        string cidade
+        string estado
+        geometry localizacao_postgis "Ponto Geográfico"
+    }
+
+    ADMINISTRADOR {
+        uuid usuario_id PK, FK
+        string nivel_acesso "TOTAL, MODERADOR, ANALISTA"
+    }
+
+    REGISTRO_DIARIO {
+        uuid id PK
+        uuid paciente_id FK
+        timestamp data_hora
+        string humor "MUITO_BEM, MAL, etc"
+        string nota_voz_url
+    }
+
+    REGISTRO_SINTOMA {
+        uuid id PK
+        uuid registro_diario_id FK
+        string sintoma_tipo "NAUSEA, DOR, etc"
+        float intensidade
+    }
+
+    APOIO {
+        uuid id PK
+        string nome
+        string tipo_apoio "ONG, CLINICA, TRANSPORTE"
+        string logradouro
+        string bairro
+        geometry localizacao_postgis
+        string status_administrativo
+    }
+
+    GRADE_FUNCIONAMENTO {
+        uuid id PK
+        uuid apoio_id FK
+        integer dia_semana "0-6"
+        time horario_inicio
+        time horario_fim
+    }
+
+    ARTIGO {
+        uuid id PK
+        uuid autor_id FK
+        string titulo
+        text conteudo
+        integer tempo_leitura_minutos
+        string imagem_url
+        timestamp data_publicacao
+    }
+
+    CATEGORIA {
+        uuid id PK
+        string nome
+    }
+
+    ARTIGO_CATEGORIA {
+        uuid artigo_id PK, FK
+        uuid categoria_id PK, FK
+    }
+
+    CONSULTA {
+        uuid id PK
+        uuid paciente_id FK
+        string medico_nome
+        timestamp data_hora
+        string status_consulta
+    }
