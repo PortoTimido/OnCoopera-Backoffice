@@ -1,14 +1,19 @@
-# OnCoopera — Project Constitution
+# OnCoopera Backoffice — Project Constitution
 
-## 1. Propósito
+## 1. Propósito e escopo
 
-Esta Constitution define os princípios, restrições e regras fundamentais que devem orientar o desenvolvimento do OnCoopera.
+Esta Constitution define os princípios, restrições e regras fundamentais que devem orientar o desenvolvimento do **backoffice do OnCoopera**.
 
-Ela deve ser considerada a referência normativa de mais alto nível do projeto para decisões relacionadas a:
+Seu escopo é exclusivamente a aplicação administrativa utilizada para gerenciamento das informações e funcionalidades de backoffice do projeto.
+
+Esta Constitution não define regras arquiteturais ou de implementação da aplicação mobile do OnCoopera.
+
+Ela deve ser considerada a referência normativa de mais alto nível do backoffice para decisões relacionadas a:
 
 * arquitetura;
 * organização do código;
-* desenvolvimento de novas funcionalidades;
+* desenvolvimento de funcionalidades;
+* integração com o backend;
 * qualidade de software;
 * segurança;
 * privacidade;
@@ -17,9 +22,9 @@ Ela deve ser considerada a referência normativa de mais alto nível do projeto 
 * documentação;
 * Spec Driven Development.
 
-As regras descritas neste documento devem ser respeitadas por desenvolvedores e agentes de inteligência artificial utilizados durante o desenvolvimento.
+As regras descritas neste documento devem ser respeitadas por desenvolvedores e agentes de inteligência artificial utilizados no desenvolvimento do backoffice.
 
-Este documento não deve conter detalhes específicos de funcionalidades individuais. Esses detalhes devem ser definidos nas respectivas specifications.
+Detalhes específicos de funcionalidades não devem ser definidos nesta Constitution. Eles devem permanecer nas respectivas specifications.
 
 ---
 
@@ -27,82 +32,71 @@ Este documento não deve conter detalhes específicos de funcionalidades individ
 
 ## 2.1 Linguagem
 
-TypeScript é a linguagem padrão para os componentes de software desenvolvidos pelo projeto.
+TypeScript é a linguagem padrão para o desenvolvimento do backoffice e dos componentes de backend relacionados ao projeto.
 
-Novos códigos de frontend e backend devem utilizar TypeScript.
-
----
-
-## 2.2 Backend
-
-O backend será desenvolvido sobre Node.js utilizando TypeScript.
-
-O framework de backend ainda não foi definido.
-
-Até que exista uma decisão formal, nenhuma specification deve assumir um framework específico como requisito arquitetural global.
-
-A escolha do framework deve ser registrada por meio de uma Architecture Decision Record — ADR.
+Novos códigos devem utilizar TypeScript.
 
 ---
 
-## 2.3 Aplicação web — Backoffice
+## 2.2 Frontend
 
-O OnCoopera possuirá uma aplicação de backoffice desenvolvida com:
+O backoffice será desenvolvido utilizando:
 
 * React;
 * TypeScript.
 
 A biblioteca de componentes e/ou biblioteca visual ainda não foi definida.
 
-Enquanto não existir um Design System formal, o desenvolvimento deve:
+Enquanto não houver um Design System formal, o desenvolvimento deve:
 
-* priorizar componentes reutilizáveis;
-* evitar duplicação desnecessária de componentes;
-* preservar consistência visual entre telas;
+* priorizar reutilização de componentes;
+* evitar duplicação desnecessária;
+* manter consistência visual entre telas;
 * seguir boas práticas de componentização;
 * utilizar os protótipos existentes no Figma como referência visual.
 
-A existência de um elemento nos protótipos não implica necessariamente a criação de um novo componente.
+Antes de criar um novo componente, deve ser avaliado se a necessidade pode ser atendida por:
 
-Antes de criar um componente, deve ser avaliado se a necessidade pode ser atendida por composição ou reutilização de componentes existentes.
+1. reutilização de um componente existente;
+2. composição de componentes existentes;
+3. extensão controlada de um componente existente.
+
+A criação de abstrações excessivamente genéricas apenas para eliminar pequenas duplicações deve ser evitada.
 
 ---
 
-## 2.4 Aplicação mobile
+## 2.3 Backend
 
-A aplicação mobile será desenvolvida utilizando:
+O backend utilizado pelo backoffice será desenvolvido sobre:
 
-* React Native;
-* Expo;
+* Node.js;
 * TypeScript.
 
-A biblioteca de componentes e/ou biblioteca visual ainda não foi definida.
+O framework do backend ainda não foi definido.
 
-A organização arquitetural interna do frontend mobile ainda não foi definida e não deve ser presumida pelas specifications.
+Até que exista uma decisão formal, nenhuma specification deve assumir um framework específico como padrão arquitetural.
 
-Sua definição deverá ocorrer antes que seja adotada como padrão global do projeto.
+A definição do framework deverá ser registrada em uma Architecture Decision Record — ADR.
 
 ---
 
-## 2.5 Banco de dados
+## 2.4 Banco de dados
 
-O banco de dados utilizado pelo OnCoopera será PostgreSQL.
+O banco de dados utilizado pelo sistema será PostgreSQL.
 
-O acesso ao banco de dados será realizado utilizando Prisma.
+O acesso ao banco será realizado utilizando Prisma.
 
-Decisões relacionadas ao modelo de persistência devem respeitar a separação arquitetural definida para o backend.
+Detalhes de persistência devem permanecer isolados das regras centrais de negócio.
 
-O domínio da aplicação não deve depender diretamente de detalhes de persistência.
+O domínio da aplicação não deve depender diretamente do Prisma.
 
 ---
 
 # 3. Arquitetura do backend
 
-## 3.1 Domain-Driven Design
+O backend seguirá Domain-Driven Design — DDD.
 
-O backend do OnCoopera utilizará Domain-Driven Design — DDD — como princípio arquitetural.
-
-A aplicação será organizada, em alto nível, nas seguintes áreas:
+Sua organização em alto nível será:
 
 ```text
 api/
@@ -112,90 +106,84 @@ domain/
 infrastructure/
 ```
 
-Cada área possui uma responsabilidade distinta e essas responsabilidades devem ser preservadas durante o desenvolvimento.
+Cada camada deve possuir responsabilidades claramente delimitadas.
 
 ---
 
-## 3.2 Domain
+## 3.1 Domain
 
-A camada `domain` deve representar as regras e conceitos do domínio da aplicação.
+A camada `domain` representa os conceitos e regras de negócio do sistema.
 
-Ela deve concentrar comportamento e regras de negócio que independem de:
+Ela deve permanecer independente de:
 
-* banco de dados;
 * framework HTTP;
 * controllers;
-* bibliotecas de interface;
-* mecanismos específicos de infraestrutura;
-* detalhes externos à regra de negócio.
+* Prisma;
+* banco de dados;
+* serviços externos;
+* interface gráfica.
 
-O domínio não deve conhecer Prisma, HTTP ou detalhes específicos do framework utilizado pelo backend.
-
-Sempre que possível, regras de negócio devem permanecer independentes de tecnologias externas.
+Regras de negócio relevantes devem permanecer no domínio ou em estruturas coerentes com o modelo adotado, e não em controllers ou componentes React.
 
 ---
 
-## 3.3 Application
+## 3.2 Application
 
 A camada `application` deve coordenar os casos de uso da aplicação.
 
-Ela é responsável por organizar a execução das operações necessárias para atender às funcionalidades do sistema.
+Ela pode utilizar elementos do domínio para realizar operações e orquestrar o fluxo necessário para atender uma funcionalidade.
 
-A camada de aplicação pode utilizar elementos do domínio, mas não deve transferir regras de negócio essenciais para controllers ou para a infraestrutura.
-
-Casos de uso devem possuir responsabilidades claramente delimitadas.
+A camada de aplicação não deve depender de detalhes específicos de interface gráfica.
 
 ---
 
-## 3.4 API
+## 3.3 API
 
 A camada `api` representa a entrada HTTP da aplicação.
 
-Ela deve ser responsável por atividades relacionadas ao transporte da requisição, como:
+Ela deve ser responsável principalmente por:
 
 * receber requisições;
 * interpretar parâmetros;
-* encaminhar dados para os casos de uso apropriados;
+* validar dados de entrada conforme o padrão definido;
+* acionar os casos de uso apropriados;
 * transformar resultados em respostas HTTP;
-* retornar códigos HTTP apropriados.
+* retornar códigos HTTP adequados.
 
-A camada de API não deve concentrar regras de negócio.
-
-Controllers ou estruturas equivalentes devem permanecer simples e atuar principalmente como adaptadores entre HTTP e a camada de aplicação.
+Controllers ou estruturas equivalentes não devem concentrar regras de negócio.
 
 ---
 
-## 3.5 Infrastructure
+## 3.4 Infrastructure
 
-A camada `infrastructure` deve concentrar detalhes tecnológicos e integrações externas ao domínio.
+A camada `infrastructure` deve concentrar detalhes técnicos externos ao domínio.
 
 Isso inclui, quando aplicável:
 
-* persistência;
 * Prisma;
 * implementações de repositórios;
-* acesso a serviços externos;
-* mecanismos de infraestrutura.
+* persistência;
+* acesso ao banco de dados;
+* integração com serviços externos;
+* implementações específicas de infraestrutura.
 
-Dependências externas devem permanecer isoladas sempre que possível.
-
-Mudanças de infraestrutura não devem exigir modificações desnecessárias nas regras centrais do domínio.
+Mudanças de infraestrutura não devem exigir alterações desnecessárias no domínio.
 
 ---
 
-## 3.6 Documentation
+## 3.5 Documentation
 
 A área `documentation` deve concentrar documentação técnica relacionada ao backend quando essa documentação fizer parte da estrutura da aplicação.
 
-Specifications e Architecture Decision Records pertencentes ao processo de SDD devem permanecer na estrutura específica de documentação definida para o projeto e não devem ser misturados com código de domínio.
+Os artefatos de SDD devem permanecer organizados em sua própria estrutura documental e não devem ser misturados com código de domínio.
 
 ---
 
 # 4. Dependências entre camadas
 
-As dependências entre as camadas devem preservar a independência do domínio.
+A arquitetura deve preservar a independência das regras de negócio.
 
-Como princípio geral:
+Como princípio:
 
 ```text
 API
@@ -209,291 +197,283 @@ Infrastructure
 Application / Domain abstractions
 ```
 
-O domínio não deve depender da API.
+O domínio não deve depender:
 
-O domínio não deve depender da infraestrutura.
+* da API;
+* da infraestrutura;
+* do framework do backend;
+* do Prisma;
+* do React;
+* de qualquer detalhe de interface.
 
-O domínio não deve depender do framework HTTP.
-
-O domínio não deve depender diretamente do Prisma.
-
-A infraestrutura pode implementar contratos necessários às camadas internas.
-
-Detalhes externos devem depender das abstrações internas quando essa separação for necessária para preservar a arquitetura.
-
----
-
-# 5. API
-
-## 5.1 Estilo de comunicação
-
-A comunicação entre os clientes e o backend será realizada através de REST API.
-
-Serão consumidores da API, entre outros clientes definidos pelo projeto:
-
-* aplicação mobile;
-* aplicação web de backoffice.
+A infraestrutura pode implementar contratos definidos pelas camadas internas.
 
 ---
 
-## 5.2 Padrão de rotas
+# 5. Arquitetura do frontend
 
-O padrão global de rotas REST ainda não foi definido.
+A arquitetura interna definitiva do frontend React ainda não foi definida.
 
-Nenhuma specification deve criar um novo padrão global implicitamente.
+Nenhuma specification deve estabelecer silenciosamente um padrão global de organização de pastas ou estado da aplicação.
 
-Até que exista uma decisão arquitetural, rotas devem ser especificadas apenas quando forem necessárias para a funcionalidade em questão.
+Enquanto essa definição não for formalizada, novas funcionalidades devem:
 
-Uma convenção global de APIs poderá posteriormente ser estabelecida por ADR ou documentação arquitetural específica.
+* respeitar a organização já existente no projeto;
+* manter código relacionado próximo quando isso melhorar coesão;
+* separar componentes visuais de lógica relevante;
+* evitar dependências desnecessárias entre módulos;
+* evitar componentes com responsabilidades excessivas;
+* reutilizar estruturas existentes antes de criar novas abstrações.
+
+Quando uma arquitetura global de frontend for escolhida, a decisão deverá ser registrada através de ADR.
 
 ---
 
-## 5.3 Contratos
+# 6. REST API
+
+A comunicação entre o backoffice e o backend será realizada através de REST API.
+
+---
+
+## 6.1 Contratos
 
 Os contratos entre frontend e backend devem ser explícitos.
 
-Uma specification que introduza ou altere uma operação da API deve documentar, quando aplicável:
+Uma functionality que introduza ou altere uma operação da API deve documentar, quando aplicável:
 
-* objetivo da operação;
-* dados de entrada;
-* dados de saída;
+* objetivo;
+* método HTTP;
+* rota;
+* parâmetros;
+* corpo da requisição;
+* resposta esperada;
 * possíveis erros;
-* critérios de autorização;
-* efeitos esperados da operação.
+* regras de autorização.
 
-Mudanças que quebrem contratos existentes devem ser identificadas durante a etapa de design da specification.
+Mudanças que quebrem contratos existentes devem ser identificadas durante a etapa de design.
 
 ---
 
-# 6. Autenticação e autorização
+## 6.2 Padrão de rotas
 
-## 6.1 Estado atual
+O padrão global de rotas REST ainda não foi formalmente definido.
 
-Durante as fases iniciais do desenvolvimento, será utilizado um mecanismo simplificado de sessão para validação de acesso.
+Nenhuma feature deve introduzir implicitamente um novo padrão global.
+
+Caso seja necessário definir uma convenção para toda a API, essa decisão deve ser documentada separadamente.
+
+---
+
+# 7. Autenticação e autorização
+
+## 7.1 Estado atual
+
+Durante a fase atual do desenvolvimento, a validação de acesso utilizará um mecanismo simplificado baseado em sessão.
 
 Esse mecanismo é temporário.
 
 ---
 
-## 6.2 MVP final
+## 7.2 MVP final
 
 Na versão final do MVP, a autenticação deverá utilizar JWT.
 
-Specifications desenvolvidas durante o período de autenticação temporária não devem assumir que o mecanismo atual será definitivo.
-
-Regras de negócio não devem ser acopladas ao mecanismo temporário de autenticação.
+O código de negócio não deve depender diretamente do mecanismo temporário de autenticação.
 
 ---
 
-## 6.3 Autorização
+## 7.3 Autorização
 
-Autenticação não deve ser considerada equivalente à autorização.
+Autenticação e autorização são responsabilidades distintas.
 
-Sempre que uma funcionalidade possuir restrições de acesso, a specification deve declarar quem pode executar a operação.
+Sempre que uma funcionalidade possuir restrições de acesso, a specification deve indicar quais atores podem executar determinada operação.
 
-Restrições de acesso não devem existir exclusivamente no frontend.
+A autorização efetiva deve ser validada pelo backend.
 
-O backend deve ser responsável pela validação efetiva das permissões aplicáveis.
-
----
-
-# 7. Privacidade e LGPD
-
-O OnCoopera deve ser desenvolvido considerando adequação à Lei Geral de Proteção de Dados — LGPD.
-
-As regras específicas de tratamento, retenção, armazenamento e proteção de dados ainda não foram formalizadas.
-
-Por esse motivo, este documento não estabelece mecanismos técnicos específicos que ainda não tenham sido definidos pelo projeto.
-
-Entretanto, toda nova functionality que envolva dados pessoais deve avaliar explicitamente questões relacionadas a privacidade durante as etapas de requirements e design.
-
-Quando aplicável, a análise deve identificar:
-
-* quais dados são necessários;
-* por que os dados são necessários;
-* onde os dados serão armazenados;
-* quais atores podem acessá-los;
-* se os dados serão expostos através da API;
-* riscos relacionados à exposição indevida.
-
-Dados pessoais não devem ser coletados ou expostos apenas por conveniência técnica.
-
-Decisões específicas relacionadas à adequação à LGPD deverão ser documentadas quando forem formalmente definidas.
+Ocultar um recurso no frontend não deve ser considerado mecanismo suficiente de segurança.
 
 ---
 
-# 8. Acessibilidade
+# 8. Privacidade e LGPD
 
-A acessibilidade é um requisito transversal do OnCoopera.
+O backoffice do OnCoopera deve ser desenvolvido considerando adequação à Lei Geral de Proteção de Dados — LGPD.
 
-Ainda não existe um padrão formal de acessibilidade adotado pelo projeto.
+As regras específicas de tratamento, retenção e proteção de dados ainda não foram formalmente definidas.
 
-Portanto, nenhuma specification deve declarar conformidade com uma norma ou nível específico que ainda não tenha sido definido.
+Portanto, esta Constitution não estabelece mecanismos técnicos que ainda não tenham sido aprovados.
 
-Mesmo sem uma norma formal estabelecida, novas interfaces devem considerar acessibilidade durante seu design e implementação.
+Entretanto, toda nova funcionalidade que manipule dados pessoais deve avaliar, quando aplicável:
 
-Decisões futuras relacionadas a padrões formais de acessibilidade devem ser incorporadas à arquitetura ou à Constitution quando forem oficialmente adotadas.
+* quais dados são utilizados;
+* por que são necessários;
+* onde são armazenados;
+* quem pode visualizá-los;
+* quem pode alterá-los;
+* quais dados são retornados pela API;
+* riscos de exposição indevida.
+
+Dados pessoais não devem ser expostos apenas por conveniência de implementação.
 
 ---
 
-# 9. Interface e experiência do usuário
+# 9. Acessibilidade
 
-## 9.1 Figma
+A acessibilidade é um requisito transversal do backoffice.
 
-Os protótipos existentes no Figma são atualmente a principal referência visual das interfaces do OnCoopera.
+Ainda não existe uma norma ou nível formal de conformidade adotado pelo projeto.
+
+Por esse motivo, não deve ser declarada conformidade com padrões específicos que ainda não tenham sido formalmente escolhidos.
+
+Mesmo assim, novas interfaces devem considerar acessibilidade durante design e implementação.
+
+---
+
+# 10. Interface e Figma
+
+Os protótipos existentes no Figma são atualmente a principal referência visual do backoffice.
 
 Eles devem orientar:
 
-* estrutura visual;
-* hierarquia da informação;
-* fluxos;
 * composição das telas;
-* comportamento esperado da interface quando representado no protótipo.
+* hierarquia visual;
+* organização das informações;
+* fluxos de interação;
+* comportamento representado nos protótipos.
 
 ---
 
-## 9.2 Ausência de Design System formal
+## 10.1 Ausência de Design System formal
 
-O projeto ainda não possui um Design System formal.
+O projeto ainda não possui Design System formal.
 
-Portanto, não devem ser inventadas regras globais de:
+Não devem ser inventadas como regras globais definições que ainda não existem, como:
 
-* cores;
-* tipografia;
-* espaçamento;
-* componentes;
-* breakpoints;
 * tokens;
-* comportamento visual;
+* paleta oficial;
+* escalas de espaçamento;
+* tipografia oficial;
+* breakpoints;
+* biblioteca de componentes obrigatória.
 
-que não estejam formalmente definidas.
-
-Quando padrões começarem a se repetir no projeto, deve ser avaliada sua transformação em componentes reutilizáveis ou em regras formais de Design System.
-
----
-
-## 9.3 Reutilização
-
-Antes da criação de um novo componente de interface, deve-se verificar:
-
-1. se existe um componente equivalente;
-2. se um componente existente pode ser estendido;
-3. se a necessidade pode ser resolvida através de composição;
-4. se o componente é específico da feature ou compartilhável.
-
-Duplicação visual e comportamental deve ser evitada.
-
-Reutilização não deve ser forçada quando resultar em abstrações excessivamente genéricas ou difíceis de manter.
+Padrões recorrentes devem ser identificados e, quando fizer sentido, transformados em componentes reutilizáveis.
 
 ---
 
-# 10. Qualidade de código
+# 11. Componentização
 
-O código do OnCoopera deve priorizar:
+Componentes devem possuir responsabilidades claras.
+
+Componentes puramente visuais não devem concentrar:
+
+* regras de negócio;
+* persistência;
+* decisões de autorização;
+* integrações complexas com API.
+
+Antes da criação de um novo componente, deve ser verificado se já existe uma implementação equivalente.
+
+Componentes compartilhados devem representar comportamentos realmente reutilizáveis.
+
+Componentes específicos de uma feature não devem ser promovidos prematuramente a componentes globais.
+
+---
+
+# 12. Qualidade de código
+
+O desenvolvimento deve priorizar:
 
 * legibilidade;
+* simplicidade;
 * coesão;
 * baixo acoplamento;
-* responsabilidades bem definidas;
-* reutilização adequada;
-* simplicidade;
-* facilidade de manutenção.
+* responsabilidades claras;
+* manutenção;
+* previsibilidade;
+* reutilização adequada.
 
-Não devem ser introduzidas abstrações sem uma necessidade concreta.
+Soluções mais complexas não devem ser escolhidas apenas por serem consideradas tecnicamente mais sofisticadas.
 
-Soluções mais complexas não devem ser escolhidas apenas por serem consideradas arquiteturalmente mais sofisticadas.
-
-A arquitetura deve servir às necessidades do sistema.
+A arquitetura deve atender às necessidades reais do sistema.
 
 ---
 
-## 10.1 Responsabilidade
+## 12.1 Responsabilidade
 
-Classes, funções, componentes e módulos devem possuir responsabilidades claras.
+Código de interface não deve concentrar regra de negócio.
 
-Código responsável por interface não deve concentrar regras de negócio.
+Código HTTP não deve concentrar regra de domínio.
 
-Código responsável por transporte HTTP não deve concentrar regras de domínio.
-
-Código responsável por persistência não deve definir regras de negócio que pertencem ao domínio.
+Código de persistência não deve definir comportamento de negócio pertencente ao domínio.
 
 ---
 
-## 10.2 Duplicação
+## 12.2 Duplicação
 
-Duplicação significativa de regra de negócio deve ser evitada.
+Duplicação significativa de lógica deve ser evitada.
 
-Antes de duplicar comportamento existente, deve ser avaliada a possibilidade de reutilização.
+Antes de repetir um comportamento existente, deve ser considerada a reutilização.
 
-Entretanto, abstrações não devem ser criadas prematuramente apenas para eliminar pequenas semelhanças de implementação.
-
----
-
-## 10.3 Escopo
-
-Uma implementação deve permanecer dentro do escopo definido pela specification e pelas tasks correspondentes.
-
-Refatorações não relacionadas à funcionalidade não devem ser realizadas automaticamente.
-
-Quando uma alteração fora do escopo for necessária para implementar corretamente uma feature, ela deve ser identificada durante o design ou review.
+Entretanto, pequenas semelhanças não justificam automaticamente uma abstração compartilhada.
 
 ---
 
-# 11. Testes
+## 12.3 Escopo
 
-## 11.1 Princípio geral
+A implementação deve permanecer dentro do escopo definido pela specification.
 
-Testes fazem parte da implementação da funcionalidade e não devem ser tratados apenas como uma atividade posterior.
+Refatorações não relacionadas à funcionalidade não devem ser executadas apenas por preferência do desenvolvedor ou do agente.
 
-Os critérios de aceite definidos nas specifications devem servir como referência para a estratégia de validação.
+Quando uma alteração fora do escopo for necessária, ela deve ser identificada durante design ou review.
 
 ---
 
-## 11.2 Backend
+# 13. Testes
+
+Testes fazem parte do processo de desenvolvimento e validação.
+
+Os critérios de aceite das specifications devem servir como referência para definição dos cenários testáveis.
+
+---
+
+## 13.1 Backend
 
 Japa será utilizado como ferramenta de testes do backend.
 
-A estratégia completa de cobertura e divisão entre:
+A estratégia completa de divisão entre testes:
 
-* testes unitários;
-* testes de integração;
-* testes funcionais;
+* unitários;
+* integração;
+* funcionais;
 
 ainda não foi formalmente definida.
 
-Nenhuma taxa mínima de cobertura deve ser assumida enquanto não houver decisão explícita do projeto.
+Não existe atualmente uma taxa mínima obrigatória de cobertura.
 
 ---
 
-## 11.3 Backoffice web
+## 13.2 Frontend
 
-Playwright será utilizado para testes aplicáveis à aplicação web.
+Playwright será utilizado para testes aplicáveis ao backoffice.
 
-A estratégia complementar de testes unitários e de componentes ainda não foi definida.
+A estratégia complementar para testes unitários e testes de componentes ainda não foi definida.
 
-Playwright não deve ser implicitamente considerado a única ferramenta de testes do frontend até que essa decisão seja formalizada.
-
----
-
-## 11.4 Aplicação mobile
-
-A estratégia e as ferramentas de testes da aplicação React Native + Expo ainda não foram formalmente definidas.
-
-Nenhuma ferramenta deve ser adotada como padrão global do projeto sem decisão explícita.
+Playwright não deve ser considerado automaticamente a única ferramenta de testes do frontend até que exista uma decisão formal nesse sentido.
 
 ---
 
-## 11.5 Correções de bugs
+## 13.3 Testes de regressão
 
-Quando um defeito revelar uma situação que possa ser reproduzida automaticamente, deve ser avaliada a criação de um teste de regressão que impeça a reintrodução do mesmo comportamento.
+Quando um bug puder ser reproduzido de forma automatizada, deve ser avaliada a criação de um teste de regressão.
+
+O objetivo é evitar que o mesmo comportamento defeituoso seja reintroduzido posteriormente.
 
 ---
 
-# 12. Spec Driven Development
+# 14. Spec Driven Development
 
-O OnCoopera adota Spec Driven Development — SDD — como processo obrigatório para o desenvolvimento de funcionalidades relevantes.
+O desenvolvimento de funcionalidades relevantes do backoffice deve seguir Spec Driven Development — SDD.
 
-O fluxo padrão é:
+O fluxo obrigatório é:
 
 ```text
 requirements
@@ -509,22 +489,22 @@ implementation
 validation
 ```
 
-A implementação não deve ser utilizada como substituta da specification.
+A implementação não substitui a specification.
 
 ---
 
-# 13. Requirements
+# 15. Requirements
 
-A etapa de `requirements` deve definir o que precisa ser desenvolvido e por quê.
+A etapa de `requirements` deve responder principalmente:
 
-Ela deve priorizar comportamento e necessidade de negócio.
+> O que precisa ser desenvolvido e por quê?
 
-Requirements devem evitar decisões de implementação quando essas decisões pertencerem à etapa de design.
+Ela deve priorizar necessidades funcionais e regras de negócio.
 
-Devem ser identificados, quando aplicável:
+Quando aplicável, deve conter:
 
 * objetivo;
-* atores envolvidos;
+* atores;
 * requisitos funcionais;
 * regras de negócio;
 * restrições;
@@ -532,137 +512,132 @@ Devem ser identificados, quando aplicável:
 * cenários relevantes;
 * erros esperados;
 * requisitos de segurança;
-* requisitos de privacidade;
-* requisitos de acessibilidade.
+* privacidade;
+* acessibilidade.
 
-Requirements não devem inventar comportamento para preencher lacunas.
+Requirements não devem inventar decisões técnicas desnecessárias.
 
-Quando uma informação necessária não estiver definida, ela deve ser marcada como pendente e esclarecida antes de impactar a implementação.
+Informações ainda desconhecidas devem ser explicitamente tratadas como pendentes.
 
 ---
 
-# 14. Design
+# 16. Design
 
-A etapa de `design` deve transformar os requirements aprovados em uma proposta técnica de implementação.
+A etapa de `design` deve responder:
 
-Ela deve documentar somente decisões necessárias para implementar a feature.
+> Como os requirements serão implementados tecnicamente?
 
-Dependendo da funcionalidade, o design pode abordar:
+Quando aplicável, deve considerar:
 
-* componentes envolvidos;
+* frontend;
+* backend;
 * camadas afetadas;
-* entidades e objetos do domínio;
+* componentes;
 * casos de uso;
+* domínio;
 * persistência;
 * alterações no banco;
 * endpoints;
-* contratos;
-* integrações;
-* componentes de interface;
-* tratamento de erros;
+* contratos da API;
 * autenticação;
 * autorização;
+* tratamento de erros;
 * impactos em funcionalidades existentes;
 * estratégia de testes.
 
-O design deve respeitar esta Constitution e os ADRs aceitos pelo projeto.
+O design deve respeitar esta Constitution e os ADRs aceitos.
 
 ---
 
-# 15. Review
+# 17. Review
 
-Nenhuma feature relevante deve avançar diretamente do design para implementação sem passar por review.
+Antes da criação das tasks, requirements e design devem ser revisados.
 
-A etapa de review deve buscar inconsistências antes da criação das tasks.
+A revisão deve procurar, quando aplicável:
 
-O review deve verificar, quando aplicável:
-
-* requisitos ambíguos;
-* requisitos contraditórios;
-* critérios de aceite incompletos;
-* regras de negócio não contempladas;
-* violações da arquitetura;
-* duplicação de funcionalidade existente;
-* impacto em funcionalidades existentes;
+* ambiguidades;
+* contradições;
+* requisitos incompletos;
+* regras de negócio ausentes;
+* violações arquiteturais;
+* funcionalidades existentes que possam ser reutilizadas;
+* componentes existentes;
+* impactos em outras telas;
 * riscos de segurança;
 * riscos de privacidade;
-* impactos no banco de dados;
-* inconsistências entre Figma e specification;
-* componentes existentes que podem ser reutilizados;
-* decisões técnicas não justificadas.
+* impactos no banco;
+* divergências entre Figma e specification;
+* decisões técnicas sem justificativa.
 
-Problemas encontrados durante review devem ser corrigidos na specification ou design antes da implementação.
+Problemas encontrados devem ser corrigidos antes da implementação.
 
 ---
 
-# 16. Tasks
+# 18. Tasks
 
-Após aprovação do design, a implementação deve ser dividida em tasks executáveis.
+Após o design ser revisado, o trabalho deve ser dividido em tasks executáveis.
 
-Uma task deve representar uma unidade de trabalho suficientemente clara para que seja possível determinar quando ela foi concluída.
+Cada task deve representar uma unidade clara de implementação.
 
-Tasks devem, quando possível, possuir rastreabilidade com os requirements correspondentes.
+Sempre que possível, deve existir rastreabilidade entre requirements e tasks.
 
 Exemplo:
 
 ```text
 REQ-003
-  ↓
+   ↓
 T005 — Implementar caso de uso
-T006 — Expor endpoint
-T007 — Integrar interface
+T006 — Criar endpoint
+T007 — Integrar tela
 T008 — Validar critério de aceite
 ```
 
-Tasks excessivamente genéricas devem ser evitadas.
-
-Exemplo inadequado:
+Tasks como:
 
 ```text
 Implementar funcionalidade.
 ```
 
-A divisão de tasks não deve introduzir requisitos que não estejam presentes na specification.
+devem ser evitadas por serem genéricas demais.
 
 ---
 
-# 17. Implementation
+# 19. Implementation
 
 A implementação deve seguir:
 
+* Constitution;
+* ADRs aplicáveis;
 * requirements;
-* design aprovado;
-* tasks;
-* esta Constitution;
-* ADRs aplicáveis.
+* design;
+* tasks.
 
-Durante a implementação, decisões já estabelecidas não devem ser alteradas silenciosamente.
+Decisões já estabelecidas não devem ser alteradas silenciosamente.
 
-Se surgir uma necessidade que contradiga ou amplie a specification, a documentação correspondente deve ser revisada antes que a nova decisão seja tratada como parte oficial da feature.
+Se durante a implementação surgir uma necessidade que altere requirements ou design, a documentação deve ser revisada para refletir a nova decisão.
 
 ---
 
-# 18. Validation
+# 20. Validation
 
-A etapa de validation deve verificar se a implementação atende ao que foi especificado.
+A etapa de validation deve verificar se a implementação corresponde ao comportamento especificado.
 
-A validação deve utilizar como referência:
+Devem ser considerados:
 
 * requirements;
 * critérios de aceite;
 * design;
 * tasks;
-* testes aplicáveis.
+* testes existentes;
+* comportamento final da interface.
 
-Uma task concluída não significa automaticamente que a feature foi validada.
-
-A feature deve ser comparada com a specification final.
+Uma task marcada como concluída não significa automaticamente que a functionality está validada.
 
 ---
 
-# 19. Rastreabilidade
+# 21. Rastreabilidade
 
-Sempre que viável, deve ser possível rastrear:
+Sempre que viável, deve ser possível seguir a relação:
 
 ```text
 Requirement
@@ -676,142 +651,109 @@ Implementation
 Validation
 ```
 
-Um requisito não deve desaparecer silenciosamente entre specification e implementação.
+Requisitos não devem desaparecer silenciosamente durante a implementação.
 
-Da mesma forma, funcionalidades não especificadas não devem surgir durante a implementação sem que a specification seja atualizada.
+Comportamentos não especificados não devem surgir sem que a documentação correspondente seja atualizada.
 
 ---
 
-# 20. Decisões arquiteturais
+# 22. Architecture Decision Records
 
-Decisões arquiteturais relevantes e transversais devem ser registradas através de Architecture Decision Records — ADRs.
+Decisões arquiteturais relevantes e transversais ao backoffice devem ser registradas através de ADRs.
 
-Um ADR deve ser utilizado quando uma decisão:
+Um ADR deve ser criado quando uma decisão:
 
 * afetar múltiplas features;
-* estabelecer um padrão arquitetural;
+* estabelecer um padrão global;
 * possuir alternativas relevantes;
-* precisar registrar por que determinada escolha foi realizada;
-* gerar consequências importantes para o projeto.
+* possuir consequências arquiteturais;
+* precisar registrar por que determinada alternativa foi escolhida.
 
-Exemplos de decisões apropriadas para ADR:
+Exemplos:
 
-* escolha do framework de backend;
-* estratégia arquitetural dos frontends;
+* framework do backend;
+* arquitetura do frontend React;
+* padrão de rotas REST;
 * estratégia de autenticação;
-* padrão global de APIs;
-* estratégia global de testes;
-* adoção de um Design System.
+* biblioteca de componentes;
+* estratégia global de testes.
 
-Decisões específicas de apenas uma feature devem permanecer na documentação da própria feature quando não justificarem um ADR.
+Decisões específicas de uma única feature devem permanecer na documentação da própria feature quando não justificarem um ADR.
 
 ---
 
-# 21. Informações não definidas
+# 23. Informações não definidas
 
 Informações desconhecidas não devem ser inventadas.
 
-Quando uma specification, design ou task depender de uma informação ainda não definida, o agente ou desenvolvedor deve:
+Quando uma specification depender de uma informação ainda não definida, deve-se:
 
-1. identificar explicitamente a lacuna;
-2. verificar se existe uma decisão anterior aplicável;
-3. solicitar esclarecimento quando a decisão depender de requisito ou preferência do projeto;
-4. registrar a decisão no artefato apropriado depois de definida.
+1. identificar a lacuna;
+2. verificar se já existe decisão aplicável;
+3. solicitar esclarecimento quando necessário;
+4. registrar a decisão no artefato adequado.
 
-Valores, regras de negócio, comportamentos, permissões, tecnologias e requisitos não devem ser presumidos apenas para permitir que a implementação continue.
+Não devem ser presumidos:
+
+* requisitos;
+* regras de negócio;
+* permissões;
+* tecnologias;
+* comportamentos;
+* valores;
+* contratos;
+* decisões arquiteturais.
 
 ---
 
-# 22. Uso de agentes de inteligência artificial
+# 24. Uso de agentes de IA
 
-Agentes de IA utilizados no desenvolvimento do OnCoopera devem considerar esta Constitution como uma restrição obrigatória.
+Agentes de inteligência artificial utilizados no desenvolvimento do backoffice devem considerar esta Constitution como uma restrição obrigatória.
 
-Antes de implementar uma funcionalidade, o agente deve consultar:
+Antes da implementação, o agente deve consultar:
 
-1. esta Constitution;
-2. ADRs relacionados;
+1. Constitution;
+2. ADRs aplicáveis;
 3. requirements da feature;
-4. design da feature;
+4. design;
 5. tasks aprovadas.
 
 O agente deve analisar o código existente antes de criar novas estruturas.
 
-Ele deve procurar:
+Deve procurar:
 
-* implementações equivalentes;
 * padrões existentes;
 * componentes reutilizáveis;
+* implementações semelhantes;
 * contratos existentes;
-* regras de domínio relacionadas;
+* regras relacionadas;
 * possíveis impactos da alteração.
-
-O agente não deve substituir padrões existentes por preferências próprias sem justificativa documentada.
 
 ---
 
-## 22.1 Proibições para agentes
-
-Um agente não deve:
+## 24.1 Agentes não devem
 
 * inventar requisitos;
 * inventar regras de negócio;
-* criar novos padrões globais silenciosamente;
-* alterar decisões arquiteturais sem registrar a necessidade;
-* introduzir novas bibliotecas sem necessidade documentada;
-* executar refatorações fora do escopo apenas por preferência;
-* mover regras de domínio para controllers ou componentes de interface;
+* estabelecer padrões globais silenciosamente;
+* substituir decisões arquiteturais por preferências próprias;
+* introduzir bibliotecas sem necessidade;
+* refatorar partes não relacionadas sem justificativa;
+* mover regras de negócio para controllers;
+* mover regras de negócio para componentes React;
 * ignorar ADRs aplicáveis;
-* considerar uma task concluída sem verificar os critérios correspondentes.
+* considerar uma feature concluída sem validação.
 
 ---
 
-## 22.2 Dúvidas e ambiguidades
+# 25. Hierarquia documental
 
-Quando houver ambiguidade capaz de alterar:
-
-* regra de negócio;
-* arquitetura;
-* comportamento do usuário;
-* persistência;
-* segurança;
-* privacidade;
-* contrato da API;
-
-a decisão não deve ser inventada pelo agente.
-
-A dúvida deve ser resolvida antes que a suposição seja incorporada como comportamento oficial do sistema.
-
----
-
-# 23. Evolução da Constitution
-
-Esta Constitution pode evoluir conforme o projeto amadurecer.
-
-Alterações devem ocorrer quando uma nova regra passar a ser considerada global e obrigatória para o projeto.
-
-Detalhes específicos de implementação não devem ser adicionados à Constitution apenas porque são utilizados por uma única feature.
-
-Antes de adicionar uma nova regra, deve-se perguntar:
-
-> Esta regra deve ser obrigatória também para futuras funcionalidades do OnCoopera?
-
-Se a resposta for não, provavelmente a informação pertence a:
-
-* uma specification;
-* um design;
-* uma decisão da feature;
-* ou um ADR.
-
----
-
-# 24. Hierarquia documental
-
-Em caso de organização das decisões do projeto, deve ser considerada a seguinte separação:
+A documentação do SDD deve respeitar a seguinte separação:
 
 ```text
 Constitution
     │
-    │ regras globais obrigatórias
+    │ regras globais
     ↓
 Architecture Decision Records
     │
@@ -819,38 +761,57 @@ Architecture Decision Records
     ↓
 Feature Requirements
     │
-    │ comportamento necessário
+    │ o que deve acontecer
     ↓
 Feature Design
     │
-    │ solução técnica
+    │ como será implementado
     ↓
 Feature Tasks
     │
     │ trabalho executável
     ↓
 Implementation
+    │
+    ↓
+Validation
 ```
 
 Uma specification não deve contradizer esta Constitution.
 
-Uma decisão específica de feature não deve contradizer um ADR aceito sem que a decisão arquitetural seja revisada.
+Uma feature não deve contradizer um ADR aceito sem que a decisão arquitetural correspondente seja revisada.
 
 ---
 
-# 25. Princípio final
+# 26. Evolução da Constitution
 
-O objetivo do processo não é produzir documentação por documentação.
+Esta Constitution deve evoluir somente quando uma nova regra passar a ser considerada global para o desenvolvimento do backoffice.
 
-Specifications, ADRs e esta Constitution existem para aumentar:
+Antes de adicionar uma regra, deve ser feita a seguinte pergunta:
+
+> Esta decisão deve obrigatoriamente ser seguida pelas próximas funcionalidades do backoffice?
+
+Se a resposta for não, a informação provavelmente pertence a:
+
+* requirements;
+* design;
+* decisions da feature;
+* ADR.
+
+---
+
+# 27. Princípio final
+
+O objetivo do SDD não é produzir documentação por formalidade.
+
+A documentação existe para aumentar:
 
 * clareza;
-* previsibilidade;
-* rastreabilidade;
-* qualidade;
 * consistência;
-* capacidade de evolução do software.
+* rastreabilidade;
+* previsibilidade;
+* qualidade;
+* facilidade de manutenção;
+* confiabilidade da implementação realizada por humanos ou agentes de IA.
 
-A documentação deve possuir informação suficiente para orientar decisões e implementação, sem criar complexidade desnecessária.
-
-Quando houver conflito entre velocidade imediata e uma decisão não esclarecida que possa afetar o comportamento ou arquitetura do sistema, a decisão deve ser esclarecida antes de ser transformada em código.
+Quando existir uma decisão relevante ainda não definida, ela deve ser esclarecida antes de ser incorporada ao código como comportamento oficial do sistema.
