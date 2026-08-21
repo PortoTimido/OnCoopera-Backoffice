@@ -45,7 +45,7 @@ O backoffice será desenvolvido utilizando:
 * React;
 * TypeScript.
 
-A biblioteca de componentes e/ou biblioteca visual ainda não foi definida.
+A ferramenta de build e o roteamento do frontend são definidos no ADR-002. A biblioteca de componentes e/ou biblioteca visual é uma decisão incremental ainda aberta.
 
 Enquanto não houver um Design System formal, o desenvolvimento deve:
 
@@ -72,11 +72,7 @@ O backend utilizado pelo backoffice será desenvolvido sobre:
 * Node.js;
 * TypeScript.
 
-O framework do backend ainda não foi definido.
-
-Até que exista uma decisão formal, nenhuma specification deve assumir um framework específico como padrão arquitetural.
-
-A definição do framework deverá ser registrada em uma Architecture Decision Record — ADR.
+Fastify é o adaptador HTTP e Zod é utilizado para validação nas bordas, conforme ADR-003. Essas dependências não devem atravessar as fronteiras da API e da infraestrutura.
 
 ---
 
@@ -212,11 +208,7 @@ A infraestrutura pode implementar contratos definidos pelas camadas internas.
 
 # 5. Arquitetura do frontend
 
-A arquitetura interna definitiva do frontend React ainda não foi definida.
-
-Nenhuma specification deve estabelecer silenciosamente um padrão global de organização de pastas ou estado da aplicação.
-
-Enquanto essa definição não for formalizada, novas funcionalidades devem:
+A arquitetura do frontend é organizada por features, conforme ADR-002 e `architecture/frontend.md`. Novas funcionalidades devem:
 
 * respeitar a organização já existente no projeto;
 * manter código relacionado próximo quando isso melhorar coesão;
@@ -225,7 +217,7 @@ Enquanto essa definição não for formalizada, novas funcionalidades devem:
 * evitar componentes com responsabilidades excessivas;
 * reutilizar estruturas existentes antes de criar novas abstrações.
 
-Quando uma arquitetura global de frontend for escolhida, a decisão deverá ser registrada através de ADR.
+Mudanças globais nessa organização devem ser registradas através de ADR.
 
 ---
 
@@ -256,29 +248,19 @@ Mudanças que quebrem contratos existentes devem ser identificadas durante a eta
 
 ## 6.2 Padrão de rotas
 
-O padrão global de rotas REST ainda não foi formalmente definido.
+O padrão global de rotas REST, paginação e erros é definido no ADR-004 e em `architecture/conventions.md`.
 
-Nenhuma feature deve introduzir implicitamente um novo padrão global.
-
-Caso seja necessário definir uma convenção para toda a API, essa decisão deve ser documentada separadamente.
+Nenhuma feature deve alterar implicitamente esse padrão global. Exceções precisam ser justificadas no design; mudanças transversais exigem novo ADR.
 
 ---
 
 # 7. Autenticação e autorização
 
-## 7.1 Estado atual
+## 7.1 Mecanismo
 
-Durante a fase atual do desenvolvimento, a validação de acesso utilizará um mecanismo simplificado baseado em sessão.
+O MVP utiliza access token JWT de curta duração e refresh token rotativo em cookies seguros, com sessão revogável no servidor, conforme ADR-005 e `architecture/security.md`.
 
-Esse mecanismo é temporário.
-
----
-
-## 7.2 MVP final
-
-Na versão final do MVP, a autenticação deverá utilizar JWT.
-
-O código de negócio não deve depender diretamente do mecanismo temporário de autenticação.
+O código de negócio depende de uma identidade autenticada e não de cookies, JWT ou framework HTTP.
 
 ---
 
@@ -320,11 +302,7 @@ Dados pessoais não devem ser expostos apenas por conveniência de implementaç�
 
 A acessibilidade é um requisito transversal do backoffice.
 
-Ainda não existe uma norma ou nível formal de conformidade adotado pelo projeto.
-
-Por esse motivo, não deve ser declarada conformidade com padrões específicos que ainda não tenham sido formalmente escolhidos.
-
-Mesmo assim, novas interfaces devem considerar acessibilidade durante design e implementação.
+O alvo do MVP é WCAG 2.2 nível AA nos fluxos administrativos implementados. Os critérios técnicos mínimos estão em `architecture/frontend.md` e devem ser considerados durante design, implementação e validação.
 
 ---
 
@@ -439,13 +417,7 @@ Os critérios de aceite das specifications devem servir como referência para de
 
 Japa será utilizado como ferramenta de testes do backend.
 
-A estratégia completa de divisão entre testes:
-
-* unitários;
-* integração;
-* funcionais;
-
-ainda não foi formalmente definida.
+A estratégia divide testes entre domínio unitário, aplicação com dependências substituídas, integração de infraestrutura e API funcional, conforme `architecture/backend.md`.
 
 Não existe atualmente uma taxa mínima obrigatória de cobertura.
 
@@ -455,7 +427,7 @@ Não existe atualmente uma taxa mínima obrigatória de cobertura.
 
 Playwright será utilizado para testes aplicáveis ao backoffice.
 
-A estratégia complementar para testes unitários e testes de componentes ainda não foi definida.
+A ferramenta complementar para testes unitários e de componentes será escolhida junto ao scaffold do frontend e registrada no ADR-002 ou em ADR substituto.
 
 Playwright não deve ser considerado automaticamente a única ferramenta de testes do frontend até que exista uma decisão formal nesse sentido.
 
