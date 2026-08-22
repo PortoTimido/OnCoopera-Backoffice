@@ -35,11 +35,9 @@ A stack atualmente definida para o backend é:
 * PostgreSQL;
 * Prisma;
 * REST API;
-* Fastify como adaptador HTTP;
 * Zod para validação nas bordas;
 * Japa para testes.
 
-Essas escolhas são registradas no ADR-003. Fastify e Zod devem permanecer nas bordas e não podem se tornar dependências do domínio.
 
 ---
 
@@ -628,17 +626,6 @@ Não é obrigatório criar mappers para toda operação caso não exista distin�
 
 Alterações estruturais no banco devem ser realizadas através do mecanismo de migrations utilizado em conjunto com Prisma.
 
-Alterações manuais no schema do banco não devem ser consideradas parte oficial da evolução estrutural do sistema.
-
-Quando uma feature necessitar de alteração no banco, seu `design.md` deve identificar:
-
-* alteração necessária;
-* entidades/tabelas afetadas;
-* novos campos;
-* relacionamentos;
-* restrições;
-* impactos esperados.
-
 ---
 
 # 27. Transações
@@ -953,34 +940,7 @@ Abstrações criadas apenas por possibilidade futura devem ser evitadas.
 
 ---
 
-# 40. Regras para specifications
-
-Ao criar uma feature que envolva backend, seu `design.md` deve identificar, quando aplicável:
-
-```text
-Backend impact
-
-- Use Case:
-- Domain entities affected:
-- Business rules:
-- Repository operations:
-- Database changes:
-- API endpoint:
-- Input:
-- Output:
-- Authorization:
-- External integrations:
-- Transaction requirements:
-- Tests:
-```
-
-Itens que não se aplicam podem ser omitidos.
-
-A specification não deve criar camadas apenas para preencher esse modelo.
-
----
-
-# 41. Regras para agentes de IA
+# 40. Regras para agentes de IA
 
 Antes de implementar alterações no backend, o agente deve:
 
@@ -1008,7 +968,7 @@ persistência e integrações
 
 ---
 
-# 42. O agente não deve
+# 41. O agente não deve
 
 Um agente não deve:
 
@@ -1027,37 +987,7 @@ Se uma decisão necessária ainda não estiver definida, ela deve ser tratada co
 
 ---
 
-# 43. Decisões incrementais ainda abertas
-
-As decisões que bloqueavam o scaffold foram fechadas nos ADRs 001–006. Permanecem deliberadamente incrementais:
-
-* biblioteca visual e tokens, após avaliação do Figma e acessibilidade;
-* biblioteca de server state e testes de componente do frontend;
-* provedor de storage e processamento de uploads;
-* infraestrutura de métricas e tracing;
-* parâmetros operacionais de rate limit, backup e tokens por ambiente.
-
-O backend usa composição manual no boot. Um container de injeção só deve ser proposto se houver evidência de complexidade que o justifique.
-
-Logs são JSON estruturado, com request ID e redação de dados sensíveis. A biblioteca concreta pode acompanhar o logger do Fastify enquanto esse contrato for preservado.
-
-Essas decisões devem ser tomadas antes da feature ou marco de produção que delas dependa; não impedem o início do desenvolvimento local.
-
----
-
-# 44. Evolução desta arquitetura
-
-Este documento deve ser atualizado quando uma decisão arquitetural global for formalizada.
-
-Decisões que envolvam alternativas relevantes e justificativa arquitetural devem ser registradas primeiro através de ADR quando apropriado.
-
-Este documento passa então a representar a arquitetura atualmente aceita.
-
-O histórico do motivo da decisão deve permanecer no ADR.
-
----
-
-# 45. Princípio final
+# 42. Princípio final
 
 A arquitetura do backend deve proteger as regras de negócio contra dependências desnecessárias de tecnologia.
 
