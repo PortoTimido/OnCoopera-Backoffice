@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Container">
+<g id="Input">
+<g filter="url(#filter0_i_0_22)">
+<rect width="24" height="24" rx="6" fill="#F4FBF7"/>
+</g>
+<rect x="1" y="1" width="22" height="22" rx="5" stroke="#BBCAC4" stroke-width="2"/>
+</g>
+<path id="Icon" opacity="0" d="M10.1625 16.5L5.8875 12.225L6.95625 11.1562L10.1625 14.3625L17.0437 7.48125L18.1125 8.55L10.1625 16.5V16.5" fill="white"/>
+</g>
+<defs>
+<filter id="filter0_i_0_22" x="0" y="0" width="25" height="25" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feMorphology radius="2" operator="erode" in="SourceAlpha" result="effect1_innerShadow_0_22"/>
+<feOffset dx="1" dy="1"/>
+<feGaussianBlur stdDeviation="1"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_0_22"/>
+</filter>
+</defs>
+</svg>

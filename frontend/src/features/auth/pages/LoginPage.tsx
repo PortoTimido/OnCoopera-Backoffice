@@ -1,0 +1,109 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+import { Eye, EyeOff, LockKeyhole, LogIn, Mail } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Button } from '../../../components/ui/Button'
+import { TextField } from '../../../components/ui/TextField'
+import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { login } from '../api/authApi'
+import { AuthCard } from '../components/AuthCard'
+import { AuthShell } from '../components/AuthShell'
+import { storeAuthSession } from '../model/authSession'
+
+export function LoginPage() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [remember, setRemember] = useState(true)
+  const [status, setStatus] = useState(() =>
+    searchParams.get('sessionExpired') === '1' ? 'Sua sessão expirou. Entre novamente para continuar.' : '',
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus('')
+    setIsSubmitting(true)
+
+    const form = new FormData(event.currentTarget)
+
+    try {
+      const session = await login({
+        identificador: String(form.get('identificador') ?? ''),
+        senha: String(form.get('senha') ?? ''),
+      })
+
+      storeAuthSession(session.accessToken, session.usuario)
+      navigate('/dashboard', { replace: true })
+    } catch (error) {
+      setStatus(getApiErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <AuthShell
+      copy={{
+        title: 'A gestão clínica, humanizada e eficiente.',
+        description:
+          'Acesse o painel central para gerenciar artigos, interações, usuários e monitorar o radar de suporte com precisão e empatia.',
+      }}
+      dataNodeId="327:3049"
+      variant="login"
+    >
+      <AuthCard variant="login">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="mb-8 text-center">
+            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink">Bem-vindo</h2>
+            <p className="mt-2 text-base leading-6 text-muted">Acesse sua conta para continuar.</p>
+          </div>
+
+          <TextField
+            autoComplete="email"
+            defaultValue="admin@oncoopera.com"
+            label="E-mail corporativo"
+            leftIcon={<Mail size={20} strokeWidth={1.8} />}
+            name="identificador"
+            required
+            type="email"
+          />
+
+          <TextField
+            autoComplete="current-password"
+            defaultValue="oncoopera"
+            label="Senha"
+            leftIcon={<LockKeyhole size={20} strokeWidth={1.8} />}
+            name="senha"
+            onRightIconClick={() => setIsPasswordVisible((current) => !current)}
+            required
+            rightIcon={isPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIconButtonLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+            type={isPasswordVisible ? 'text' : 'password'}
+          />
+
+          <div className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
+            <label className="inline-flex items-center gap-2.5 font-semibold text-muted">
+              <input
+                checked={remember}
+                className="h-5 w-5 rounded border-line accent-brand-teal"
+                onChange={(event) => setRemember(event.target.checked)}
+                type="checkbox"
+              />
+              <span>Manter conectado</span>
+            </label>
+            <Link className="font-bold text-brand-teal hover:underline" to="/recuperar-senha">
+              Esqueci minha senha
+            </Link>
+          </div>
+
+          <Button className="h-15 rounded-3xl" disabled={isSubmitting} icon={<LogIn size={20} strokeWidth={2.2} />} type="submit">
+            {isSubmitting ? 'Acessando...' : 'Acessar painel'}
+          </Button>
+
+          {status ? <p className="pt-1 text-center text-sm font-semibold text-red-700" role="alert">{status}</p> : null}
+        </form>
+      </AuthCard>
+    </AuthShell>
+  )
+}

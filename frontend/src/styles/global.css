@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400,0,1;9..144,600,0,1&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-backoffice: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  --color-brand-admin: #0f766e;
+  --color-admin-canvas: #f7faf9;
+  --color-admin-topbar: #f8fafc;
+  --color-admin-text: #181c1c;
+  --color-admin-nav: #64748b;
+  --color-brand-mint: #3ecfb2;
+  --color-brand-teal: #006b5a;
+  --color-brand-teal-dark: #005446;
+  --color-brand-teal-deep: #00201a;
+  --color-ink: #2d2926;
+  --color-ink-strong: #161d1b;
+  --color-muted: #6c7a75;
+  --color-muted-strong: #3c4a45;
+  --color-line: #dde4e0;
+  --color-surface-mint: #f4fbf7;
+  --color-surface-soft: #eef5f1;
+  --color-surface-clay: #f5f3ee;
+  --color-surface-illustration: #e9efeb;
+  --color-security-blue: #6eb5ff;
+  --color-warning: #ffd166;
+
+  --shadow-clay-teal: 8px 8px 0 rgba(0, 107, 90, 0.1);
+  --shadow-clay-teal-strong: 4px 4px 0 rgba(0, 107, 90, 0.2);
+  --shadow-clay-sage: 8px 8px 0 #bbcac4;
+  --shadow-clay-sage-soft: 8px 8px 0 rgba(187, 202, 196, 0.6);
+  --shadow-clay-sage-sm: 4px 4px 0 #bbcac4;
+  --shadow-button-dark: 4px 4px 0 #005143;
+  --shadow-input-inset: inset 2px 2px 4px rgba(0, 107, 90, 0.05);
+  --shadow-admin-sidebar: 4px 0 0 rgba(187, 202, 196, 0.2);
+  --shadow-admin-topbar: 0 4px 0 rgba(187, 202, 196, 0.15);
+  --shadow-admin-card: 4px 4px 8px rgba(187, 202, 196, 0.2);
+}
+
+:root {
+  color: var(--color-muted-strong);
+  background: var(--color-surface-mint);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-surface-mint);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100svh;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled {
+  cursor: default;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+::selection {
+  color: var(--color-brand-teal-deep);
+  background: rgba(62, 207, 178, 0.35);
+}
