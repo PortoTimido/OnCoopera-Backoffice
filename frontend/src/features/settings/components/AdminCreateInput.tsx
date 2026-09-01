@@ -11,12 +11,12 @@ export function AdminCreateInput({
   rightElement?: ReactNode
 }) {
   return (
-    <label className={cx('grid gap-[clamp(8px,0.625vw,14px)] text-[clamp(12px,0.94vw,17px)] font-semibold text-ink-strong', className)}>
+    <label className={cx('grid gap-2 text-sm font-semibold text-ink-strong', className)}>
       <span>{label}</span>
       <span className="relative block">
         <input
           className={cx(
-            'h-[clamp(44px,3.44vw,70px)] w-full rounded-xl border-2 border-[#e9efeb] bg-surface-mint px-[clamp(18px,1.4vw,29px)] text-[clamp(16px,1.25vw,24px)] text-admin-text outline-none shadow-[inset_3px_3px_6px_2px_rgba(0,0,0,0.04),inset_-3px_-3px_6px_2px_rgba(255,255,255,0.7)] transition placeholder:text-[#6b7280] focus:border-brand-mint focus:ring-4 focus:ring-brand-mint/20',
+            'h-13 w-full rounded-xl border-2 border-[#e9efeb] bg-surface-mint px-5 text-base text-admin-text outline-none shadow-[inset_3px_3px_6px_2px_rgba(0,0,0,0.04),inset_-3px_-3px_6px_2px_rgba(255,255,255,0.7)] transition placeholder:text-[#6b7280] read-only:text-muted-strong focus:border-brand-mint focus:ring-4 focus:ring-brand-mint/20',
             rightElement ? 'pr-[50px]' : undefined,
           )}
           {...props}

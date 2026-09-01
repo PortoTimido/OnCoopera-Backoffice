@@ -5,15 +5,40 @@ import { getCurrentUser } from '../../auth/api/authApi'
 import { getStoredAccessToken, getStoredUser, storeAuthSession } from '../../auth/model/authSession'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
 import { createBackofficeAdministrator } from '../../backoffice/api/backofficeApi'
+import type { AdminProfile } from '../../backoffice/api/backofficeApi'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { settingsAssets } from '../assets'
 import { AdminCreateInput } from '../components/AdminCreateInput'
+import { AdminCreateSelect } from '../components/AdminCreateSelect'
 
-function createLoginFromEmail(email: string) {
-  const [prefix] = email.trim().toLowerCase().split('@')
+const permissionOptions: Array<{ label: string; value: AdminProfile }> = [
+  { label: 'Acesso total', value: 'TOTAL' },
+  { label: 'Moderação de conteúdo', value: 'MODERADOR_DE_CONTEUDO' },
+  { label: 'Gestão de apoios', value: 'GERENTE_DE_APOIOS' },
+  { label: 'Análise de interações', value: 'ANALISTA_DE_INTERACOES' },
+]
 
-  return prefix.replace(/[^a-z0-9._-]/g, '.').replace(/\.+/g, '.').replace(/^\.|\.$/g, '') || 'administrador'
+function normalizeLoginPart(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+}
+
+function createLoginFromName(name: string) {
+  const parts = name.trim().split(/\s+/).map(normalizeLoginPart).filter(Boolean)
+
+  if (parts.length === 0) {
+    return 'administrador'
+  }
+
+  if (parts.length === 1) {
+    return parts[0]
+  }
+
+  return `${parts[0]}.${parts[parts.length - 1]}`
 }
 
 function getPasswordScore(password: string) {
@@ -29,6 +54,7 @@ export function CreateAdministratorPage() {
   const [user, setUser] = useState<AuthenticatedUser | null>(() => getStoredUser())
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [permission, setPermission] = useState<AdminProfile>('TOTAL')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
@@ -38,6 +64,7 @@ export function CreateAdministratorPage() {
 
   const passwordScore = useMemo(() => getPasswordScore(password), [password])
   const passwordStrengthLabel = passwordScore >= 3 ? 'Boa' : passwordScore >= 2 ? 'Razoável' : 'Fraca'
+  const generatedLogin = useMemo(() => createLoginFromName(name), [name])
 
   useEffect(() => {
     const token = getStoredAccessToken()
@@ -95,15 +122,16 @@ export function CreateAdministratorPage() {
       const created = await createBackofficeAdministrator({
         dataNascimento: '1990-01-01',
         email,
-        login: createLoginFromEmail(email),
+        login: generatedLogin,
         nome: name,
-        perfisAdministrativos: ['TOTAL'],
+        perfisAdministrativos: [permission],
         telefone: '11999999999',
       })
 
       setTemporaryPassword(created.senhaTemporaria || 'Senha temporária criada pela API.')
       setName('')
       setEmail('')
+      setPermission('TOTAL')
       setPassword('')
       setConfirmPassword('')
       setAcceptedTerms(false)
@@ -117,41 +145,57 @@ export function CreateAdministratorPage() {
   return (
     <AppLayout activeItem="Configurações" user={user}>
       <main
-        className="min-h-0 flex-1 overflow-auto bg-[#f1f4f3] px-6 py-8 sm:px-10 lg:px-[clamp(40px,3.125vw,64px)] lg:py-[clamp(24px,1.875vw,38px)]"
+        className="grid min-h-0 flex-1 place-items-center overflow-auto bg-[#f1f4f3] px-6 py-8 sm:px-10 lg:overflow-hidden lg:px-10 lg:py-0"
         data-figma-node-id="327:3355"
       >
-        <div className="mx-auto grid w-full max-w-[clamp(798px,62.34vw,1276px)] gap-[clamp(48px,3.75vw,76px)]">
-          <header className="grid gap-1">
-            <nav className="flex items-center gap-2 text-[clamp(14px,1.1vw,20px)] leading-[1.45]" aria-label="Caminho">
+        <div className="grid w-full max-w-[1180px] gap-6">
+          <header className="mx-auto grid w-full max-w-[900px] gap-1">
+            <nav className="flex items-center gap-2 text-base leading-6" aria-label="Caminho">
               <Link className="text-muted hover:text-brand-teal" to="/configuracoes">
                 Configurações
               </Link>
               <img className="h-2 w-[4.933px]" src={settingsAssets.breadcrumbChevron} alt="" aria-hidden="true" />
               <span className="font-bold text-brand-teal">Criar conta administrativa</span>
             </nav>
-            <h1 className="font-serif text-[clamp(32px,2.5vw,52px)] font-semibold leading-[1.2] text-ink">Criar conta administrativa</h1>
+            <h1 className="font-serif text-[40px] font-semibold leading-[1.15] text-ink">Criar conta administrativa</h1>
           </header>
 
           <form
-            className="mx-auto grid w-full max-w-[clamp(486px,38vw,778px)] gap-[clamp(16px,1.25vw,26px)] rounded-3xl border-2 border-[#e9efeb] bg-white px-[clamp(42px,3.28vw,67px)] py-[clamp(41px,3.2vw,66px)] shadow-[6px_6px_0_rgba(187,202,196,0.6)]"
+            className="mx-auto grid w-full max-w-[900px] gap-4 rounded-[28px] border-2 border-[#e9efeb] bg-white px-10 py-8 shadow-[6px_6px_0_rgba(187,202,196,0.6)]"
             onSubmit={handleSubmit}
           >
-            <AdminCreateInput
-              label="Nome completo"
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Ex: Helena Vasconcelos"
-              required
-              value={name}
-            />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <AdminCreateInput
+                label="Nome completo"
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Ex: Helena Vasconcelos"
+                required
+                value={name}
+              />
 
-            <AdminCreateInput
-              label="E-mail corporativo"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="helena@instituicao.org"
-              required
-              type="email"
-              value={email}
-            />
+              <AdminCreateInput
+                label="Usuário de login"
+                name="login"
+                readOnly
+                value={generatedLogin}
+              />
+
+              <AdminCreateInput
+                label="E-mail corporativo"
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="helena@instituicao.org"
+                required
+                type="email"
+                value={email}
+              />
+
+              <AdminCreateSelect
+                label="Nível de permissão"
+                onChange={setPermission}
+                options={permissionOptions}
+                value={permission}
+              />
+            </div>
 
             <div className="grid gap-2">
               <AdminCreateInput
@@ -185,10 +229,10 @@ export function CreateAdministratorPage() {
               value={confirmPassword}
             />
 
-            <label className="mt-2 flex items-start gap-3 text-[clamp(16px,1.25vw,22px)] leading-[1.35] text-muted-strong">
+            <label className="mt-1 flex items-start gap-3 text-base leading-6 text-muted-strong">
               <input
                 checked={acceptedTerms}
-                className="mt-0.5 h-6 w-6 shrink-0 rounded-md border-2 border-[#bbcac4] accent-brand-teal"
+                className="mt-0.5 h-5 w-5 shrink-0 rounded-md border-2 border-[#bbcac4] accent-brand-teal"
                 onChange={(event) => setAcceptedTerms(event.target.checked)}
                 type="checkbox"
               />
@@ -199,7 +243,7 @@ export function CreateAdministratorPage() {
             </label>
 
             <button
-              className="mt-2 inline-flex h-[clamp(64px,5vw,102px)] items-center justify-center gap-2 rounded-xl bg-brand-teal px-6 text-[clamp(14px,1.1vw,20px)] font-bold tracking-[0.28px] text-white shadow-button-dark transition hover:-translate-y-0.5 disabled:opacity-60"
+              className="mt-1 inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-brand-teal px-6 text-base font-bold tracking-[0.28px] text-white shadow-button-dark transition hover:-translate-y-0.5 disabled:opacity-60"
               disabled={isSubmitting}
               type="submit"
             >
