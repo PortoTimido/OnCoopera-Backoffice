@@ -13,17 +13,17 @@ const navItems = [
     href: '/dashboard',
     icon: backofficeAssets.navHomeInactive,
     activeIcon: backofficeAssets.navHome,
-    iconClassName: 'h-[18px] w-[18px]',
+    iconClassName: 'h-[14px] w-[14px]',
   },
   { label: 'Artigos', href: '/artigos', icon: backofficeAssets.navArticles, iconClassName: 'h-5 w-4' },
   { label: 'Radar de Apoio', href: '/radar-de-apoio', icon: backofficeAssets.navRadar, iconClassName: 'h-5 w-5' },
-  { label: 'Usuários', href: '/usuarios', icon: backofficeAssets.navUsers, iconClassName: 'h-4 w-[22px]' },
+  { label: 'Usuários', href: '/usuarios', icon: backofficeAssets.navUsers, iconClassName: 'h-4 w-[17px]' },
   {
     label: 'Configurações',
     href: '/configuracoes',
     icon: backofficeAssets.navSettings,
     activeIcon: backofficeAssets.navSettingsActive,
-    iconClassName: 'h-5 w-[20.1px]',
+    iconClassName: 'h-4 w-[15px]',
   },
 ] as const
 
@@ -48,13 +48,13 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
   }
 
   return (
-    <aside className="relative z-2 hidden min-h-svh w-[clamp(240px,18.75vw,384px)] shrink-0 flex-col justify-between bg-admin-topbar/80 py-[clamp(32px,2.5vw,52px)] pl-[clamp(16px,1.25vw,26px)] shadow-admin-sidebar backdrop-blur-xl lg:flex">
-      <div className="grid gap-[clamp(40px,3.125vw,64px)]">
-        <div className="grid gap-1 px-[clamp(16px,1.25vw,26px)]">
-          <Link className="font-serif text-[clamp(24px,1.875vw,38px)] font-semibold leading-[1.33] text-brand-admin" to="/dashboard">
+    <aside className="relative z-2 hidden min-h-svh w-[clamp(180px,15vw,288px)] shrink-0 flex-col justify-between bg-admin-topbar/80 py-[clamp(24px,2vw,39px)] pl-[clamp(12px,1vw,20px)] shadow-admin-sidebar backdrop-blur-xl lg:flex">
+      <div className="grid gap-[clamp(30px,2.5vw,48px)]">
+        <div className="grid gap-1 px-[clamp(12px,1vw,20px)]">
+          <Link className="font-serif text-[clamp(21px,1.5vw,29px)] font-semibold leading-[1.33] text-brand-admin" to="/dashboard">
             OnCoopera
           </Link>
-          <p className="text-[clamp(14px,1.1vw,22px)] leading-[1.45] text-muted">Painel Administrativo</p>
+          <p className="text-[clamp(12px,0.9vw,17px)] leading-[1.45] text-muted">Painel Administrativo</p>
         </div>
 
         <nav className="grid gap-2" aria-label="Navegação principal">
@@ -64,7 +64,7 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
             return (
               <Link
                 className={cx(
-                  'flex h-[clamp(48px,3.75vw,64px)] items-center gap-[clamp(12px,0.9375vw,20px)] rounded-l-full px-[clamp(16px,1.25vw,26px)] text-[clamp(16px,1.25vw,22px)] leading-[1.5] transition',
+                  'flex h-[clamp(36px,3vw,48px)] items-center gap-[clamp(9px,0.75vw,15px)] rounded-l-full px-[clamp(12px,1vw,20px)] text-[clamp(13px,1vw,17px)] leading-[1.5] transition',
                   isActive
                     ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]'
                     : 'text-admin-nav hover:bg-white/60 hover:text-brand-admin',
@@ -102,19 +102,19 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
 
         <button
           aria-expanded={isUserMenuOpen}
-          className="flex h-[clamp(48px,3.75vw,64px)] w-full min-w-0 items-center gap-[clamp(12px,0.9375vw,20px)] rounded-l-full px-[clamp(16px,1.25vw,26px)] text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint"
+          className="flex h-[clamp(36px,3vw,48px)] w-full min-w-0 items-center gap-[clamp(9px,0.75vw,15px)] rounded-l-full px-[clamp(12px,1vw,20px)] text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint"
           onClick={() => setIsUserMenuOpen((current) => !current)}
           type="button"
         >
           <img
-            className="h-[clamp(34px,2.65vw,44px)] w-[clamp(34px,2.65vw,44px)] shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+            className="h-[clamp(26px,2.1vw,33px)] w-[clamp(26px,2.1vw,33px)] shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
             src={backofficeAssets.adminAvatar}
             alt=""
             aria-hidden="true"
           />
           <span className="min-w-0">
-            <span className="block truncate text-[clamp(14px,1.1vw,18px)] leading-[1.25] text-admin-text">{userName}</span>
-            <span className="block truncate text-[clamp(11px,0.86vw,14px)] leading-[1.25] text-muted">{userEmail}</span>
+            <span className="block truncate text-[clamp(11px,0.9vw,14px)] leading-[1.25] text-admin-text">{userName}</span>
+            <span className="block truncate text-[clamp(9px,0.7vw,11px)] leading-[1.25] text-muted">{userEmail}</span>
           </span>
         </button>
       </div>
