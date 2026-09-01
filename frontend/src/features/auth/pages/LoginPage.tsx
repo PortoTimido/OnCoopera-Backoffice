@@ -61,21 +61,21 @@ export function LoginPage() {
 
           <TextField
             autoComplete="email"
-            defaultValue="admin@oncoopera.com"
             label="E-mail corporativo"
             leftIcon={<Mail size={20} strokeWidth={1.8} />}
             name="identificador"
+            placeholder="Digite seu e-mail"
             required
             type="email"
           />
 
           <TextField
             autoComplete="current-password"
-            defaultValue="oncoopera"
             label="Senha"
             leftIcon={<LockKeyhole size={20} strokeWidth={1.8} />}
             name="senha"
             onRightIconClick={() => setIsPasswordVisible((current) => !current)}
+            placeholder="Digite sua senha"
             required
             rightIcon={isPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
             rightIconButtonLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
