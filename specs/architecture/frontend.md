@@ -13,7 +13,7 @@ Dependências adicionais só devem ser introduzidas quando resolverem uma necess
 ## 3. Organização
 
 ```text
-frontend/src/
+src/
 ├── app/          # boot, providers, router e configuração
 ├── assets/
 ├── components/   # componentes realmente compartilhados
