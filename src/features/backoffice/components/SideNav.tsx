@@ -48,13 +48,13 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
   }
 
   return (
-    <aside className="relative z-2 hidden min-h-svh w-[clamp(180px,15vw,288px)] shrink-0 flex-col justify-between bg-admin-topbar/80 py-[clamp(24px,2vw,39px)] pl-[clamp(12px,1vw,20px)] shadow-admin-sidebar backdrop-blur-xl lg:flex">
-      <div className="grid gap-[clamp(30px,2.5vw,48px)]">
-        <div className="grid gap-1 px-[clamp(12px,1vw,20px)]">
-          <Link className="font-serif text-[clamp(21px,1.5vw,29px)] font-semibold leading-[1.33] text-brand-admin" to="/dashboard">
+    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[var(--backoffice-sidebar-width)] flex-col justify-between bg-admin-topbar/80 py-8 pl-4 shadow-admin-sidebar backdrop-blur-xl lg:flex">
+      <div className="grid gap-10">
+        <div className="grid gap-1 px-3">
+          <Link className="font-serif text-[21px] font-semibold leading-[1.33] text-brand-admin" to="/dashboard">
             OnCoopera
           </Link>
-          <p className="text-[clamp(12px,0.9vw,17px)] leading-[1.45] text-muted">Painel Administrativo</p>
+          <p className="text-[12px] leading-[1.45] text-muted">Painel Administrativo</p>
         </div>
 
         <nav className="grid gap-2" aria-label="Navegação principal">
@@ -64,7 +64,7 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
             return (
               <Link
                 className={cx(
-                  'flex h-[clamp(36px,3vw,48px)] items-center gap-[clamp(9px,0.75vw,15px)] rounded-l-full px-[clamp(12px,1vw,20px)] text-[clamp(13px,1vw,17px)] leading-[1.5] transition',
+                  'flex h-10 items-center gap-3 rounded-l-full px-3 text-[13px] leading-[1.5] transition',
                   isActive
                     ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]'
                     : 'text-admin-nav hover:bg-white/60 hover:text-brand-admin',
@@ -102,19 +102,19 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
 
         <button
           aria-expanded={isUserMenuOpen}
-          className="flex h-[clamp(36px,3vw,48px)] w-full min-w-0 items-center gap-[clamp(9px,0.75vw,15px)] rounded-l-full px-[clamp(12px,1vw,20px)] text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint"
+          className="flex h-10 w-full min-w-0 items-center gap-3 rounded-l-full px-3 text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint"
           onClick={() => setIsUserMenuOpen((current) => !current)}
           type="button"
         >
           <img
-            className="h-[clamp(26px,2.1vw,33px)] w-[clamp(26px,2.1vw,33px)] shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+            className="h-7 w-7 shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
             src={backofficeAssets.adminAvatar}
             alt=""
             aria-hidden="true"
           />
           <span className="min-w-0">
-            <span className="block truncate text-[clamp(11px,0.9vw,14px)] leading-[1.25] text-admin-text">{userName}</span>
-            <span className="block truncate text-[clamp(9px,0.7vw,11px)] leading-[1.25] text-muted">{userEmail}</span>
+            <span className="block truncate text-[11px] leading-[1.25] text-admin-text">{userName}</span>
+            <span className="block truncate text-[9px] leading-[1.25] text-muted">{userEmail}</span>
           </span>
         </button>
       </div>

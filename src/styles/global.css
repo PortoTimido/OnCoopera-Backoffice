@@ -41,6 +41,7 @@
 }
 
 :root {
+  --backoffice-sidebar-width: 200px;
   --admin-content-max: 1100px;
   --admin-preview-content-max: 1120px;
   --admin-side-panel-width: 292px;
