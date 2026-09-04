@@ -4,6 +4,6 @@
 
 Revisado para a etapa visual sem backend.
 
-- Não foram inferidas permissões, ciclo de vida de status ou contrato REST.
-- A lista e a edição usam exclusivamente dados de demonstração, descartados ao recarregar a aplicação.
-- A integração com Google Maps permanece isolada, sem chave real no repositório.
+- O contrato REST foi conferido em `http://localhost:3000/docs`: `/api/backoffice/apoios` e `/api/backoffice/apoios/:id`.
+- Não foram inferidas permissões, ciclo de vida de status ou endpoint de upload além do contrato publicado.
+- A integração com Google Maps e upload de imagem permanecem isolados, sem chave real no repositório.

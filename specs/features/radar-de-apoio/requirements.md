@@ -11,13 +11,12 @@ Permitir que administradores consultem e preparem o cadastro de locais e serviç
 
 ## Requisitos funcionais
 
-- Exibir uma lista local demonstrativa de apoios, com pesquisa, filtro por categoria e paginação visual.
-- Permitir abrir o cadastro de um novo apoio e a edição de um apoio de demonstração.
+- Consultar, criar, editar e desativar apoios pela API do backoffice, com pesquisa, filtro por categoria e paginação.
+- Permitir abrir o cadastro de um novo apoio e a edição de um apoio existente.
 - Coletar nome, categoria, descrição, endereço, cidade, estado, imagem e localização geográfica.
 - Validar os campos obrigatórios e arquivos JPG/PNG de até 5 MB antes do salvamento.
 - Exibir o componente de mapa como placeholder até a integração com Google Maps ser aprovada e configurada.
 
 ## Fora do escopo
 
-- Persistência, autenticação/autorização específica e consumo de API.
-- Carregamento do SDK do Google Maps e geocodificação.
+- Carregamento do SDK do Google Maps, geocodificação e upload de imagem; o Swagger atual não expõe endpoint para imagens.
