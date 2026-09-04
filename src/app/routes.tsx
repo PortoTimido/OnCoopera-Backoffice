@@ -10,6 +10,8 @@ import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
 import { CreateAdministratorPage } from '../features/settings/pages/CreateAdministratorPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { NotFoundPage } from '../features/system/pages/NotFoundPage'
+import { SupportEditorPage } from '../features/radar-de-apoio/pages/SupportEditorPage'
+import { SupportListPage } from '../features/radar-de-apoio/pages/SupportListPage'
 
 const ArticlePreviewPage = lazy(() =>
   import('../features/articles/pages/ArticlePreviewPage').then((module) => ({ default: module.ArticlePreviewPage })),
@@ -32,6 +34,9 @@ export function AppRoutes() {
       />
       <Route path="/artigos/novo" element={<ArticleEditorPage />} />
       <Route path="/artigos/:articleId/editar" element={<ArticleEditorPage />} />
+      <Route path="/radar-de-apoio" element={<SupportListPage />} />
+      <Route path="/radar-de-apoio/novo" element={<SupportEditorPage />} />
+      <Route path="/radar-de-apoio/:supportId/editar" element={<SupportEditorPage />} />
       <Route path="/recuperar-senha" element={<RecoverPasswordPage />} />
       <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
       <Route path="/senha-atualizada" element={<PasswordUpdatedPage />} />
