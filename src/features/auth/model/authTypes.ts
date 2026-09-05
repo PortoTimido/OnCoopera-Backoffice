@@ -8,6 +8,8 @@ export type AuthenticatedUser = {
   status: 'ATIVO' | 'INATIVO' | 'BLOQUEADO'
   tipo: 'USUARIO' | 'PACIENTE' | 'ADMINISTRADOR'
   perfisAdministrativos: string[]
+  permissoesAdministrativas?: string[]
+  trocaSenhaObrigatoria?: boolean
   ultimoAcesso: string | null
 }
 

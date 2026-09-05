@@ -7,11 +7,12 @@ import { LoginPage } from '../features/auth/pages/LoginPage'
 import { PasswordUpdatedPage } from '../features/auth/pages/PasswordUpdatedPage'
 import { RecoverPasswordPage } from '../features/auth/pages/RecoverPasswordPage'
 import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
-import { CreateAdministratorPage } from '../features/settings/pages/CreateAdministratorPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { NotFoundPage } from '../features/system/pages/NotFoundPage'
 import { SupportEditorPage } from '../features/radar-de-apoio/pages/SupportEditorPage'
 import { SupportListPage } from '../features/radar-de-apoio/pages/SupportListPage'
+import { UserEditorPage } from '../features/users/pages/UserEditorPage'
+import { UserListPage } from '../features/users/pages/UserListPage'
 
 const ArticlePreviewPage = lazy(() =>
   import('../features/articles/pages/ArticlePreviewPage').then((module) => ({ default: module.ArticlePreviewPage })),
@@ -37,12 +38,14 @@ export function AppRoutes() {
       <Route path="/radar-de-apoio" element={<SupportListPage />} />
       <Route path="/radar-de-apoio/novo" element={<SupportEditorPage />} />
       <Route path="/radar-de-apoio/:supportId/editar" element={<SupportEditorPage />} />
+      <Route path="/usuarios" element={<UserListPage />} />
+      <Route path="/usuarios/novo" element={<UserEditorPage />} />
+      <Route path="/usuarios/:userId/editar" element={<UserEditorPage />} />
       <Route path="/recuperar-senha" element={<RecoverPasswordPage />} />
       <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
       <Route path="/senha-atualizada" element={<PasswordUpdatedPage />} />
       <Route path="/redefinir-senha/sucesso" element={<PasswordUpdatedPage />} />
       <Route path="/configuracoes" element={<SettingsPage />} />
-      <Route path="/configuracoes/administradores/novo" element={<CreateAdministratorPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

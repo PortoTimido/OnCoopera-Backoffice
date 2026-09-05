@@ -10,6 +10,7 @@ export type PaginatedUsuarios = {
 }
 
 export type AdminProfile = 'TOTAL' | 'MODERADOR_DE_CONTEUDO' | 'GERENTE_DE_APOIOS' | 'ANALISTA_DE_INTERACOES'
+export type AdministrativePermission = 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
 
 export type CreateAdministratorPayload = {
   nome: string
@@ -18,6 +19,7 @@ export type CreateAdministratorPayload = {
   telefone: string
   dataNascimento: string
   perfisAdministrativos: AdminProfile[]
+  permissoesAdministrativas?: AdministrativePermission[]
 }
 
 export type UpdateAdministratorPayload = Partial<CreateAdministratorPayload> & {
@@ -35,9 +37,16 @@ export async function listBackofficeUsuarios(params?: {
   pageSize?: number
   status?: AuthenticatedUser['status']
   tipo?: AuthenticatedUser['tipo']
+  perfil?: AdminProfile
+  search?: string
 }) {
   const { data } = await httpClient.get<PaginatedUsuarios>('/backoffice/usuarios', { params })
 
+  return data
+}
+
+export async function getBackofficeUsuario(id: string) {
+  const { data } = await httpClient.get<AdministratorDetails>(`/backoffice/usuarios/${id}`)
   return data
 }
 
