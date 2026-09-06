@@ -16,7 +16,7 @@ test('lista administradores e aplica busca e filtro', async ({ page }) => {
   await expect(page.getByText('Ana Silva')).toBeVisible()
   await page.getByLabel('Pesquisar administradores').fill('Ana')
   await expect(page).toHaveURL(/search=Ana/)
-  await page.getByLabel('Filtrar por status').selectOption('ATIVO')
+  await page.getByRole('tab', { name: 'Ativos', exact: true }).click()
   await expect(page).toHaveURL(/status=ATIVO/)
 })
 

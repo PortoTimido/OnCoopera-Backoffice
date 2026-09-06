@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Check, ChevronLeft, ChevronRight, MoreVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ArchiveX, ChevronLeft, ChevronRight, Eye, FileClock, FileText, Pencil, Plus, Send, Trash2 } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
+import { SearchFilterBar, type SearchFilterOption } from '../../backoffice/components/SearchFilterBar'
 import { deleteBackofficeArticle, listBackofficeArticles, type Article, type ArticleStatus, type PaginatedArticles } from '../api/articlesApi'
+import { createArticlePreviewFromArticle, storeArticlePreview } from '../model/articlePreview'
 
-const statusFilters: Array<{ label: string; value?: ArticleStatus }> = [
-  { label: 'Todos' },
-  { label: 'Publicados', value: 'PUBLICADO' },
-  { label: 'Rascunhos', value: 'RASCUNHO' },
-  { label: 'Desativados', value: 'DESATIVADO' },
+const statusFilters: Array<SearchFilterOption<ArticleStatus>> = [
+  { label: 'Todos', icon: FileText },
+  { label: 'Publicados', value: 'PUBLICADO', icon: Send },
+  { label: 'Rascunhos', value: 'RASCUNHO', icon: FileClock },
+  { label: 'Desativados', value: 'DESATIVADO', icon: ArchiveX },
 ]
 
 const categoryTone: Record<string, string> = {
@@ -75,12 +77,10 @@ function getCategory(article: Article) {
 
 export function ArticlesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [articlesResult, setArticlesResult] = useState<PaginatedArticles>(emptyPagination)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '')
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const user = getStoredUser()
   const activeStatus = getValidStatus(searchParams.get('status'))
   const currentPage = Number(searchParams.get('page') ?? '1') || 1
@@ -135,7 +135,6 @@ export function ArticlesPage() {
 
         if (isMounted) {
           setArticlesResult(data)
-          setSelectedIds([])
         }
       } catch (loadError) {
         if (isMounted) {
@@ -155,10 +154,6 @@ export function ArticlesPage() {
       isMounted = false
     }
   }, [activeStatus, currentPage, search])
-
-  function toggleSelected(id: string) {
-    setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
-  }
 
   async function refreshArticles() {
     const data = await listBackofficeArticles({
@@ -183,31 +178,6 @@ export function ArticlesPage() {
     try {
       await deleteBackofficeArticle(article.id)
       await refreshArticles()
-      setSelectedIds((current) => current.filter((id) => id !== article.id))
-      setActiveMenu(null)
-    } catch (deleteError) {
-      setError(getApiErrorMessage(deleteError))
-    }
-  }
-
-  async function handleDeleteSelectedArticles() {
-    if (selectedIds.length === 0) {
-      return
-    }
-
-    const confirmed = window.confirm(`Desativar ${selectedIds.length} artigo(s) selecionado(s)?`)
-
-    if (!confirmed) {
-      return
-    }
-
-    setError('')
-
-    try {
-      await Promise.all(selectedIds.map((id) => deleteBackofficeArticle(id)))
-      await refreshArticles()
-      setSelectedIds([])
-      setActiveMenu(null)
     } catch (deleteError) {
       setError(getApiErrorMessage(deleteError))
     }
@@ -220,9 +190,9 @@ export function ArticlesPage() {
     <AppLayout activeItem="Artigos" user={user}>
       <main className="flex min-h-0 flex-1 flex-col gap-10 overflow-auto p-6 sm:p-10 lg:p-12" data-figma-node-id="327:119">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="grid gap-2">
-            <span className="h-5" aria-hidden="true" />
+          <div>
             <h1 className="font-display text-[length:var(--admin-list-title-size)] leading-[var(--admin-list-title-line-height)] text-admin-text">Artigos</h1>
+            <p className="mt-1 text-sm text-muted">Gerencie os artigos e conteúdos do sistema.</p>
           </div>
 
           <Link
@@ -234,51 +204,7 @@ export function ArticlesPage() {
           </Link>
         </header>
 
-        <section className="flex flex-col gap-5 rounded-2xl bg-surface-soft p-5 shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)] lg:flex-row lg:items-center lg:justify-between">
-          <label className="relative block w-full max-w-[var(--admin-search-max)]">
-            <span className="sr-only">Pesquisar artigos</span>
-            <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-strong" size={18} strokeWidth={2} />
-            <input
-              className="h-14 w-full rounded-xl border-0 bg-[#e6e9e8] px-12 text-base text-admin-text shadow-[4px_4px_0_rgba(187,202,196,0.2)] outline-none transition placeholder:text-muted focus:ring-4 focus:ring-brand-mint/20"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Pesquisar..."
-              value={query}
-            />
-          </label>
-
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar artigos">
-            {statusFilters.map((filter) => (
-              <button
-                className={cx(
-                  'h-10 rounded-full border border-[#bbcac4]/15 px-5 text-sm text-admin-text transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-2 focus-visible:outline-brand-mint',
-                  activeStatus === filter.value ? 'bg-white shadow-[2px_2px_0_rgba(187,202,196,0.2)]' : 'bg-white/70',
-                  !activeStatus && !filter.value ? 'bg-white shadow-[2px_2px_0_rgba(187,202,196,0.2)]' : undefined,
-                )}
-                key={filter.label}
-                onClick={() => updateSearchParams({ page: null, status: filter.value ?? null })}
-                type="button"
-                role="tab"
-                aria-selected={activeStatus === filter.value || (!activeStatus && !filter.value)}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {selectedIds.length > 0 ? (
-          <div className="flex items-center justify-between rounded-2xl bg-brand-mint/15 px-5 py-3 text-sm font-semibold text-brand-teal">
-            <span>{selectedIds.length} item selecionado</span>
-            <button
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-red-700 shadow-[2px_2px_0_rgba(187,202,196,0.2)]"
-              onClick={handleDeleteSelectedArticles}
-              type="button"
-            >
-              <Trash2 size={16} strokeWidth={2} />
-              Apagar
-            </button>
-          </div>
-        ) : null}
+        <SearchFilterBar activeValue={activeStatus} filtersLabel="Filtrar artigos" onFilterChange={(value) => updateSearchParams({ page: null, status: value ?? null })} onQueryChange={setQuery} options={statusFilters} query={query} searchLabel="Pesquisar artigos" searchPlaceholder="Pesquisar..." />
 
         {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
@@ -287,21 +213,18 @@ export function ArticlesPage() {
             <table className="w-full min-w-[var(--admin-table-min-width)] border-collapse text-left">
               <thead className="bg-surface-soft text-xs font-bold uppercase tracking-[0.6px] text-muted-strong">
                 <tr>
-                  <th className="w-16 px-4 py-4">
-                    <span className="sr-only">Selecionar</span>
-                  </th>
                   <th className="px-4 py-4">Título</th>
                   <th className="px-4 py-4">Categoria</th>
                   <th className="px-4 py-4">Status</th>
                   <th className="px-4 py-4">Autor</th>
                   <th className="px-4 py-4">Dt. publicação</th>
-                  <th className="w-20 px-4 py-4 text-right">Ações</th>
+                  <th className="w-32 px-4 py-4 text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td className="px-4 py-12 text-center text-sm text-muted" colSpan={7}>
+                    <td className="px-4 py-12 text-center text-sm text-muted" colSpan={6}>
                       Carregando artigos...
                     </td>
                   </tr>
@@ -309,7 +232,7 @@ export function ArticlesPage() {
 
                 {!isLoading && articlesResult.data.length === 0 ? (
                   <tr>
-                    <td className="px-4 py-12 text-center text-sm text-muted" colSpan={7}>
+                    <td className="px-4 py-12 text-center text-sm text-muted" colSpan={6}>
                       Nenhum artigo encontrado.
                     </td>
                   </tr>
@@ -322,19 +245,6 @@ export function ArticlesPage() {
 
                       return (
                         <tr className="border-t border-[#bbcac4]/15 first:border-t-0" key={article.id}>
-                          <td className="px-4 py-4">
-                            <button
-                              className={cx(
-                                'grid h-5 w-5 place-items-center rounded border border-[#bbcac4]/50 transition focus-visible:outline-2 focus-visible:outline-brand-mint',
-                                selectedIds.includes(article.id) ? 'border-brand-teal bg-brand-teal text-white' : 'bg-white',
-                              )}
-                              onClick={() => toggleSelected(article.id)}
-                              type="button"
-                              aria-label={`Selecionar ${article.titulo}`}
-                            >
-                              {selectedIds.includes(article.id) ? <Check size={13} strokeWidth={2.4} /> : null}
-                            </button>
-                          </td>
                           <td className="max-w-[var(--admin-table-title-max)] px-4 py-4">
                             <p className="truncate text-base leading-6 text-admin-text">{article.titulo}</p>
                             <p className="truncate text-xs leading-4 text-muted-strong">{getArticleDescription(article)}</p>
@@ -351,31 +261,24 @@ export function ArticlesPage() {
                           </td>
                           <td className="max-w-[var(--admin-table-author-max)] px-4 py-4 text-sm leading-5 text-admin-text">{article.autorId.slice(0, 8)}</td>
                           <td className="px-4 py-4 text-sm leading-5 text-muted-strong">{formatDate(article.dataPublicacao)}</td>
-                          <td className="relative px-4 py-4 text-right">
-                            <button
-                              className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint"
-                              onClick={() => setActiveMenu((current) => (current === article.id ? null : article.id))}
-                              type="button"
-                              aria-label={`Abrir ações de ${article.titulo}`}
-                            >
-                              <MoreVertical size={18} strokeWidth={2} />
-                            </button>
-                            {activeMenu === article.id ? (
-                              <div className="absolute right-4 top-12 z-10 grid w-36 gap-1 rounded-2xl border border-[#bbcac4]/20 bg-white p-2 text-left shadow-[4px_4px_0_rgba(187,202,196,0.2)]">
-                                <Link className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-admin-text hover:bg-surface-soft" to={`/artigos/${article.id}/editar`}>
-                                  <Pencil size={15} strokeWidth={2} />
-                                  Editar
-                                </Link>
-                                <button
-                                  className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
-                                  onClick={() => handleDeleteArticle(article)}
-                                  type="button"
-                                >
-                                  <Trash2 size={15} strokeWidth={2} />
-                                  Apagar
-                                </button>
-                              </div>
-                            ) : null}
+                          <td className="px-4 py-4">
+                            <div className="flex justify-center gap-1">
+                              <Link
+                                aria-label={`Visualizar ${article.titulo}`}
+                                className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint"
+                                onClick={() => storeArticlePreview(createArticlePreviewFromArticle(article, getArticleDescription(article)))}
+                                state={{ preview: createArticlePreviewFromArticle(article, getArticleDescription(article)) }}
+                                to="/artigos/preview"
+                              >
+                                <Eye size={16} />
+                              </Link>
+                              <Link aria-label={`Editar ${article.titulo}`} className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint" to={`/artigos/${article.id}/editar`}>
+                                <Pencil size={16} />
+                              </Link>
+                              <button aria-label={`Desativar ${article.titulo}`} className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-brand-mint" onClick={() => handleDeleteArticle(article)} type="button">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )

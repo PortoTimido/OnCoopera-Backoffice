@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LogOut } from 'lucide-react'
+import { Cog, FileText, LayoutDashboard, LogOut, Radar, UsersRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { logout } from '../../auth/api/authApi'
@@ -11,19 +11,17 @@ const navItems = [
   {
     label: 'Início',
     href: '/dashboard',
-    icon: backofficeAssets.navHomeInactive,
-    activeIcon: backofficeAssets.navHome,
-    iconClassName: 'h-[14px] w-[14px]',
+    icon: LayoutDashboard,
+    iconClassName: 'h-5 w-5',
   },
-  { label: 'Artigos', href: '/artigos', icon: backofficeAssets.navArticles, iconClassName: 'h-5 w-4' },
-  { label: 'Radar de Apoio', href: '/radar-de-apoio', icon: backofficeAssets.navRadar, iconClassName: 'h-5 w-5' },
-  { label: 'Usuários', href: '/usuarios', icon: backofficeAssets.navUsers, iconClassName: 'h-4 w-[17px]' },
+  { label: 'Artigos', href: '/artigos', icon: FileText, iconClassName: 'h-5 w-5' },
+  { label: 'Radar de Apoio', href: '/radar-de-apoio', icon: Radar, iconClassName: 'h-5 w-5' },
+  { label: 'Usuários', href: '/usuarios', icon: UsersRound, iconClassName: 'h-5 w-5' },
   {
     label: 'Configurações',
     href: '/configuracoes',
-    icon: backofficeAssets.navSettings,
-    activeIcon: backofficeAssets.navSettingsActive,
-    iconClassName: 'h-4 w-[15px]',
+    icon: Cog,
+    iconClassName: 'h-5 w-5',
   },
 ] as const
 
@@ -60,6 +58,7 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
         <nav className="grid gap-2" aria-label="Navegação principal">
           {navItems.map((item) => {
             const isActive = item.label === activeItem
+            const Icon = item.icon
 
             return (
               <Link
@@ -72,11 +71,10 @@ export function SideNav({ activeItem, user }: { activeItem: string; user: Authen
                 key={item.label}
                 to={item.href}
               >
-                <img
-                  className={cx('shrink-0', item.iconClassName)}
-                  src={'activeIcon' in item && isActive ? item.activeIcon : item.icon}
-                  alt=""
+                <Icon
                   aria-hidden="true"
+                  className={cx('shrink-0', item.iconClassName)}
+                  strokeWidth={2.35}
                 />
                 <span>{item.label}</span>
               </Link>
