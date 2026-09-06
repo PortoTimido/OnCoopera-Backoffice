@@ -44,29 +44,21 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
   return (
     <aside className={cx('fixed inset-y-0 left-0 z-20 flex flex-col justify-between bg-admin-topbar/80 py-5 shadow-admin-sidebar backdrop-blur-xl transition-[width,padding] duration-200 sm:py-8', isCollapsed ? 'w-[var(--backoffice-sidebar-collapsed-width)] px-2' : 'w-[var(--backoffice-sidebar-width)] pl-4')}>
       <div className={cx('grid', isCollapsed ? 'gap-7' : 'gap-10')}>
-        <div className={cx('relative min-h-7', isCollapsed ? 'px-1' : 'px-3 pr-10')}>
-          <div className={cx('flex items-center gap-2', isCollapsed && 'justify-start')}>
-            <Link aria-label="Ir para início" className="shrink-0 rounded-lg focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint" to="/dashboard">
-              <img className="h-5 w-5" src={backofficeAssets.logoWaveDark} alt="" aria-hidden="true" />
-            </Link>
-            {!isCollapsed ? <Link className="font-serif text-[21px] font-semibold leading-[1.1] text-brand-admin" to="/dashboard">OnCoopera</Link> : null}
-          </div>
+        <div className={cx('relative min-h-7', isCollapsed ? 'px-1' : 'px-3 pr-12')}>
+          {isCollapsed ? <div className="group relative mx-auto h-7 w-7"><img className="absolute inset-1 h-5 w-5 transition-opacity group-hover:opacity-0 group-focus-within:opacity-0" src={backofficeAssets.logoWaveDark} alt="Logo OnCoopera" /><button aria-label="Expandir barra lateral" className="absolute inset-0 grid place-items-center rounded-md text-muted-strong opacity-0 transition hover:bg-surface-soft focus-visible:opacity-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint group-hover:opacity-100" onClick={onToggle} type="button"><PanelLeftOpen size={18} /></button><span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-30 w-max -translate-y-1/2 rounded-md bg-admin-text px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">Abrir barra lateral</span></div> : <div className="flex items-center gap-2"><Link aria-label="Ir para início" className="shrink-0 rounded-lg focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint" to="/dashboard"><img className="h-5 w-5" src={backofficeAssets.logoWaveDark} alt="" aria-hidden="true" /></Link><Link className="font-serif text-[21px] font-semibold leading-[1.1] text-brand-admin" to="/dashboard">OnCoopera</Link></div>}
           {!isCollapsed ? <p className="ml-7 mt-1 text-[12px] leading-[1.2] text-muted">Painel Administrativo</p> : null}
-          <div className="group absolute right-1 top-0">
+          {!isCollapsed ? <div className="absolute right-[8px] top-0">
             <button aria-label={isCollapsed ? 'Expandir barra lateral' : 'Retrair barra lateral'} className="grid h-7 w-7 place-items-center rounded-md text-muted-strong transition hover:bg-surface-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint" onClick={onToggle} type="button">
               {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
             </button>
-            <span className="pointer-events-none absolute right-0 top-[calc(100%+6px)] z-30 w-max rounded-md bg-admin-text px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" role="tooltip">
-              {isCollapsed ? 'Expandir sidebar' : 'Retrair sidebar'}
-            </span>
-          </div>
+          </div> : null}
         </div>
 
         <nav className="grid gap-2" aria-label="Navegação principal">
           {navItems.map((item) => {
             const isActive = item.label === activeItem
             const Icon = item.icon
-            return <Link className={cx('flex h-10 items-center text-[13px] leading-[1.5] transition', isCollapsed ? 'justify-center rounded-xl px-2' : 'gap-3 rounded-l-full px-3', isActive ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]' : 'text-admin-nav hover:bg-white/60 hover:text-brand-admin')} key={item.label} title={isCollapsed ? item.label : undefined} to={item.href}><Icon aria-hidden="true" className={cx('shrink-0', item.iconClassName)} strokeWidth={2.35} /><span className={isCollapsed ? 'sr-only' : undefined}>{item.label}</span></Link>
+            return <Link className={cx('group relative flex h-10 items-center text-[13px] leading-[1.5] transition', isCollapsed ? 'justify-center rounded-xl px-2' : 'gap-3 rounded-l-full px-3', isActive ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]' : 'text-admin-nav hover:bg-white/60 hover:text-brand-admin')} key={item.label} to={item.href}><Icon aria-hidden="true" className={cx('shrink-0', item.iconClassName)} strokeWidth={2.35} /><span className={isCollapsed ? 'sr-only' : undefined}>{item.label}</span>{isCollapsed ? <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-30 w-max -translate-y-1/2 rounded-md bg-admin-text px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus:opacity-100">{item.label}</span> : null}</Link>
           })}
         </nav>
       </div>

@@ -1,12 +1,8 @@
 import { backofficeAssets } from '../assets'
 
-export function TopBar({ showBrand }: { showBrand: boolean }) {
+export function TopBar() {
   return (
     <header className="relative z-2 flex h-[clamp(48px,4vw,77px)] shrink-0 items-center justify-between bg-admin-topbar px-6 shadow-admin-topbar lg:justify-end lg:px-[clamp(24px,2vw,39px)]">
-      {showBrand ? <div>
-        <p className="font-serif text-xl font-semibold leading-none text-brand-admin">OnCoopera</p>
-      </div> : null}
-
       <div className="flex items-center gap-2">
         <button
           className="grid h-[clamp(30px,2.5vw,48px)] w-[clamp(30px,2.5vw,48px)] place-items-center rounded-full transition hover:bg-surface-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint"
