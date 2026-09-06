@@ -1,11 +1,11 @@
 import { backofficeAssets } from '../assets'
 
-export function TopBar() {
+export function TopBar({ showBrand }: { showBrand: boolean }) {
   return (
     <header className="relative z-2 flex h-[clamp(48px,4vw,77px)] shrink-0 items-center justify-between bg-admin-topbar px-6 shadow-admin-topbar lg:justify-end lg:px-[clamp(24px,2vw,39px)]">
-      <div className="lg:hidden">
+      {showBrand ? <div>
         <p className="font-serif text-xl font-semibold leading-none text-brand-admin">OnCoopera</p>
-      </div>
+      </div> : null}
 
       <div className="flex items-center gap-2">
         <button
