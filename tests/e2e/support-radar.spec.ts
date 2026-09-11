@@ -85,6 +85,23 @@ test('valida intervalo de horário e permite removê-lo', async ({ page }) => {
   await expect(page.getByText('08:00 – 12:00')).not.toBeVisible()
 })
 
+test('duplica um horário para outros dias da semana', async ({ page }) => {
+  await mockSupportApi(page)
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByRole('combobox', { name: 'Início' }).click()
+  await page.getByRole('option', { name: '08:00' }).click()
+  await page.getByRole('combobox', { name: 'Fim' }).click()
+  await page.getByRole('option', { name: '18:00' }).click()
+  await page.getByRole('button', { name: 'Adicionar horário' }).click()
+  await page.getByRole('button', { name: /Duplicar horário de Segunda-feira/ }).click()
+  await page.getByRole('button', { name: 'Ter', exact: true }).click()
+  await page.getByRole('button', { name: 'Qua', exact: true }).click()
+  await page.getByRole('button', { name: 'Qui', exact: true }).click()
+  await page.getByRole('button', { name: 'Sex', exact: true }).click()
+  await page.getByRole('button', { name: 'Duplicar para 4 dias' }).click()
+  await expect(page.getByText('08:00 – 18:00')).toHaveCount(5)
+})
+
 test('carrega e atualiza um apoio existente', async ({ page }) => {
   await mockSupportApi(page)
   await page.goto('/radar-de-apoio/inca/editar')
