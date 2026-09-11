@@ -1,20 +1,34 @@
-import type { AdminProfile, AdministrativePermission } from '../../backoffice/api/backofficeApi'
+import type { AdministrativePermission } from '../../backoffice/api/backofficeApi'
 
-export const administratorProfiles: Array<{ value: AdminProfile; label: string; description: string }> = [
-  { value: 'TOTAL', label: 'Administrador', description: 'Acesso total ao sistema' },
-  { value: 'MODERADOR_DE_CONTEUDO', label: 'Moderador de conteúdo', description: 'Gestão de conteúdo e artigos' },
-  { value: 'GERENTE_DE_APOIOS', label: 'Gestão de apoios', description: 'Gestão do Radar de Apoio' },
-  { value: 'ANALISTA_DE_INTERACOES', label: 'Analista de interações', description: 'Análise de interações' },
-]
+export type DetailedAdministrativePermission = Exclude<AdministrativePermission, 'TOTAL'>
 
-export const administrativePermissions: Array<{ value: AdministrativePermission; label: string; description: string }> = [
+export const administrativePermissions: Array<{ value: DetailedAdministrativePermission; label: string; description: string }> = [
   { value: 'GERENCIAR_USUARIOS', label: 'Gerenciar usuários', description: 'Criar, editar e bloquear acessos.' },
   { value: 'GESTAO_CONTEUDOS', label: 'Gestão de conteúdos', description: 'Publicar artigos e cartilhas.' },
   { value: 'GESTAO_RADAR_APOIO', label: 'Gestão de Radar de Apoio', description: 'Criar, editar e excluir apoios.' },
 ]
 
-export function profileLabel(value: string) {
-  return administratorProfiles.find((profile) => profile.value === value)?.label ?? value
+export function permissionsToPayload(permissions: DetailedAdministrativePermission[]): AdministrativePermission[] {
+  return permissions.length === administrativePermissions.length ? ['TOTAL'] : permissions
+}
+
+export function permissionsFromApi(permissions: readonly string[] | undefined, legacyProfiles: readonly string[] = []): DetailedAdministrativePermission[] {
+  const hasTotalAccess = permissions?.includes('TOTAL') || (!permissions?.length && legacyProfiles.includes('TOTAL'))
+  if (hasTotalAccess) return administrativePermissions.map((permission) => permission.value)
+
+  return administrativePermissions
+    .map((permission) => permission.value)
+    .filter((permission) => permissions?.includes(permission))
+}
+
+export function permissionsLabel(permissions: readonly string[] | undefined, legacyProfiles: readonly string[] = []) {
+  if (permissions?.includes('TOTAL') || (!permissions?.length && legacyProfiles.includes('TOTAL'))) return 'TOTAL'
+
+  const labels = administrativePermissions
+    .filter((permission) => permissions?.includes(permission.value))
+    .map((permission) => permission.label)
+
+  return labels.join(', ') || '—'
 }
 
 export function createLoginFromName(value: string) {

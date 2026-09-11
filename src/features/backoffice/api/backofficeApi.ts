@@ -10,7 +10,7 @@ export type PaginatedUsuarios = {
 }
 
 export type AdminProfile = 'TOTAL' | 'MODERADOR_DE_CONTEUDO' | 'GERENTE_DE_APOIOS' | 'ANALISTA_DE_INTERACOES'
-export type AdministrativePermission = 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
+export type AdministrativePermission = 'TOTAL' | 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
 
 export type CreateAdministratorPayload = {
   nome: string
@@ -18,7 +18,8 @@ export type CreateAdministratorPayload = {
   login: string
   telefone: string
   dataNascimento: string
-  perfisAdministrativos: AdminProfile[]
+  /** @deprecated O acesso é definido por permissoesAdministrativas. */
+  perfisAdministrativos?: AdminProfile[]
   permissoesAdministrativas?: AdministrativePermission[]
 }
 
