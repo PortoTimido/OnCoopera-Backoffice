@@ -1,5 +1,8 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
+import { clearAuthSession, getStoredAccessToken, getStoredUser, storeAuthSession } from '../../auth/model/authSession'
+import { RequiredPasswordChangeModal } from '../../auth/components/RequiredPasswordChangeModal'
 import { SideNav } from './SideNav'
 import { TopBar } from './TopBar'
 
@@ -14,6 +17,8 @@ export function AppLayout({
   children: ReactNode
   user: AuthenticatedUser | null
 }) {
+  const navigate = useNavigate()
+  const [requiresPasswordChange, setRequiresPasswordChange] = useState(() => (user ?? getStoredUser())?.trocaSenhaObrigatoria === true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const storedValue = window.sessionStorage.getItem(sidebarStateKey)
     return storedValue === null ? window.innerWidth < 1280 : storedValue === 'true'
@@ -44,13 +49,32 @@ export function AppLayout({
     })
   }
 
+  function handlePasswordChangeCompleted(_newPassword: string) {
+    const currentUser = user ?? getStoredUser()
+    const accessToken = getStoredAccessToken()
+
+    if (currentUser && accessToken) {
+      storeAuthSession(accessToken, { ...currentUser, trocaSenhaObrigatoria: false })
+    }
+
+    setRequiresPasswordChange(false)
+  }
+
+  function handleRequiredPasswordChangeClose() {
+    clearAuthSession()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div className="min-h-svh bg-admin-canvas font-backoffice text-admin-text" data-layout="backoffice" style={layoutStyle}>
-      <SideNav activeItem={activeItem} isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} user={user} />
-      <div className="relative z-1 flex min-h-svh min-w-0 flex-col overflow-hidden bg-admin-canvas pl-[var(--backoffice-current-sidebar-width)] transition-[padding] duration-200">
-        <TopBar />
-        {children}
+      <div inert={requiresPasswordChange}>
+        <SideNav activeItem={activeItem} isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} user={user} />
+        <div className="relative z-1 flex min-h-svh min-w-0 flex-col overflow-hidden bg-admin-canvas pl-[var(--backoffice-current-sidebar-width)] transition-[padding] duration-200">
+          <TopBar />
+          {children}
+        </div>
       </div>
+      {requiresPasswordChange ? <RequiredPasswordChangeModal onClose={handleRequiredPasswordChangeClose} onCompleted={handlePasswordChangeCompleted} /> : null}
     </div>
   )
 }

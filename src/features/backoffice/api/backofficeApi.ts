@@ -31,6 +31,7 @@ export type AdministratorDetails = {
   usuario: AuthenticatedUser
   endereco: unknown | null
   senhaTemporaria?: string
+  emailEnvio?: 'ENVIADO' | 'FALHOU'
 }
 
 export async function listBackofficeUsuarios(params?: {

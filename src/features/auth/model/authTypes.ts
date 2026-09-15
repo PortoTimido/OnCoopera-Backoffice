@@ -27,3 +27,28 @@ export type ChangePasswordPayload = {
   senhaAtual: string
   novaSenha: string
 }
+
+export type ChangeTemporaryPasswordPayload = {
+  identificador: string
+  senhaTemporaria: string
+  novaSenha: string
+}
+
+export type PasswordRecoveryRequestPayload = {
+  email: string
+}
+
+export type PasswordRecoveryVerifyPayload = {
+  email: string
+  code: string
+}
+
+export type PasswordRecoveryVerifyResponse = {
+  resetToken: string
+}
+
+export type PasswordRecoveryResetPayload = {
+  resetToken: string
+  newPassword: string
+  passwordConfirmation: string
+}

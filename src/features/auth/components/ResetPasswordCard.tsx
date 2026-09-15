@@ -1,57 +1,52 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
 import { cx } from '../../../lib/cx'
+import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { resetPasswordWithRecoveryToken } from '../api/authApi'
 import { authAssets } from '../assets'
-import { authContract } from '../model/authContract'
 import { AuthCard } from './AuthCard'
 import { PasswordStrength, type PasswordCriterion } from './PasswordStrength'
 
 type ResetPasswordCardProps = {
   mode?: 'interactive' | 'preview'
+  resetToken?: string
+  onSuccess?: () => void
 }
 
-export function ResetPasswordCard({ mode = 'interactive' }: ResetPasswordCardProps) {
+export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess }: ResetPasswordCardProps) {
   const isPreview = mode === 'preview'
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
 
-  const criteria = useMemo<PasswordCriterion[]>(() => {
-    const liveCriteria = [
+  const criteria = useMemo<PasswordCriterion[]>(
+    () => [
       { label: 'Mínimo de 8 caracteres', met: password.length >= 8 },
       { label: 'Pelo menos uma letra maiúscula', met: /[A-Z]/.test(password) },
       { label: 'Pelo menos um número', met: /\d/.test(password) },
       { label: 'Caractere especial (!@#$%)', met: /[!@#$%]/.test(password) },
-    ]
+    ],
+    [password],
+  )
 
-    if (password) {
-      return liveCriteria
-    }
+  const score = criteria.filter((criterion) => criterion.met).length
 
-    return liveCriteria.map((criterion, index) => ({ ...criterion, met: index < 2 }))
-  }, [password])
-
-  const liveCriteriaCount = useMemo(() => {
-    return [
-      password.length >= 8,
-      /[A-Z]/.test(password),
-      /\d/.test(password),
-      /[!@#$%]/.test(password),
-    ].filter(Boolean).length
-  }, [password])
-
-  const displayedScore = password ? liveCriteriaCount : 2
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (isPreview) {
       return
     }
 
-    if (liveCriteriaCount < 4) {
+    setError('')
+
+    if (score < criteria.length) {
       setError('A senha ainda não atende todos os critérios de segurança.')
       return
     }
@@ -61,8 +56,24 @@ export function ResetPasswordCard({ mode = 'interactive' }: ResetPasswordCardPro
       return
     }
 
-    if (!authContract.hasPasswordReset) {
-      setError('O contrato atual da API ainda não expõe um endpoint de redefinição de senha por link.')
+    if (!resetToken) {
+      setError('Código de recuperação não encontrado. Solicite a recuperação de senha novamente.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await resetPasswordWithRecoveryToken({
+        resetToken,
+        newPassword: password,
+        passwordConfirmation: confirmPassword,
+      })
+      onSuccess?.()
+    } catch (resetError) {
+      setError(getApiErrorMessage(resetError))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -88,10 +99,12 @@ export function ResetPasswordCard({ mode = 'interactive' }: ResetPasswordCardPro
             label="Nova senha"
             name="password"
             onChange={(event) => setPassword(event.target.value)}
+            onRightIconClick={() => setIsPasswordVisible((current) => !current)}
             placeholder="Digite sua nova senha"
-            rightIcon={authAssets.eyeOff}
+            rightIcon={isPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIconButtonLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
             surface="mint"
-            type="password"
+            type={isPasswordVisible ? 'text' : 'password'}
             value={password}
           />
           <TextField
@@ -100,20 +113,22 @@ export function ResetPasswordCard({ mode = 'interactive' }: ResetPasswordCardPro
             label="Confirmar nova senha"
             name="confirmPassword"
             onChange={(event) => setConfirmPassword(event.target.value)}
+            onRightIconClick={() => setIsConfirmPasswordVisible((current) => !current)}
             placeholder="Repita a senha"
-            rightIcon={authAssets.eyeOff}
+            rightIcon={isConfirmPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIconButtonLabel={isConfirmPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
             surface="mint"
-            type="password"
+            type={isConfirmPasswordVisible ? 'text' : 'password'}
             value={confirmPassword}
           />
         </div>
 
-        <PasswordStrength criteria={criteria} score={displayedScore} />
+        <PasswordStrength criteria={criteria} score={score} />
 
         {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
-        <Button className="h-16 rounded-[20px]" disabled={isPreview} icon={authAssets.arrowWhite} tone="dark" type="submit">
-          Salvar nova senha
+        <Button className="h-16 rounded-[20px]" disabled={isPreview || isSubmitting} icon={authAssets.arrowWhite} tone="dark" type="submit">
+          {isSubmitting ? 'Salvando...' : 'Salvar nova senha'}
         </Button>
       </form>
     </AuthCard>

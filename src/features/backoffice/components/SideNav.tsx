@@ -4,15 +4,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { logout } from '../../auth/api/authApi'
 import { clearAuthSession } from '../../auth/model/authSession'
+import { hasAdministrativePermission, type AdministrativePermission } from '../../auth/model/administrativePermissions'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
 import { backofficeAssets } from '../assets'
 
 const navItems = [
-  { label: 'Início', href: '/dashboard', icon: LayoutDashboard, iconClassName: 'h-5 w-5' },
-  { label: 'Artigos', href: '/artigos', icon: FileText, iconClassName: 'h-5 w-5' },
-  { label: 'Radar de Apoio', href: '/radar-de-apoio', icon: Radar, iconClassName: 'h-5 w-5' },
-  { label: 'Usuários', href: '/usuarios', icon: UsersRound, iconClassName: 'h-5 w-5' },
-  { label: 'Configurações', href: '/configuracoes', icon: Cog, iconClassName: 'h-5 w-5' },
+  { label: 'Início', href: '/dashboard', icon: LayoutDashboard, iconClassName: 'h-5 w-5', permission: undefined },
+  { label: 'Artigos', href: '/artigos', icon: FileText, iconClassName: 'h-5 w-5', permission: 'GESTAO_CONTEUDOS' },
+  { label: 'Radar de Apoio', href: '/radar-de-apoio', icon: Radar, iconClassName: 'h-5 w-5', permission: 'GESTAO_RADAR_APOIO' },
+  { label: 'Usuários', href: '/usuarios', icon: UsersRound, iconClassName: 'h-5 w-5', permission: 'GERENCIAR_USUARIOS' },
+  { label: 'Configurações', href: '/configuracoes', icon: Cog, iconClassName: 'h-5 w-5', permission: undefined },
 ] as const
 
 type SideNavProps = {
@@ -55,7 +56,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
         </div>
 
         <nav className="grid gap-2" aria-label="Navegação principal">
-          {navItems.map((item) => {
+          {navItems.filter((item) => !item.permission || hasAdministrativePermission(user, item.permission as AdministrativePermission)).map((item) => {
             const isActive = item.label === activeItem
             const Icon = item.icon
             return <Link className={cx('group relative flex h-10 items-center text-[13px] leading-[1.5] transition', isCollapsed ? 'justify-center rounded-xl px-2' : 'gap-3 rounded-l-full px-3', isActive ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]' : 'text-admin-nav hover:bg-white/60 hover:text-brand-admin')} key={item.label} to={item.href}><Icon aria-hidden="true" className={cx('shrink-0', item.iconClassName)} strokeWidth={2.35} /><span className={isCollapsed ? 'sr-only' : undefined}>{item.label}</span>{isCollapsed ? <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-30 w-max -translate-y-1/2 rounded-md bg-admin-text px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus:opacity-100">{item.label}</span> : null}</Link>

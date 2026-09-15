@@ -5,9 +5,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
-import { login } from '../api/authApi'
+import { isPasswordChangeRequiredError, login } from '../api/authApi'
 import { AuthCard } from '../components/AuthCard'
 import { AuthShell } from '../components/AuthShell'
+import { RequiredPasswordChangeModal } from '../components/RequiredPasswordChangeModal'
 import { storeAuthSession } from '../model/authSession'
 
 export function LoginPage() {
@@ -19,6 +20,7 @@ export function LoginPage() {
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [temporaryPasswordChange, setTemporaryPasswordChange] = useState<{ identificador: string; senhaTemporaria: string } | null>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -26,20 +28,41 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     const form = new FormData(event.currentTarget)
+    const identificador = String(form.get('identificador') ?? '')
+    const senha = String(form.get('senha') ?? '')
 
     try {
       const session = await login({
-        identificador: String(form.get('identificador') ?? ''),
-        senha: String(form.get('senha') ?? ''),
+        identificador,
+        senha,
       })
 
       storeAuthSession(session.accessToken, session.usuario)
       navigate('/dashboard', { replace: true })
     } catch (error) {
-      setStatus(getApiErrorMessage(error))
+      if (isPasswordChangeRequiredError(error)) {
+        setTemporaryPasswordChange({ identificador, senhaTemporaria: senha })
+      } else {
+        setStatus(getApiErrorMessage(error))
+      }
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  async function handleTemporaryPasswordChanged(newPassword: string) {
+    if (!temporaryPasswordChange) {
+      return
+    }
+
+    const session = await login({ identificador: temporaryPasswordChange.identificador, senha: newPassword })
+    storeAuthSession(session.accessToken, session.usuario)
+    navigate('/dashboard', { replace: true })
+  }
+
+  function handleTemporaryPasswordChangeClose() {
+    setTemporaryPasswordChange(null)
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -104,6 +127,7 @@ export function LoginPage() {
           {status ? <p className="pt-1 text-center text-sm font-semibold text-red-700" role="alert">{status}</p> : null}
         </form>
       </AuthCard>
+      {temporaryPasswordChange ? <RequiredPasswordChangeModal identifier={temporaryPasswordChange.identificador} mode="temporary" temporaryPassword={temporaryPasswordChange.senhaTemporaria} onClose={handleTemporaryPasswordChangeClose} onCompleted={handleTemporaryPasswordChanged} /> : null}
     </AuthShell>
   )
 }

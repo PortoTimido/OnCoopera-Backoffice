@@ -21,6 +21,10 @@ export function permissionsFromApi(permissions: readonly string[] | undefined, l
     .filter((permission) => permissions?.includes(permission))
 }
 
+export function hasTotalPermission(permissions: readonly string[] | undefined, legacyProfiles: readonly string[] = []): boolean {
+  return Boolean(permissions?.includes('TOTAL') || (!permissions?.length && legacyProfiles.includes('TOTAL')))
+}
+
 export function permissionsLabel(permissions: readonly string[] | undefined, legacyProfiles: readonly string[] = []) {
   if (permissions?.includes('TOTAL') || (!permissions?.length && legacyProfiles.includes('TOTAL'))) return 'TOTAL'
 

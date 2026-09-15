@@ -1,8 +1,19 @@
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { authAssets } from '../assets'
 import { AuthShell } from '../components/AuthShell'
 import { ResetPasswordCard } from '../components/ResetPasswordCard'
 
+type LocationState = { resetToken?: string } | null
+
 export function ResetPasswordPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const resetToken = (location.state as LocationState)?.resetToken
+
+  if (!resetToken) {
+    return <Navigate to="/recuperar-senha" replace />
+  }
+
   return (
     <AuthShell
       copy={{
@@ -16,7 +27,7 @@ export function ResetPasswordPage() {
       showAdminBadge
       variant="illustrated"
     >
-      <ResetPasswordCard />
+      <ResetPasswordCard resetToken={resetToken} onSuccess={() => navigate('/senha-atualizada', { replace: true })} />
     </AuthShell>
   )
 }

@@ -26,14 +26,14 @@ httpClient.interceptors.response.use(
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       const requestUrl = error.config?.url ?? ''
-      const isLoginRequest = requestUrl.includes('/auth/login')
+      const isUnauthenticatedRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/password-recovery')
       const isAlreadyOnLogin = typeof window !== 'undefined' && window.location.pathname === '/login'
 
-      if (!isLoginRequest) {
+      if (!isUnauthenticatedRequest) {
         clearAuthSession()
       }
 
-      if (!isLoginRequest && !isAlreadyOnLogin && typeof window !== 'undefined') {
+      if (!isUnauthenticatedRequest && !isAlreadyOnLogin && typeof window !== 'undefined') {
         window.location.assign('/login?sessionExpired=1')
       }
     }
