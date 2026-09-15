@@ -1,10 +1,24 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const support = {
+  imagens: [{ id: 'foto-inca', url: 'https://cdn.example.com/inca.png', ordem: 0 }],
   id: 'inca', nome: 'INCA', tipoApoio: 'CLINICA', telefone: '(21) 93207-1000', descricao: 'Instituto Nacional de Câncer.', status: 'ATIVO', endereco: { cep: '20230-130', logradouro: 'Praça da Cruz Vermelha', numero: '23', bairro: 'Centro', cidade: 'Rio de Janeiro', estado: 'RJ', latitude: -22.909, longitude: -43.179 }, horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '18:00' }], imagensUrl: [], estaAbertoAgora: true, dataCriacao: '2026-01-01T00:00:00.000Z', dataAtualizacao: '2026-01-01T00:00:00.000Z',
 }
 
+const radarManager = {
+  id: 'radar-1', nome: 'Radar manager', email: 'radar@example.com', login: 'radar', telefone: '11999998888', dataNascimento: '1990-01-01', status: 'ATIVO', tipo: 'ADMINISTRADOR', perfisAdministrativos: ['GESTAO_RADAR_APOIO'], permissoesAdministrativas: ['GESTAO_RADAR_APOIO'], trocaSenhaObrigatoria: false, ultimoAcesso: null,
+}
+
 async function mockSupportApi(page: Page) {
+  await page.addInitScript((user) => {
+    window.localStorage.setItem('oncoopera.accessToken', 'radar-token')
+    window.localStorage.setItem('oncoopera.user', JSON.stringify(user))
+  }, radarManager)
+  await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: radarManager }))
+  await page.route(/\/api\/backoffice\/apoios\/[^/?]+\/imagens(?:\/[^/?]+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
+    await route.fulfill({ json: support })
+  })
   await page.route(/https:\/\/viacep\.com\.br\/ws\/01001000\/json\/$/, (route) => route.fulfill({ json: { cep: '01001-000', logradouro: 'Praça da Sé', bairro: 'Sé', localidade: 'São Paulo', uf: 'SP' } }))
   await page.route(/\/api\/backoffice\/apoios(?:\?.*)?$/, async (route) => {
     if (route.request().method() === 'GET') { await route.fulfill({ json: { data: [support], page: 1, pageSize: 10, total: 1, totalPages: 1 } }); return }
@@ -59,10 +73,13 @@ test('cria apoio usando o payload estruturado do backend', async ({ page }) => {
   await page.getByRole('combobox', { name: 'Fim' }).click()
   await page.getByRole('option', { name: '18:00' }).click()
   await page.getByRole('button', { name: 'Adicionar horário' }).click()
-  const saveRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().includes('/api/backoffice/apoios'))
+  const saveRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/apoios'))
+  const imageRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().includes('/api/backoffice/apoios/novo-apoio/imagens'))
+  await page.locator('input[type="file"]').setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: Buffer.from('imagem valida') })
   await page.getByRole('button', { name: 'Salvar cadastro' }).click()
   const payload = (await saveRequest).postDataJSON()
   expect(payload).toMatchObject({ telefone: '(11) 3333-4444', horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '12:00' }, { diaSemana: 1, horarioInicio: '13:00', horarioFim: '18:00' }] })
+  expect((await imageRequest).postData()).toContain('name="imagem"')
   await expect(page).toHaveURL(/\/radar-de-apoio$/)
 })
 
