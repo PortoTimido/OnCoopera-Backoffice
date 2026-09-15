@@ -43,7 +43,6 @@ export type ListArticlesParams = {
 export type SaveArticlePayload = {
   categoriaIds: string[]
   conteudo: string
-  imagemUrl?: string | null
   status?: ArticleStatus
   tagIds?: string[]
   tempoLeituraMinutos: number
@@ -80,6 +79,19 @@ export async function updateBackofficeArticle(id: string, payload: Partial<SaveA
 
 export async function deleteBackofficeArticle(id: string) {
   await httpClient.delete(`/backoffice/artigos/${id}`)
+}
+
+export async function uploadBackofficeArticleImage(id: string, file: File) {
+  const formData = new FormData()
+  formData.append('imagem', file)
+
+  const { data } = await httpClient.post<Article>(`/backoffice/artigos/${id}/imagem`, formData)
+
+  return data
+}
+
+export async function deleteBackofficeArticleImage(id: string) {
+  await httpClient.delete(`/backoffice/artigos/${id}/imagem`)
 }
 
 export async function listBackofficeArticleCategories(search?: string) {

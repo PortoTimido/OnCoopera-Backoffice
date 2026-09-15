@@ -5,11 +5,14 @@ import { cx } from '../../../lib/cx'
 
 type ArticleDropzoneProps = {
   file: File | null
+  imageUrl: string | null
   onFileChange: (file: File | null) => void
+  onRemoveImage: () => void
 }
 
-export function ArticleDropzone({ file, onFileChange }: ArticleDropzoneProps) {
-  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
+export function ArticleDropzone({ file, imageUrl, onFileChange, onRemoveImage }: ArticleDropzoneProps) {
+  const localPreviewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
+  const previewUrl = localPreviewUrl || imageUrl || ''
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -32,11 +35,11 @@ export function ArticleDropzone({ file, onFileChange }: ArticleDropzoneProps) {
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl)
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
       }
     }
-  }, [previewUrl])
+  }, [localPreviewUrl])
 
   return (
     <div
@@ -55,12 +58,17 @@ export function ArticleDropzone({ file, onFileChange }: ArticleDropzoneProps) {
         <div className="grid w-full gap-3">
           <img className="max-h-[180px] w-full rounded-xl object-cover" src={previewUrl} alt="" aria-hidden="true" />
           <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-2 text-left shadow-[2px_2px_0_rgba(187,202,196,0.2)]">
-            <span className="min-w-0 truncate text-sm text-admin-text">{file?.name}</span>
+            <span className="min-w-0 truncate text-sm text-admin-text">{file?.name ?? 'Imagem de capa atual'}</span>
             <button
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-soft hover:text-admin-text"
               onClick={(event) => {
                 event.stopPropagation()
-                onFileChange(null)
+                if (file) {
+                  onFileChange(null)
+                  return
+                }
+
+                onRemoveImage()
               }}
               type="button"
               aria-label="Remover imagem"

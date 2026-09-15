@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Calendar, CheckCircle2, Clock3, Eye, FileText, Image as ImageIcon, Lightbulb, MessageSquareQuote, Save, Send, X } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Calendar, CheckCircle2, Clock3, Eye, FileText, Lightbulb, MessageSquareQuote, Save, Send, X } from 'lucide-react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
@@ -13,6 +13,8 @@ import {
   getBackofficeArticle,
   listBackofficeArticleCategories,
   listBackofficeArticleTags,
+  deleteBackofficeArticleImage,
+  uploadBackofficeArticleImage,
   updateBackofficeArticle,
   type Article,
   type ArticleStatus,
@@ -89,6 +91,7 @@ function getFileDataUrl(file: File) {
 export function ArticleEditorPage() {
   const { articleId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [body, setBody] = useState(initialBody)
   const [categories, setCategories] = useState<ArticleTaxonomy[]>([])
   const [error, setError] = useState('')
@@ -96,6 +99,7 @@ export function ArticleEditorPage() {
   const [feedback, setFeedback] = useState('')
   const [helpModal, setHelpModal] = useState<HelpModal>(null)
   const [imageUrl, setImageUrl] = useState('')
+  const [isImageRemovalRequested, setIsImageRemovalRequested] = useState(false)
   const [isLoading, setIsLoading] = useState(Boolean(articleId))
   const [isSaving, setIsSaving] = useState(false)
   const [customReadingTime, setCustomReadingTime] = useState<number | null>(null)
@@ -107,6 +111,7 @@ export function ArticleEditorPage() {
   const [title, setTitle] = useState('')
   const user = getStoredUser()
   const isEditing = Boolean(articleId)
+  const imageSaveError = new URLSearchParams(location.search).has('imageUploadFailed') ? 'Artigo salvo, mas não foi possível persistir a imagem. Selecione-a novamente para tentar de novo.' : ''
   const estimatedReadingTime = useMemo(() => estimateReadingTime(body), [body])
   const readingTime = customReadingTime ?? estimatedReadingTime
   const categoryOptions = useMemo(
@@ -150,6 +155,7 @@ export function ArticleEditorPage() {
           setStatus(articleResult.status)
           setCustomReadingTime(Math.max(1, articleResult.tempoLeituraMinutos || estimateReadingTime(articleResult.conteudo || initialBody)))
           setImageUrl(articleResult.imagemUrl ?? '')
+          setIsImageRemovalRequested(false)
           setSelectedCategoryId(articleResult.categorias[0]?.id ?? mergedCategories[0]?.id ?? '')
           setSelectedTagIds(articleResult.tags.map((tag) => tag.id))
         } else {
@@ -222,7 +228,6 @@ export function ArticleEditorPage() {
     return {
       categoriaIds: [resolvedCategoryId],
       conteudo: body,
-      imagemUrl: imageUrl.trim() || null,
       status: nextStatus,
       tagIds: selectedTagIds,
       tempoLeituraMinutos: readingTime,
@@ -230,7 +235,7 @@ export function ArticleEditorPage() {
     }
   }
 
-  function buildPreviewData(previewImageUrl = imageUrl.trim() || null): ArticlePreviewData {
+  function buildPreviewData(previewImageUrl = imageUrl || null): ArticlePreviewData {
     const selectedCategory = categories.find((category) => category.id === selectedCategoryId)
 
     return {
@@ -254,7 +259,7 @@ export function ArticleEditorPage() {
     setError('')
 
     try {
-      const previewImageUrl = featuredImage ? await getFileDataUrl(featuredImage) : imageUrl.trim() || null
+      const previewImageUrl = featuredImage ? await getFileDataUrl(featuredImage) : imageUrl || null
       openPreview(buildPreviewData(previewImageUrl))
     } catch {
       setError('Não foi possível preparar a imagem para pré-visualização.')
@@ -274,6 +279,8 @@ export function ArticleEditorPage() {
 
     setIsSaving(true)
 
+    let savedArticle: Article | null = null
+
     try {
       const payload = await buildPayload(nextStatus)
 
@@ -281,10 +288,24 @@ export function ArticleEditorPage() {
         return
       }
 
-      const savedArticle = articleId ? await updateBackofficeArticle(articleId, payload) : await createBackofficeArticle(payload)
+      savedArticle = articleId ? await updateBackofficeArticle(articleId, payload) : await createBackofficeArticle(payload)
+
+      if (featuredImage) {
+        savedArticle = await uploadBackofficeArticleImage(savedArticle.id, featuredImage)
+      } else if (isImageRemovalRequested && articleId) {
+        await deleteBackofficeArticleImage(articleId)
+        savedArticle = { ...savedArticle, imagemUrl: null }
+      }
 
       setFeedback(nextStatus === 'PUBLICADO' ? 'Artigo publicado com sucesso.' : 'Rascunho salvo com sucesso.')
       setStatus(savedArticle.status)
+      setImageUrl(savedArticle.imagemUrl ?? '')
+      setFeaturedImage(null)
+      setIsImageRemovalRequested(false)
+
+      if (imageSaveError) {
+        navigate(location.pathname, { replace: true })
+      }
 
       if (shouldOpenPreview) {
         openPublishedPreview(savedArticle)
@@ -295,6 +316,11 @@ export function ArticleEditorPage() {
         navigate(`/artigos/${savedArticle.id}/editar`, { replace: true })
       }
     } catch (saveError) {
+      if (savedArticle && !articleId) {
+        navigate(`/artigos/${savedArticle.id}/editar?imageUploadFailed=1`, { replace: true })
+        return
+      }
+
       setError(getApiErrorMessage(saveError))
     } finally {
       setIsSaving(false)
@@ -370,7 +396,7 @@ export function ArticleEditorPage() {
             </div>
           </header>
 
-          {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
+          {error || imageSaveError ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error || imageSaveError}</p> : null}
 
           {isLoading ? (
             <div className="rounded-3xl bg-white p-8 text-sm text-muted shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">Carregando artigo...</div>
@@ -396,7 +422,20 @@ export function ArticleEditorPage() {
 
                 <div className="grid gap-4 rounded-3xl bg-white p-6 shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">
                   <h2 className="text-lg leading-7 text-admin-text">Imagem</h2>
-                  <ArticleDropzone file={featuredImage} onFileChange={setFeaturedImage} />
+                  <ArticleDropzone
+                    file={featuredImage}
+                    imageUrl={imageUrl || null}
+                    onFileChange={(file) => {
+                      setFeaturedImage(file)
+                      if (file) {
+                        setIsImageRemovalRequested(false)
+                      }
+                    }}
+                    onRemoveImage={() => {
+                      setImageUrl('')
+                      setIsImageRemovalRequested(true)
+                    }}
+                  />
                 </div>
 
                 <RichTextEditor value={body} onChange={setBody} />
@@ -480,20 +519,6 @@ export function ArticleEditorPage() {
                   </div>
 
                   <FieldShell icon={Calendar} label="Data de publicação" value="Automática ao publicar" />
-
-                  <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">Imagem URL</span>
-                    <span className="relative block">
-                      <ImageIcon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-strong" size={16} strokeWidth={2} />
-                      <input
-                        className="h-11 w-full rounded-xl border-0 bg-[#e6e9e8] px-10 text-sm text-admin-text shadow-[inset_2px_2px_4px_rgba(215,219,218,0.8)] outline-none placeholder:text-muted focus:ring-4 focus:ring-brand-mint/20"
-                        onChange={(event) => setImageUrl(event.target.value)}
-                        placeholder="https://..."
-                        type="url"
-                        value={imageUrl}
-                      />
-                    </span>
-                  </label>
 
                   <div className="grid gap-2">
                     <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">Tags</span>
