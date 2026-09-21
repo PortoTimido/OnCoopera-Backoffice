@@ -365,8 +365,8 @@ export function ArticleEditorPage() {
 
   return (
     <AppLayout activeItem="Artigos" user={user}>
-      <main className="min-h-0 flex-1 overflow-auto bg-surface-soft p-6 sm:p-10 lg:p-12" data-figma-node-id="327:1136">
-        <div className="mx-auto grid w-full max-w-[var(--admin-content-max)] gap-8">
+      <main className="min-h-0 flex-1 overflow-auto bg-admin-canvas p-6 sm:p-10 lg:p-12" data-figma-node-id="327:1136">
+        <div className="mx-auto grid w-full gap-8">
           <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid gap-2">
               <nav className="flex items-center gap-2 text-sm leading-5" aria-label="Breadcrumb">
@@ -401,7 +401,7 @@ export function ArticleEditorPage() {
           {isLoading ? (
             <div className="rounded-3xl bg-white p-8 text-sm text-muted shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">Carregando artigo...</div>
           ) : (
-            <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_var(--admin-side-panel-width)]">
+            <div className="grid items-start gap-7 lg:pr-12 lg:grid-cols-[minmax(0,1fr)_var(--admin-side-panel-width)] lg:gap-x-14">
               <section className="grid min-w-0 gap-6" aria-label="Conteúdo do artigo">
                 <div className="grid gap-4 rounded-3xl bg-white p-6 shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">
                   <input
