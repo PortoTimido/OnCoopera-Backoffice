@@ -11,6 +11,7 @@ export type AuthenticatedUser = {
   permissoesAdministrativas?: string[]
   trocaSenhaObrigatoria?: boolean
   ultimoAcesso: string | null
+  imagemUrl?: string | null
 }
 
 export type AuthResponse = {

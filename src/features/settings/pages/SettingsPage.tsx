@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
-import { getCurrentUser, updateOwnProfile } from '../../auth/api/authApi'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
+import { deleteOwnImage, getCurrentUser, updateOwnProfile, uploadOwnImage } from '../../auth/api/authApi'
 import { getStoredAccessToken, getStoredUser, storeAuthSession } from '../../auth/model/authSession'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
+import { clearCachedUserImage } from '../../auth/model/userImageCache'
+import { UserAvatar } from '../../auth/components/UserAvatar'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { formatPhoneNumber } from '../../../lib/formatters'
@@ -10,6 +12,9 @@ import { DatePicker } from '../../../components/ui/DatePicker'
 import { settingsAssets } from '../assets'
 import { SettingsCard } from '../components/SettingsCard'
 import { SettingsInput } from '../components/SettingsInput'
+
+const maxAvatarFileSizeBytes = 200 * 1024 * 1024
+const acceptedAvatarMimeTypes = ['image/jpeg', 'image/png']
 
 const todayIsoDate = new Date().toISOString().slice(0, 10)
 const datePickerInputClass =
@@ -29,6 +34,8 @@ export function SettingsPage() {
   const [feedback, setFeedback] = useState('')
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     const token = getStoredAccessToken()
@@ -97,6 +104,65 @@ export function SettingsPage() {
     }
   }
 
+  async function handleAvatarFileSelected(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null
+    event.target.value = ''
+
+    if (!file || !user) {
+      return
+    }
+
+    setFeedback('')
+    setError('')
+
+    if (!acceptedAvatarMimeTypes.includes(file.type)) {
+      setError('Envie uma imagem em formato JPG ou PNG.')
+      return
+    }
+
+    if (file.size > maxAvatarFileSizeBytes) {
+      setError('A imagem deve ter no máximo 200 mb.')
+      return
+    }
+
+    setIsUploadingAvatar(true)
+
+    try {
+      const updated = await uploadOwnImage(file)
+      await clearCachedUserImage(user.id)
+      setUser(updated)
+      storeAuthSession(getStoredAccessToken() || '', updated)
+      setFeedback('Foto de perfil atualizada com sucesso.')
+    } catch (uploadError) {
+      setError(getApiErrorMessage(uploadError))
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
+  async function handleRemoveAvatar() {
+    if (!user) {
+      return
+    }
+
+    setFeedback('')
+    setError('')
+    setIsUploadingAvatar(true)
+
+    try {
+      await deleteOwnImage()
+      await clearCachedUserImage(user.id)
+      const updated = { ...user, imagemUrl: null }
+      setUser(updated)
+      storeAuthSession(getStoredAccessToken() || '', updated)
+      setFeedback('Foto de perfil removida.')
+    } catch (removeError) {
+      setError(getApiErrorMessage(removeError))
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
   return (
     <AppLayout activeItem="Configurações" user={user}>
       <main
@@ -115,21 +181,40 @@ export function SettingsPage() {
             <form className="mt-4 grid gap-6 lg:grid-cols-[230px_1fr]" onSubmit={handleSaveAccount}>
               <div className="grid justify-items-center gap-3">
                 <div className="relative">
-                  <img
-                    className="h-28 w-28 rounded-full border-2 border-white object-cover shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_2px_rgba(215,219,218,0.5)]"
-                    src={settingsAssets.currentUserAvatar}
-                    alt=""
-                    aria-hidden="true"
+                  <UserAvatar
+                    className="h-28 w-28 border-2 border-white text-2xl shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_2px_rgba(215,219,218,0.5)]"
+                    user={user}
+                  />
+                  <input
+                    ref={avatarInputRef}
+                    accept="image/jpeg,image/png"
+                    className="sr-only"
+                    onChange={handleAvatarFileSelected}
+                    type="file"
                   />
                   <button
-                    className="absolute bottom-0 right-0 grid h-7 w-7 place-items-center rounded-full bg-[#e0e3e2] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]"
+                    className="absolute bottom-0 right-0 grid h-7 w-7 place-items-center rounded-full bg-[#e0e3e2] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] disabled:opacity-60"
+                    disabled={isUploadingAvatar}
+                    onClick={() => avatarInputRef.current?.click()}
                     type="button"
                     aria-label="Alterar avatar"
                   >
                     <img className="h-[10.5px] w-[11.667px]" src={settingsAssets.camera} alt="" aria-hidden="true" />
                   </button>
                 </div>
-                <p className="pt-1 text-center text-xs leading-4 text-muted-strong">JPG or PNG - máximo de 200 mb</p>
+                <p className="pt-1 text-center text-xs leading-4 text-muted-strong">
+                  {isUploadingAvatar ? 'Enviando imagem...' : 'JPG or PNG - máximo de 200 mb'}
+                </p>
+                {user?.imagemUrl ? (
+                  <button
+                    className="text-xs font-semibold text-red-700 underline-offset-2 hover:underline disabled:opacity-60"
+                    disabled={isUploadingAvatar}
+                    onClick={handleRemoveAvatar}
+                    type="button"
+                  >
+                    Remover foto
+                  </button>
+                ) : null}
               </div>
 
               <div className="grid content-start gap-4">

@@ -6,6 +6,7 @@ import { logout } from '../../auth/api/authApi'
 import { clearAuthSession } from '../../auth/model/authSession'
 import { hasAdministrativePermission, type AdministrativePermission } from '../../auth/model/administrativePermissions'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
+import { UserAvatar } from '../../auth/components/UserAvatar'
 import { backofficeAssets } from '../assets'
 
 const navItems = [
@@ -67,7 +68,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
       <div className="relative">
         {isUserMenuOpen ? <div className={cx('absolute bottom-[calc(100%+10px)] rounded-2xl border border-red-100 bg-red-50 p-2 shadow-[4px_4px_0_rgba(220,38,38,0.08)]', isCollapsed ? 'left-0 w-48' : 'left-0 right-0')}><button className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60" disabled={isLoggingOut} onClick={handleLogout} type="button"><LogOut size={17} strokeWidth={2} /><span>{isLoggingOut ? 'Saindo...' : 'Sair do sistema'}</span></button></div> : null}
 
-        <button aria-expanded={isUserMenuOpen} aria-label={isCollapsed ? `Menu de ${userName}` : undefined} className={cx('flex h-10 min-w-0 items-center text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint', isCollapsed ? 'mx-auto w-10 justify-center rounded-xl' : 'w-full gap-3 rounded-l-full px-3')} onClick={() => setIsUserMenuOpen((current) => !current)} type="button"><img className="h-7 w-7 shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(0,0,0,0.05)]" src={backofficeAssets.adminAvatar} alt="" aria-hidden="true" /><span className={cx('min-w-0', isCollapsed && 'sr-only')}><span className="block truncate text-[11px] leading-[1.25] text-admin-text">{userName}</span><span className="block truncate text-[9px] leading-[1.25] text-muted">{userEmail}</span></span></button>
+        <button aria-expanded={isUserMenuOpen} aria-label={isCollapsed ? `Menu de ${userName}` : undefined} className={cx('flex h-10 min-w-0 items-center text-left transition hover:bg-white/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint', isCollapsed ? 'mx-auto w-10 justify-center rounded-xl' : 'w-full gap-3 rounded-l-full px-3')} onClick={() => setIsUserMenuOpen((current) => !current)} type="button"><UserAvatar className="h-7 w-7 shrink-0 text-[11px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]" user={user} /><span className={cx('min-w-0', isCollapsed && 'sr-only')}><span className="block truncate text-[11px] leading-[1.25] text-admin-text">{userName}</span><span className="block truncate text-[9px] leading-[1.25] text-muted">{userEmail}</span></span></button>
       </div>
     </aside>
   )

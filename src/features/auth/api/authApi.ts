@@ -30,6 +30,19 @@ export async function updateOwnProfile(payload: Partial<Pick<AuthenticatedUser, 
   return data
 }
 
+export async function uploadOwnImage(file: File) {
+  const formData = new FormData()
+  formData.append('imagem', file)
+
+  const { data } = await httpClient.post<AuthenticatedUser>('/auth/me/imagem', formData)
+
+  return data
+}
+
+export async function deleteOwnImage() {
+  await httpClient.delete('/auth/me/imagem')
+}
+
 export async function changePassword(payload: ChangePasswordPayload) {
   await httpClient.post('/auth/change-password', payload)
 }
