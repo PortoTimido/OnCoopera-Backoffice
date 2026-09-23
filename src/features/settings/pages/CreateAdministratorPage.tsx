@@ -8,6 +8,7 @@ import { createBackofficeAdministrator } from '../../backoffice/api/backofficeAp
 import type { AdminProfile } from '../../backoffice/api/backofficeApi'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useToast } from '../../../components/ui/useToast'
 import { settingsAssets } from '../assets'
 import { AdminCreateInput } from '../components/AdminCreateInput'
 import { AdminCreateSelect } from '../components/AdminCreateSelect'
@@ -60,7 +61,7 @@ export function CreateAdministratorPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [temporaryPassword, setTemporaryPassword] = useState('')
-  const [error, setError] = useState('')
+  const toast = useToast()
 
   const passwordScore = useMemo(() => getPasswordScore(password), [password])
   const passwordStrengthLabel = passwordScore >= 3 ? 'Boa' : passwordScore >= 2 ? 'Razoável' : 'Fraca'
@@ -98,21 +99,20 @@ export function CreateAdministratorPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError('')
     setTemporaryPassword('')
 
     if (!acceptedTerms) {
-      setError('Aceite os termos de uso e a política de privacidade para continuar.')
+      toast.alert('Aceite os termos de uso e a política de privacidade para continuar.')
       return
     }
 
     if (password.length < 8) {
-      setError('A senha deve conter ao menos 8 caracteres.')
+      toast.alert('A senha deve conter ao menos 8 caracteres.')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas informadas não coincidem.')
+      toast.alert('As senhas informadas não coincidem.')
       return
     }
 
@@ -128,6 +128,7 @@ export function CreateAdministratorPage() {
         telefone: '11999999999',
       })
 
+      toast.success('Conta administrativa criada com sucesso.')
       setTemporaryPassword(created.senhaTemporaria || 'Senha temporária criada pela API.')
       setName('')
       setEmail('')
@@ -136,7 +137,7 @@ export function CreateAdministratorPage() {
       setConfirmPassword('')
       setAcceptedTerms(false)
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError))
+      toast.error(getApiErrorMessage(submitError))
     } finally {
       setIsSubmitting(false)
     }
@@ -253,10 +254,9 @@ export function CreateAdministratorPage() {
 
             {temporaryPassword ? (
               <p className="rounded-xl bg-brand-mint/20 px-4 py-3 text-sm font-semibold text-brand-teal">
-                Conta criada. Senha temporária: {temporaryPassword}
+                Guarde esta senha temporária para compartilhar com o novo administrador: {temporaryPassword}
               </p>
             ) : null}
-            {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
           </form>
         </div>
       </main>

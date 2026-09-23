@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { KeyRound, LockKeyhole, X } from 'lucide-react'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useToast } from '../../../components/ui/useToast'
 import { changePassword, changeTemporaryPassword } from '../api/authApi'
 import { PasswordStrength, type PasswordCriterion } from './PasswordStrength'
 
@@ -14,11 +15,11 @@ type RequiredPasswordChangeModalProps = {
 }
 
 export function RequiredPasswordChangeModal({ identifier, mode = 'authenticated', temporaryPassword, onClose, onCompleted }: RequiredPasswordChangeModalProps) {
+  const toast = useToast()
   const currentPasswordRef = useRef<HTMLInputElement>(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
-  const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -36,15 +37,14 @@ export function RequiredPasswordChangeModal({ identifier, mode = 'authenticated'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError('')
 
     if (score < criteria.length) {
-      setError('A nova senha ainda não atende todos os critérios de segurança.')
+      toast.alert('A nova senha ainda não atende todos os critérios de segurança.')
       return
     }
 
     if (newPassword !== confirmation) {
-      setError('As senhas informadas não coincidem.')
+      toast.alert('As senhas informadas não coincidem.')
       return
     }
 
@@ -52,7 +52,7 @@ export function RequiredPasswordChangeModal({ identifier, mode = 'authenticated'
     try {
       if (mode === 'temporary') {
         if (!identifier || !temporaryPassword) {
-          setError('Não foi possível identificar a conta para trocar a senha temporária.')
+          toast.alert('Não foi possível identificar a conta para trocar a senha temporária.')
           return
         }
         await changeTemporaryPassword({ identificador: identifier, senhaTemporaria: temporaryPassword, novaSenha: newPassword })
@@ -61,7 +61,7 @@ export function RequiredPasswordChangeModal({ identifier, mode = 'authenticated'
       }
       await onCompleted(newPassword)
     } catch (changePasswordError) {
-      setError(getApiErrorMessage(changePasswordError))
+      toast.error(getApiErrorMessage(changePasswordError))
     } finally {
       setIsSubmitting(false)
     }
@@ -93,7 +93,6 @@ export function RequiredPasswordChangeModal({ identifier, mode = 'authenticated'
             <input autoComplete="new-password" className="h-11 w-full rounded-xl border-2 border-line bg-surface-soft px-4 text-sm font-normal outline-none focus:border-brand-mint focus:ring-4 focus:ring-brand-mint/20" onChange={(event) => setConfirmation(event.target.value)} required type="password" value={confirmation} />
           </label>
           <PasswordStrength criteria={criteria} score={score} />
-          {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p> : null}
           <button className="mt-2 h-11 rounded-xl bg-brand-teal px-5 text-sm font-bold text-white transition hover:bg-brand-teal/90 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-mint disabled:cursor-wait disabled:opacity-60" disabled={isSubmitting} type="submit">{isSubmitting ? 'Salvando...' : 'Salvar nova senha'}</button>
         </form>
       </section>

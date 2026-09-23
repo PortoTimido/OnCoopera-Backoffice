@@ -9,6 +9,7 @@ import { AppLayout } from '../../backoffice/components/AppLayout'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { formatPhoneNumber } from '../../../lib/formatters'
 import { DatePicker } from '../../../components/ui/DatePicker'
+import { useToast } from '../../../components/ui/useToast'
 import { settingsAssets } from '../assets'
 import { SettingsCard } from '../components/SettingsCard'
 import { SettingsInput } from '../components/SettingsInput'
@@ -31,8 +32,7 @@ export function SettingsPage() {
   const [email, setEmail] = useState(() => getStoredUser()?.email || 'admin@oncoopera.com')
   const [phone, setPhone] = useState(() => getStoredUser()?.telefone || '')
   const [birthDate, setBirthDate] = useState(() => toIsoDateOnly(getStoredUser()?.dataNascimento))
-  const [feedback, setFeedback] = useState('')
-  const [error, setError] = useState('')
+  const toast = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
@@ -73,11 +73,9 @@ export function SettingsPage() {
 
   async function handleSaveAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setFeedback('')
-    setError('')
 
     if (!user) {
-      setError('Entre com uma conta administrativa para salvar alterações.')
+      toast.error('Entre com uma conta administrativa para salvar alterações.')
       return
     }
 
@@ -96,9 +94,9 @@ export function SettingsPage() {
 
       setUser(updated)
       storeAuthSession(getStoredAccessToken() || '', updated)
-      setFeedback('Conta atualizada com sucesso.')
+      toast.success('Conta atualizada com sucesso.')
     } catch (saveError) {
-      setError(getApiErrorMessage(saveError))
+      toast.error(getApiErrorMessage(saveError))
     } finally {
       setIsSaving(false)
     }
@@ -112,16 +110,13 @@ export function SettingsPage() {
       return
     }
 
-    setFeedback('')
-    setError('')
-
     if (!acceptedAvatarMimeTypes.includes(file.type)) {
-      setError('Envie uma imagem em formato JPG ou PNG.')
+      toast.alert('Envie uma imagem em formato JPG ou PNG.')
       return
     }
 
     if (file.size > maxAvatarFileSizeBytes) {
-      setError('A imagem deve ter no máximo 200 mb.')
+      toast.alert('A imagem deve ter no máximo 200 mb.')
       return
     }
 
@@ -132,9 +127,9 @@ export function SettingsPage() {
       await clearCachedUserImage(user.id)
       setUser(updated)
       storeAuthSession(getStoredAccessToken() || '', updated)
-      setFeedback('Foto de perfil atualizada com sucesso.')
+      toast.success('Foto de perfil atualizada com sucesso.')
     } catch (uploadError) {
-      setError(getApiErrorMessage(uploadError))
+      toast.error(getApiErrorMessage(uploadError))
     } finally {
       setIsUploadingAvatar(false)
     }
@@ -145,8 +140,6 @@ export function SettingsPage() {
       return
     }
 
-    setFeedback('')
-    setError('')
     setIsUploadingAvatar(true)
 
     try {
@@ -155,9 +148,9 @@ export function SettingsPage() {
       const updated = { ...user, imagemUrl: null }
       setUser(updated)
       storeAuthSession(getStoredAccessToken() || '', updated)
-      setFeedback('Foto de perfil removida.')
+      toast.success('Foto de perfil removida.')
     } catch (removeError) {
-      setError(getApiErrorMessage(removeError))
+      toast.error(getApiErrorMessage(removeError))
     } finally {
       setIsUploadingAvatar(false)
     }
@@ -245,9 +238,6 @@ export function SettingsPage() {
               </div>
             </form>
           </SettingsCard>
-
-          {feedback ? <p className="rounded-2xl bg-brand-mint/20 px-4 py-3 text-sm font-semibold text-brand-teal">{feedback}</p> : null}
-          {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
         </div>
       </main>
     </AppLayout>

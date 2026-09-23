@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
 import { cx } from '../../../lib/cx'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useToast } from '../../../components/ui/useToast'
 import { resetPasswordWithRecoveryToken } from '../api/authApi'
 import { authAssets } from '../assets'
 import { AuthCard } from './AuthCard'
@@ -18,9 +19,9 @@ type ResetPasswordCardProps = {
 
 export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess }: ResetPasswordCardProps) {
   const isPreview = mode === 'preview'
+  const toast = useToast()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
@@ -44,20 +45,18 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
       return
     }
 
-    setError('')
-
     if (score < criteria.length) {
-      setError('A senha ainda não atende todos os critérios de segurança.')
+      toast.alert('A senha ainda não atende todos os critérios de segurança.')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas informadas não coincidem.')
+      toast.alert('As senhas informadas não coincidem.')
       return
     }
 
     if (!resetToken) {
-      setError('Código de recuperação não encontrado. Solicite a recuperação de senha novamente.')
+      toast.alert('Código de recuperação não encontrado. Solicite a recuperação de senha novamente.')
       return
     }
 
@@ -71,7 +70,7 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
       })
       onSuccess?.()
     } catch (resetError) {
-      setError(getApiErrorMessage(resetError))
+      toast.error(getApiErrorMessage(resetError))
     } finally {
       setIsSubmitting(false)
     }
@@ -124,8 +123,6 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
         </div>
 
         <PasswordStrength criteria={criteria} score={score} />
-
-        {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
         <Button className="h-16 rounded-[20px]" disabled={isPreview || isSubmitting} icon={authAssets.arrowWhite} tone="dark" type="submit">
           {isSubmitting ? 'Salvando...' : 'Salvar nova senha'}

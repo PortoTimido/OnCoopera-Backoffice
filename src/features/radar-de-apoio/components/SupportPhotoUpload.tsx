@@ -1,5 +1,6 @@
 import { ImageUp, UploadCloud, X } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { useToast } from '../../../components/ui/useToast'
 import type { SupportImage } from '../model/supportTypes'
 
 const maxFileSize = 5 * 1024 * 1024
@@ -13,7 +14,7 @@ type SupportPhotoUploadProps = {
 
 export function SupportPhotoUpload({ existingImage, file, onFileChange, onRemoveImage }: SupportPhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [error, setError] = useState('')
+  const toast = useToast()
   const localPreviewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
   const previewUrl = localPreviewUrl || existingImage?.url || ''
 
@@ -28,22 +29,20 @@ export function SupportPhotoUpload({ existingImage, file, onFileChange, onRemove
   function handleFile(fileToValidate: File | undefined) {
     if (!fileToValidate) return
     if (!['image/jpeg', 'image/png'].includes(fileToValidate.type)) {
-      setError('Envie uma imagem JPG ou PNG.')
+      toast.error('Envie uma imagem JPG ou PNG.')
       onFileChange(null)
       return
     }
     if (fileToValidate.size > maxFileSize) {
-      setError('A imagem deve ter no máximo 5 MB.')
+      toast.error('A imagem deve ter no máximo 5 MB.')
       onFileChange(null)
       return
     }
 
-    setError('')
     onFileChange(fileToValidate)
   }
 
   function handleRemove() {
-    setError('')
     if (file) {
       onFileChange(null)
       return
@@ -72,7 +71,6 @@ export function SupportPhotoUpload({ existingImage, file, onFileChange, onRemove
         </button>
       )}
       {file ? <p className="inline-flex items-center gap-2 text-sm text-brand-teal"><ImageUp size={16} />{file.name}</p> : null}
-      {error ? <p className="text-sm font-semibold text-red-700" role="alert">{error}</p> : null}
     </div>
   )
 }

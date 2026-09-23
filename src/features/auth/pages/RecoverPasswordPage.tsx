@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useToast } from '../../../components/ui/useToast'
 import { requestPasswordRecovery } from '../api/authApi'
 import { authAssets } from '../assets'
 import { AuthCard } from '../components/AuthCard'
@@ -11,20 +12,19 @@ import { AuthShell } from '../components/AuthShell'
 
 export function RecoverPasswordPage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError('')
     setIsSubmitting(true)
 
     try {
       await requestPasswordRecovery({ email })
       navigate('/recuperar-senha/codigo', { state: { email } })
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError))
+      toast.error(getApiErrorMessage(requestError))
     } finally {
       setIsSubmitting(false)
     }
@@ -75,8 +75,6 @@ export function RecoverPasswordPage() {
               </p>
             </div>
           </div>
-
-          {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p> : null}
 
           <Button disabled={isSubmitting} icon={authAssets.arrowDark} type="submit">
             {isSubmitting ? 'Enviando...' : 'Enviar código de recuperação'}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ArchiveX, ChevronLeft, ChevronRight, Eye, FileClock, FileText, Pencil, Plus, Send, ToggleLeft, ToggleRight } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
+import { useToast } from '../../../components/ui/useToast'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
@@ -77,9 +78,9 @@ function getCategory(article: Article) {
 }
 
 export function ArticlesPage() {
+  const toast = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const [articlesResult, setArticlesResult] = useState<PaginatedArticles>(emptyPagination)
-  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '')
   const [articleToDeactivate, setArticleToDeactivate] = useState<Article | null>(null)
@@ -126,7 +127,6 @@ export function ArticlesPage() {
 
     async function loadArticles() {
       setIsLoading(true)
-      setError('')
 
       try {
         const data = await listBackofficeArticles({
@@ -142,7 +142,7 @@ export function ArticlesPage() {
       } catch (loadError) {
         if (isMounted) {
           setArticlesResult(emptyPagination)
-          setError(getApiErrorMessage(loadError))
+          toast.error(getApiErrorMessage(loadError))
         }
       } finally {
         if (isMounted) {
@@ -156,7 +156,7 @@ export function ArticlesPage() {
     return () => {
       isMounted = false
     }
-  }, [activeStatus, currentPage, search])
+  }, [activeStatus, currentPage, search, toast])
 
   async function refreshArticles() {
     const data = await listBackofficeArticles({
@@ -172,14 +172,15 @@ export function ArticlesPage() {
   async function confirmDeleteArticle() {
     if (!articleToDeactivate) return
     setIsDeleting(true)
-    setError('')
 
     try {
-      await updateBackofficeArticle(articleToDeactivate.id, { status: articleToDeactivate.status === 'PUBLICADO' ? 'DESATIVADO' : 'PUBLICADO' })
+      const wasPublished = articleToDeactivate.status === 'PUBLICADO'
+      await updateBackofficeArticle(articleToDeactivate.id, { status: wasPublished ? 'DESATIVADO' : 'PUBLICADO' })
       setArticleToDeactivate(null)
       await refreshArticles()
+      toast.success(wasPublished ? 'Artigo desativado com sucesso.' : 'Artigo ativado com sucesso.')
     } catch (deleteError) {
-      setError(getApiErrorMessage(deleteError))
+      toast.error(getApiErrorMessage(deleteError))
     } finally {
       setIsDeleting(false)
     }
@@ -207,8 +208,6 @@ export function ArticlesPage() {
         </header>
 
         <SearchFilterBar activeValue={activeStatus} filtersLabel="Filtrar artigos" onFilterChange={(value) => updateSearchParams({ page: null, status: value ?? null })} onQueryChange={setQuery} options={statusFilters} query={query} searchLabel="Pesquisar artigos" searchPlaceholder="Pesquisar..." />
-
-        {error ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
         <section className="overflow-hidden rounded-3xl bg-white shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_rgba(215,219,218,0.5)]">
           <div className="overflow-x-auto">
@@ -318,7 +317,7 @@ export function ArticlesPage() {
           </footer>
         </section>
       </main>
-      <ConfirmationModal confirmLabel={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo' : 'Ativar artigo'} description={articleToDeactivate?.status === 'PUBLICADO' ? `O artigo \"${articleToDeactivate.titulo}\" deixará de ficar disponível no sistema.` : `O artigo \"${articleToDeactivate?.titulo ?? ''}\" voltará a ficar disponível no sistema.`} isConfirming={isDeleting} isOpen={Boolean(articleToDeactivate)} onCancel={() => setArticleToDeactivate(null)} onConfirm={confirmDeleteArticle} title={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo?' : 'Ativar artigo?'} />
+      <ConfirmationModal confirmLabel={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo' : 'Ativar artigo'} description={articleToDeactivate?.status === 'PUBLICADO' ? `O artigo "${articleToDeactivate.titulo}" deixará de ficar disponível no sistema.` : `O artigo "${articleToDeactivate?.titulo ?? ''}" voltará a ficar disponível no sistema.`} isConfirming={isDeleting} isOpen={Boolean(articleToDeactivate)} onCancel={() => setArticleToDeactivate(null)} onConfirm={confirmDeleteArticle} title={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo?' : 'Ativar artigo?'} />
     </AppLayout>
   )
 }

@@ -7,6 +7,7 @@ import { AppLayout } from '../../backoffice/components/AppLayout'
 import { SearchFilterBar, type SearchFilterOption } from '../../backoffice/components/SearchFilterBar'
 import { getStoredUser } from '../../auth/model/authSession'
 import { ConfirmationModal } from '../../../components/ui/ConfirmationModal'
+import { useToast } from '../../../components/ui/useToast'
 import { permissionsLabel } from '../model/administrator'
 
 const emptyResult: PaginatedUsuarios = { data: [], page: 1, pageSize: 10, total: 0, totalPages: 1 }
@@ -21,10 +22,11 @@ const userStatusFilters: Array<SearchFilterOption<UserStatusFilter>> = [
 function formatDate(value: string | null) { return value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date(value)) : 'Nunca acessou' }
 
 export function UserListPage() {
+  const toast = useToast()
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState(() => params.get('search') ?? '')
   const [result, setResult] = useState<PaginatedUsuarios>(emptyResult)
-  const [error, setError] = useState('')
+  const [hasLoadError, setHasLoadError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [reload, setReload] = useState(0)
   const [administratorToDeactivate, setAdministratorToDeactivate] = useState<PaginatedUsuarios['data'][number] | null>(null)
@@ -34,14 +36,14 @@ export function UserListPage() {
   const status = params.get('status') as UserStatusFilter | null
   const updateParams = useCallback((values: Record<string, string | number | null>) => { const next = new URLSearchParams(params); Object.entries(values).forEach(([key, value]) => value ? next.set(key, String(value)) : next.delete(key)); setParams(next) }, [params, setParams])
   useEffect(() => { const timeout = window.setTimeout(() => { if (query !== search) updateParams({ search: query.trim() || null, page: null }) }, 300); return () => window.clearTimeout(timeout) }, [query, search, updateParams])
-  useEffect(() => { let active = true; async function load() { setIsLoading(true); setError(''); try { const data = await listBackofficeUsuarios({ page, pageSize: 10, search: search || undefined, status: status ?? undefined, tipo: 'ADMINISTRADOR' }); if (active) setResult(data) } catch (loadError) { if (active) { setResult(emptyResult); setError(getApiErrorMessage(loadError)) } } finally { if (active) setIsLoading(false) } } void load(); return () => { active = false } }, [page, reload, search, status])
-  async function confirmDelete() { if (!administratorToDeactivate) return; setIsDeleting(true); setError(''); try { await updateBackofficeAdministrator(administratorToDeactivate.id, { status: administratorToDeactivate.status === 'ATIVO' ? 'INATIVO' : 'ATIVO' }); setAdministratorToDeactivate(null); setReload((value) => value + 1) } catch (deleteError) { setError(getApiErrorMessage(deleteError)) } finally { setIsDeleting(false) } }
+  useEffect(() => { let active = true; async function load() { setIsLoading(true); setHasLoadError(false); try { const data = await listBackofficeUsuarios({ page, pageSize: 10, search: search || undefined, status: status ?? undefined, tipo: 'ADMINISTRADOR' }); if (active) setResult(data) } catch (loadError) { if (active) { setResult(emptyResult); setHasLoadError(true); toast.error(getApiErrorMessage(loadError)) } } finally { if (active) setIsLoading(false) } } void load(); return () => { active = false } }, [page, reload, search, status, toast])
+  async function confirmDelete() { if (!administratorToDeactivate) return; setIsDeleting(true); try { await updateBackofficeAdministrator(administratorToDeactivate.id, { status: administratorToDeactivate.status === 'ATIVO' ? 'INATIVO' : 'ATIVO' }); setAdministratorToDeactivate(null); setReload((value) => value + 1) } catch (deleteError) { toast.error(getApiErrorMessage(deleteError)) } finally { setIsDeleting(false) } }
   return (
     <AppLayout activeItem="Usuários" user={getStoredUser()}>
       <main className="flex min-h-0 flex-1 flex-col gap-8 overflow-auto p-6 sm:p-10 lg:p-12">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h1 className="font-display text-[length:var(--admin-list-title-size)] leading-[var(--admin-list-title-line-height)] text-admin-text">Usuários</h1><p className="mt-1 text-sm text-muted">Gerencie as contas administrativas do sistema.</p></div><Link className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-teal px-6 text-base text-white" to="/usuarios/novo"><Plus size={17} />Novo administrador</Link></header>
         <SearchFilterBar activeValue={status ?? undefined} filtersLabel="Filtrar administradores" onFilterChange={(value) => updateParams({ status: value ?? null, page: null })} onQueryChange={setQuery} options={userStatusFilters} query={query} searchLabel="Pesquisar administradores" searchPlaceholder="Pesquisar por nome ou e-mail" />
-        {error ? <div className="flex items-center justify-between gap-4 rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700" role="alert"><span>{error}</span><button className="rounded-lg bg-white px-3 py-2" onClick={() => setReload((value) => value + 1)} type="button">Tentar novamente</button></div> : null}
+        {hasLoadError ? <div className="rounded-xl bg-surface-soft p-4 text-center text-sm text-muted">Não foi possível carregar a lista. <button className="font-bold text-brand-teal underline" onClick={() => setReload((value) => value + 1)} type="button">Tentar novamente</button></div> : null}
         {isLoading ? <section className="rounded-3xl bg-white px-4 py-12 text-center text-sm text-muted">Carregando administradores...</section> : <UserTable page={result.page} users={result.data} totalPages={result.totalPages} onDelete={setAdministratorToDeactivate} onPageChange={(next) => updateParams({ page: next })} />}
       </main>
       <ConfirmationModal confirmLabel={administratorToDeactivate?.status === 'ATIVO' ? 'Inativar administrador' : 'Ativar administrador'} description={administratorToDeactivate?.status === 'ATIVO' ? `O administrador \"${administratorToDeactivate.nome}\" perderá o acesso ao sistema.` : `O administrador \"${administratorToDeactivate?.nome ?? ''}\" voltará a ter acesso ao sistema.`} isConfirming={isDeleting} isOpen={Boolean(administratorToDeactivate)} onCancel={() => setAdministratorToDeactivate(null)} onConfirm={confirmDelete} title={administratorToDeactivate?.status === 'ATIVO' ? 'Inativar administrador?' : 'Ativar administrador?'} />

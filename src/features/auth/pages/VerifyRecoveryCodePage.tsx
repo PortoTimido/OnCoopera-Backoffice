@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useToast } from '../../../components/ui/useToast'
 import { requestPasswordRecovery, verifyPasswordRecoveryCode } from '../api/authApi'
 import { authAssets } from '../assets'
 import { AuthCard } from '../components/AuthCard'
@@ -15,9 +16,8 @@ export function VerifyRecoveryCodePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const email = (location.state as LocationState)?.email ?? ''
+  const toast = useToast()
   const [code, setCode] = useState('')
-  const [error, setError] = useState('')
-  const [info, setInfo] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResending, setIsResending] = useState(false)
 
@@ -27,30 +27,26 @@ export function VerifyRecoveryCodePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError('')
-    setInfo('')
     setIsSubmitting(true)
 
     try {
       const { resetToken } = await verifyPasswordRecoveryCode({ email, code })
       navigate('/redefinir-senha', { state: { resetToken } })
     } catch (verifyError) {
-      setError(getApiErrorMessage(verifyError))
+      toast.error(getApiErrorMessage(verifyError))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   async function handleResend() {
-    setError('')
-    setInfo('')
     setIsResending(true)
 
     try {
       await requestPasswordRecovery({ email })
-      setInfo('Se o e-mail estiver cadastrado, um novo código foi enviado.')
+      toast.success('Se o e-mail estiver cadastrado, um novo código foi enviado.')
     } catch (resendError) {
-      setError(getApiErrorMessage(resendError))
+      toast.error(getApiErrorMessage(resendError))
     } finally {
       setIsResending(false)
     }
@@ -93,9 +89,6 @@ export function VerifyRecoveryCodePage() {
             surface="white"
             value={code}
           />
-
-          {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p> : null}
-          {info ? <p className="rounded-xl bg-security-blue/10 px-4 py-3 text-sm font-semibold text-[#275d97]" role="status">{info}</p> : null}
 
           <Button disabled={isSubmitting || code.length !== 6} icon={authAssets.arrowDark} type="submit">
             {isSubmitting ? 'Verificando...' : 'Verificar código'}
