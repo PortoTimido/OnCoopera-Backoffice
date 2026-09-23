@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Calendar, CheckCircle2, Clock3, Eye, FileText, Lightbulb, MessageSquareQuote, Save, Send, X } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
+import { useToast } from '../../../components/ui/useToast'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
@@ -92,11 +93,10 @@ export function ArticleEditorPage() {
   const { articleId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const toast = useToast()
   const [body, setBody] = useState(initialBody)
   const [categories, setCategories] = useState<ArticleTaxonomy[]>([])
-  const [error, setError] = useState('')
   const [featuredImage, setFeaturedImage] = useState<File | null>(null)
-  const [feedback, setFeedback] = useState('')
   const [helpModal, setHelpModal] = useState<HelpModal>(null)
   const [imageUrl, setImageUrl] = useState('')
   const [isImageRemovalRequested, setIsImageRemovalRequested] = useState(false)
@@ -111,7 +111,7 @@ export function ArticleEditorPage() {
   const [title, setTitle] = useState('')
   const user = getStoredUser()
   const isEditing = Boolean(articleId)
-  const imageSaveError = new URLSearchParams(location.search).has('imageUploadFailed') ? 'Artigo salvo, mas não foi possível persistir a imagem. Selecione-a novamente para tentar de novo.' : ''
+  const hasImageSaveError = new URLSearchParams(location.search).has('imageUploadFailed')
   const estimatedReadingTime = useMemo(() => estimateReadingTime(body), [body])
   const readingTime = customReadingTime ?? estimatedReadingTime
   const categoryOptions = useMemo(
@@ -127,11 +127,17 @@ export function ArticleEditorPage() {
   const selectedTags = useMemo(() => getSelectedTags(tags, selectedTagIds), [selectedTagIds, tags])
 
   useEffect(() => {
+    if (!hasImageSaveError) return
+
+    toast.alert('Artigo salvo, mas não foi possível persistir a imagem. Selecione-a novamente para tentar de novo.')
+    navigate(location.pathname, { replace: true })
+  }, [hasImageSaveError, location.pathname, navigate, toast])
+
+  useEffect(() => {
     let isMounted = true
 
     async function loadEditorData() {
       setIsLoading(true)
-      setError('')
 
       try {
         const [categoriesResult, tagsResult, articleResult] = await Promise.all([
@@ -151,6 +157,7 @@ export function ArticleEditorPage() {
 
         if (articleResult) {
           setTitle(articleResult.titulo)
+          setSummary(articleResult.resumo ?? '')
           setBody(articleResult.conteudo || initialBody)
           setStatus(articleResult.status)
           setCustomReadingTime(Math.max(1, articleResult.tempoLeituraMinutos || estimateReadingTime(articleResult.conteudo || initialBody)))
@@ -167,7 +174,7 @@ export function ArticleEditorPage() {
 
           setCategories(fallbackCategories)
           setSelectedCategoryId((current) => current || fallbackCategories[0]?.id || '')
-          setError(getApiErrorMessage(loadError))
+          toast.error(getApiErrorMessage(loadError))
         }
       } finally {
         if (isMounted) {
@@ -181,7 +188,7 @@ export function ArticleEditorPage() {
     return () => {
       isMounted = false
     }
-  }, [articleId])
+  }, [articleId, toast])
 
   function removeTag(tagId: string) {
     setSelectedTagIds((current) => current.filter((id) => id !== tagId))
@@ -209,17 +216,17 @@ export function ArticleEditorPage() {
     const textContent = stripHtml(body)
 
     if (!trimmedTitle) {
-      setError('Informe o título do artigo.')
+      toast.alert('Informe o título do artigo.')
       return null
     }
 
     if (!textContent) {
-      setError('Escreva o conteúdo do artigo.')
+      toast.alert('Escreva o conteúdo do artigo.')
       return null
     }
 
     if (!selectedCategoryId) {
-      setError('Selecione uma categoria para o artigo.')
+      toast.alert('Selecione uma categoria para o artigo.')
       return null
     }
 
@@ -228,6 +235,7 @@ export function ArticleEditorPage() {
     return {
       categoriaIds: [resolvedCategoryId],
       conteudo: body,
+      resumo: summary.trim(),
       status: nextStatus,
       tagIds: selectedTagIds,
       tempoLeituraMinutos: readingTime,
@@ -256,13 +264,11 @@ export function ArticleEditorPage() {
   }
 
   async function handlePreview() {
-    setError('')
-
     try {
       const previewImageUrl = featuredImage ? await getFileDataUrl(featuredImage) : imageUrl || null
       openPreview(buildPreviewData(previewImageUrl))
     } catch {
-      setError('Não foi possível preparar a imagem para pré-visualização.')
+      toast.error('Não foi possível preparar a imagem para pré-visualização.')
     }
   }
 
@@ -274,9 +280,6 @@ export function ArticleEditorPage() {
   }
 
   async function handleSave(nextStatus: ArticleStatus, shouldOpenPreview = false) {
-    setFeedback('')
-    setError('')
-
     setIsSaving(true)
 
     let savedArticle: Article | null = null
@@ -297,15 +300,11 @@ export function ArticleEditorPage() {
         savedArticle = { ...savedArticle, imagemUrl: null }
       }
 
-      setFeedback(nextStatus === 'PUBLICADO' ? 'Artigo publicado com sucesso.' : 'Rascunho salvo com sucesso.')
+      toast.success(nextStatus === 'PUBLICADO' ? 'Artigo publicado com sucesso.' : 'Rascunho salvo com sucesso.')
       setStatus(savedArticle.status)
       setImageUrl(savedArticle.imagemUrl ?? '')
       setFeaturedImage(null)
       setIsImageRemovalRequested(false)
-
-      if (imageSaveError) {
-        navigate(location.pathname, { replace: true })
-      }
 
       if (shouldOpenPreview) {
         openPublishedPreview(savedArticle)
@@ -321,7 +320,7 @@ export function ArticleEditorPage() {
         return
       }
 
-      setError(getApiErrorMessage(saveError))
+      toast.error(getApiErrorMessage(saveError))
     } finally {
       setIsSaving(false)
     }
@@ -334,14 +333,12 @@ export function ArticleEditorPage() {
       return
     }
 
-    setError('')
-
     try {
       const createdTag = await createBackofficeArticleTag(trimmedName)
       setTags((current) => [...current.filter((tag) => tag.id !== createdTag.id), createdTag])
       setSelectedTagIds((current) => (current.includes(createdTag.id) ? current : [...current, createdTag.id]))
     } catch (tagError) {
-      setError(getApiErrorMessage(tagError))
+      toast.error(getApiErrorMessage(tagError))
     }
   }
 
@@ -352,14 +349,12 @@ export function ArticleEditorPage() {
       return
     }
 
-    setError('')
-
     try {
       const createdCategory = await createBackofficeArticleCategory(trimmedName)
       setCategories((current) => [...current.filter((category) => category.id !== createdCategory.id), createdCategory])
       setSelectedCategoryId(createdCategory.id)
     } catch (categoryError) {
-      setError(getApiErrorMessage(categoryError))
+      toast.error(getApiErrorMessage(categoryError))
     }
   }
 
@@ -384,7 +379,7 @@ export function ArticleEditorPage() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1 text-sm leading-5 text-muted">
                 <CheckCircle2 size={16} strokeWidth={2} />
-                {feedback || 'Salvo a 2 mins atrás'}
+                Salvo a 2 mins atrás
               </span>
               <button
                 className="rounded-xl bg-[#e0e3e2] px-6 py-3 text-sm leading-5 text-admin-text transition hover:-translate-y-0.5"
@@ -395,8 +390,6 @@ export function ArticleEditorPage() {
               </button>
             </div>
           </header>
-
-          {error || imageSaveError ? <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error || imageSaveError}</p> : null}
 
           {isLoading ? (
             <div className="rounded-3xl bg-white p-8 text-sm text-muted shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">Carregando artigo...</div>

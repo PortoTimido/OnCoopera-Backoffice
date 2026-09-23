@@ -11,6 +11,7 @@ export type Article = {
   id: string
   autorId: string
   titulo: string
+  resumo: string | null
   conteudo: string
   tempoLeituraMinutos: number
   imagemUrl: string | null
@@ -43,6 +44,7 @@ export type ListArticlesParams = {
 export type SaveArticlePayload = {
   categoriaIds: string[]
   conteudo: string
+  resumo: string
   status?: ArticleStatus
   tagIds?: string[]
   tempoLeituraMinutos: number

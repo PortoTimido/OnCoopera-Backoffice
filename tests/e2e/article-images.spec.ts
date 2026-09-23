@@ -5,7 +5,7 @@ const user = {
 }
 
 const article = {
-  id: 'article-1', autorId: 'content-1', titulo: 'Article title', conteudo: '<p>Article content</p>', tempoLeituraMinutos: 1, imagemUrl: 'https://cdn.example.com/article.png', status: 'RASCUNHO', categorias: [{ id: 'category-1', nome: 'Category' }], tags: [], dataCriacao: '2026-01-01T00:00:00.000Z', dataAtualizacao: '2026-01-01T00:00:00.000Z', dataPublicacao: null,
+  id: 'article-1', autorId: 'content-1', titulo: 'Article title', resumo: 'Article introduction', conteudo: '<p>Article content</p>', tempoLeituraMinutos: 1, imagemUrl: 'https://cdn.example.com/article.png', status: 'RASCUNHO', categorias: [{ id: 'category-1', nome: 'Category' }], tags: [], dataCriacao: '2026-01-01T00:00:00.000Z', dataAtualizacao: '2026-01-01T00:00:00.000Z', dataPublicacao: null,
 }
 
 async function mockArticleApi(page: Page, shouldFailImageUpload = false) {
@@ -32,6 +32,7 @@ async function mockArticleApi(page: Page, shouldFailImageUpload = false) {
 
 async function fillArticle(page: Page) {
   await page.locator('input').first().fill('Article title')
+  await page.getByPlaceholder(/breve resumo ou introdução/i).fill('Article introduction')
   await page.locator('.article-rich-text-editor').fill('Article content')
 }
 
@@ -48,6 +49,20 @@ test('uploads an article cover in multipart after creating the article', async (
   expect((await createRequest).postDataJSON()).not.toHaveProperty('imagemUrl')
   expect((await imageRequest).postData()).toContain('name="imagem"')
   await expect(page).toHaveURL(/\/artigos\/article-1\/editar$/)
+})
+
+test('persists the article introduction on create and restores it on edit', async ({ page }) => {
+  await mockArticleApi(page)
+  await page.goto('/artigos/novo')
+  await fillArticle(page)
+
+  const createRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos'))
+  await page.getByRole('button', { name: 'Salve o rascunho' }).click()
+
+  expect((await createRequest).postDataJSON()).toMatchObject({ resumo: 'Article introduction' })
+
+  await page.goto('/artigos/article-1/editar')
+  await expect(page.getByPlaceholder(/breve resumo ou introdução/i)).toHaveValue('Article introduction')
 })
 
 test('deletes a persisted article cover when it is removed', async ({ page }) => {
@@ -69,5 +84,5 @@ test('keeps a newly created article editable when its cover upload fails', async
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
 
   await expect(page).toHaveURL(/\/artigos\/article-1\/editar\?imageUploadFailed=1$/)
-  await expect(page.locator('p.bg-red-50')).toBeVisible()
+  await expect(page.getByRole('status')).toContainText('Artigo salvo, mas não foi possível persistir a imagem.')
 })
