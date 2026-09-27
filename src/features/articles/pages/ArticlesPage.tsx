@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { SearchFilterBar, type SearchFilterOption } from '../../backoffice/components/SearchFilterBar'
+import { DataGridTransition, TableSkeletonRows } from '../../backoffice/components/DataGridFeedback'
 import { listBackofficeArticles, updateBackofficeArticle, type Article, type ArticleStatus, type PaginatedArticles } from '../api/articlesApi'
 import { createArticlePreviewFromArticle, storeArticlePreview } from '../model/articlePreview'
 import { ConfirmationModal } from '../../../components/ui/ConfirmationModal'
@@ -209,9 +210,10 @@ export function ArticlesPage() {
 
         <SearchFilterBar activeValue={activeStatus} filtersLabel="Filtrar artigos" onFilterChange={(value) => updateSearchParams({ page: null, status: value ?? null })} onQueryChange={setQuery} options={statusFilters} query={query} searchLabel="Pesquisar artigos" searchPlaceholder="Pesquisar..." />
 
+        <DataGridTransition changeKey={activeStatus ?? 'TODOS'}>
         <section className="overflow-hidden rounded-3xl bg-white shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_rgba(215,219,218,0.5)]">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[var(--admin-table-min-width)] border-collapse text-left">
+            <table aria-busy={isLoading} className="w-full min-w-[var(--admin-table-min-width)] border-collapse text-left">
               <thead className="bg-surface-soft text-xs font-bold uppercase tracking-[0.6px] text-muted-strong">
                 <tr>
                   <th className="px-4 py-4">Título</th>
@@ -223,13 +225,7 @@ export function ArticlesPage() {
                 </tr>
               </thead>
               <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td className="px-4 py-12 text-center text-sm text-muted" colSpan={6}>
-                      Carregando artigos...
-                    </td>
-                  </tr>
-                ) : null}
+                {isLoading ? <TableSkeletonRows columns={6} /> : null}
 
                 {!isLoading && articlesResult.data.length === 0 ? (
                   <tr>
@@ -316,6 +312,7 @@ export function ArticlesPage() {
             </div>
           </footer>
         </section>
+        </DataGridTransition>
       </main>
       <ConfirmationModal confirmLabel={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo' : 'Ativar artigo'} description={articleToDeactivate?.status === 'PUBLICADO' ? `O artigo "${articleToDeactivate.titulo}" deixará de ficar disponível no sistema.` : `O artigo "${articleToDeactivate?.titulo ?? ''}" voltará a ficar disponível no sistema.`} isConfirming={isDeleting} isOpen={Boolean(articleToDeactivate)} onCancel={() => setArticleToDeactivate(null)} onConfirm={confirmDeleteArticle} title={articleToDeactivate?.status === 'PUBLICADO' ? 'Desativar artigo?' : 'Ativar artigo?'} />
     </AppLayout>

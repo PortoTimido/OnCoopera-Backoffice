@@ -5,6 +5,7 @@ import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { listBackofficeUsuarios, updateBackofficeAdministrator, type PaginatedUsuarios } from '../../backoffice/api/backofficeApi'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { SearchFilterBar, type SearchFilterOption } from '../../backoffice/components/SearchFilterBar'
+import { DataGridSkeleton, DataGridTransition } from '../../backoffice/components/DataGridFeedback'
 import { getStoredUser } from '../../auth/model/authSession'
 import { ConfirmationModal } from '../../../components/ui/ConfirmationModal'
 import { useToast } from '../../../components/ui/useToast'
@@ -44,7 +45,7 @@ export function UserListPage() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h1 className="font-display text-[length:var(--admin-list-title-size)] leading-[var(--admin-list-title-line-height)] text-admin-text">Usuários</h1><p className="mt-1 text-sm text-muted">Gerencie as contas administrativas do sistema.</p></div><Link className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-teal px-6 text-base text-white" to="/usuarios/novo"><Plus size={17} />Novo administrador</Link></header>
         <SearchFilterBar activeValue={status ?? undefined} filtersLabel="Filtrar administradores" onFilterChange={(value) => updateParams({ status: value ?? null, page: null })} onQueryChange={setQuery} options={userStatusFilters} query={query} searchLabel="Pesquisar administradores" searchPlaceholder="Pesquisar por nome ou e-mail" />
         {hasLoadError ? <div className="rounded-xl bg-surface-soft p-4 text-center text-sm text-muted">Não foi possível carregar a lista. <button className="font-bold text-brand-teal underline" onClick={() => setReload((value) => value + 1)} type="button">Tentar novamente</button></div> : null}
-        {isLoading ? <section className="rounded-3xl bg-white px-4 py-12 text-center text-sm text-muted">Carregando administradores...</section> : <UserTable page={result.page} users={result.data} totalPages={result.totalPages} onDelete={setAdministratorToDeactivate} onPageChange={(next) => updateParams({ page: next })} />}
+        <DataGridTransition changeKey={status ?? 'TODOS'}>{isLoading ? <DataGridSkeleton /> : <UserTable page={result.page} users={result.data} totalPages={result.totalPages} onDelete={setAdministratorToDeactivate} onPageChange={(next) => updateParams({ page: next })} />}</DataGridTransition>
       </main>
       <ConfirmationModal confirmLabel={administratorToDeactivate?.status === 'ATIVO' ? 'Inativar administrador' : 'Ativar administrador'} description={administratorToDeactivate?.status === 'ATIVO' ? `O administrador \"${administratorToDeactivate.nome}\" perderá o acesso ao sistema.` : `O administrador \"${administratorToDeactivate?.nome ?? ''}\" voltará a ter acesso ao sistema.`} isConfirming={isDeleting} isOpen={Boolean(administratorToDeactivate)} onCancel={() => setAdministratorToDeactivate(null)} onConfirm={confirmDelete} title={administratorToDeactivate?.status === 'ATIVO' ? 'Inativar administrador?' : 'Ativar administrador?'} />
     </AppLayout>
