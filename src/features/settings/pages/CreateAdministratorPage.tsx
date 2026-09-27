@@ -64,7 +64,8 @@ export function CreateAdministratorPage() {
   const toast = useToast()
 
   const passwordScore = useMemo(() => getPasswordScore(password), [password])
-  const passwordStrengthLabel = passwordScore >= 3 ? 'Boa' : passwordScore >= 2 ? 'Razoável' : 'Fraca'
+  const passwordStrengthLabel =
+    passwordScore >= 3 ? 'Boa' : passwordScore >= 2 ? 'Razoável' : 'Fraca'
   const generatedLogin = useMemo(() => createLoginFromName(name), [name])
 
   useEffect(() => {
@@ -155,10 +156,17 @@ export function CreateAdministratorPage() {
               <Link className="text-muted hover:text-brand-teal" to="/configuracoes">
                 Configurações
               </Link>
-              <img className="h-2 w-[4.933px]" src={settingsAssets.breadcrumbChevron} alt="" aria-hidden="true" />
+              <img
+                className="h-2 w-[4.933px]"
+                src={settingsAssets.breadcrumbChevron}
+                alt=""
+                aria-hidden="true"
+              />
               <span className="font-bold text-brand-teal">Criar conta administrativa</span>
             </nav>
-            <h1 className="font-serif text-[40px] font-semibold leading-[1.15] text-ink">Criar conta administrativa</h1>
+            <h1 className="font-serif text-[40px] font-semibold leading-[1.15] text-ink">
+              Criar conta administrativa
+            </h1>
           </header>
 
           <form
@@ -204,7 +212,14 @@ export function CreateAdministratorPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Mínimo de 8 caracteres"
                 required
-                rightElement={<img className="h-[19.8px] w-[22px]" src={settingsAssets.formEyeOff} alt="" aria-hidden="true" />}
+                rightElement={
+                  <img
+                    className="h-[19.8px] w-[22px]"
+                    src={settingsAssets.formEyeOff}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                }
                 type="password"
                 value={password}
               />
@@ -212,12 +227,18 @@ export function CreateAdministratorPage() {
                 <div className="grid grid-cols-4 gap-2" aria-hidden="true">
                   {Array.from({ length: 4 }, (_, index) => (
                     <span
-                      className={index < Math.max(passwordScore, 2) ? 'h-2 rounded-full bg-warning' : 'h-2 rounded-full bg-line'}
+                      className={
+                        index < Math.max(passwordScore, 2)
+                          ? 'h-2 rounded-full bg-warning'
+                          : 'h-2 rounded-full bg-line'
+                      }
                       key={index}
                     />
                   ))}
                 </div>
-                <p className="text-right text-[clamp(12px,0.94vw,17px)] font-semibold leading-[1.2] text-muted-strong">Força: {passwordStrengthLabel}</p>
+                <p className="text-right text-[clamp(12px,0.94vw,17px)] font-semibold leading-[1.2] text-muted-strong">
+                  Força: {passwordStrengthLabel}
+                </p>
               </div>
             </div>
 
@@ -249,12 +270,18 @@ export function CreateAdministratorPage() {
               type="submit"
             >
               <span>{isSubmitting ? 'Criando...' : 'Criar conta administrativa'}</span>
-              <img className="h-[13.333px] w-[13.333px]" src={settingsAssets.formArrow} alt="" aria-hidden="true" />
+              <img
+                className="h-[13.333px] w-[13.333px]"
+                src={settingsAssets.formArrow}
+                alt=""
+                aria-hidden="true"
+              />
             </button>
 
             {temporaryPassword ? (
               <p className="rounded-xl bg-brand-mint/20 px-4 py-3 text-sm font-semibold text-brand-teal">
-                Guarde esta senha temporária para compartilhar com o novo administrador: {temporaryPassword}
+                Guarde esta senha temporária para compartilhar com o novo administrador:{' '}
+                {temporaryPassword}
               </p>
             ) : null}
           </form>

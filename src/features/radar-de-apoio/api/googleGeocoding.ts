@@ -25,13 +25,24 @@ export function getGoogleMapsApiKey() {
 }
 
 export function buildGeocodingAddress(address: GeocodingAddress) {
-  return [address.street, address.number, address.neighborhood, address.city, address.state, address.cep, 'Brasil']
+  return [
+    address.street,
+    address.number,
+    address.neighborhood,
+    address.city,
+    address.state,
+    address.cep,
+    'Brasil',
+  ]
     .map((part) => part.trim())
     .filter(Boolean)
     .join(', ')
 }
 
-export async function geocodeSupportAddress(address: GeocodingAddress, signal?: AbortSignal): Promise<Coordinates> {
+export async function geocodeSupportAddress(
+  address: GeocodingAddress,
+  signal?: AbortSignal,
+): Promise<Coordinates> {
   if (!googleMapsApiKey) throw new GoogleGeocodingError('MISSING_API_KEY')
 
   const query = new URLSearchParams({
@@ -40,16 +51,19 @@ export async function geocodeSupportAddress(address: GeocodingAddress, signal?: 
     language: 'pt-BR',
     region: 'BR',
   })
-  const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${query}`, { signal })
+  const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${query}`, {
+    signal,
+  })
   if (!response.ok) throw new GoogleGeocodingError('NETWORK_ERROR')
 
-  const payload = await response.json() as {
+  const payload = (await response.json()) as {
     status?: string
     results?: Array<{ geometry?: { location?: { lat?: number; lng?: number } } }>
   }
   if (payload.status !== 'OK') throw new GoogleGeocodingError(payload.status ?? 'UNKNOWN_ERROR')
 
   const location = payload.results?.[0]?.geometry?.location
-  if (typeof location?.lat !== 'number' || typeof location.lng !== 'number') throw new GoogleGeocodingError('ZERO_RESULTS')
+  if (typeof location?.lat !== 'number' || typeof location.lng !== 'number')
+    throw new GoogleGeocodingError('ZERO_RESULTS')
   return { latitude: location.lat, longitude: location.lng }
 }

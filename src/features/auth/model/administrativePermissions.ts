@@ -1,8 +1,12 @@
 import type { AuthenticatedUser } from './authTypes'
 
-export type AdministrativePermission = 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
+export type AdministrativePermission =
+  'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
 
-export function hasAdministrativePermission(user: AuthenticatedUser | null, permission: AdministrativePermission) {
+export function hasAdministrativePermission(
+  user: AuthenticatedUser | null,
+  permission: AdministrativePermission,
+) {
   if (!user) {
     return false
   }

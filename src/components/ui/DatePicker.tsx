@@ -16,7 +16,20 @@ type DatePickerProps = {
 }
 
 const weekDayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
-const monthLabels = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+const monthLabels = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
+]
 
 function parseIsoDate(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
@@ -56,13 +69,24 @@ function parseTypedDate(text: string): Date | null {
   const month = Number(match[2])
   const year = Number(match[3])
   const date = new Date(year, month - 1, day)
-  const isRealCalendarDate = date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+  const isRealCalendarDate =
+    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
 
   return isRealCalendarDate ? date : null
 }
 
 /** Date picker global do design system: pode ser digitado no formato dd/mm/aaaa ou preenchido pelo calendário. */
-export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aaaa', required, min, max, className }: DatePickerProps) {
+export function DatePicker({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder = 'dd/mm/aaaa',
+  required,
+  min,
+  max,
+  className,
+}: DatePickerProps) {
   const generatedId = useId()
   const inputId = id ?? generatedId
   const containerRef = useRef<HTMLDivElement>(null)
@@ -93,7 +117,10 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
     if (!isOpen) return
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node
-      if (containerRef.current && !containerRef.current.contains(target)) { closeCalendar(); return }
+      if (containerRef.current && !containerRef.current.contains(target)) {
+        closeCalendar()
+        return
+      }
       if (monthMenuRef.current && !monthMenuRef.current.contains(target)) setIsMonthMenuOpen(false)
       if (yearMenuRef.current && !yearMenuRef.current.contains(target)) setIsYearMenuOpen(false)
     }
@@ -128,14 +155,18 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const startWeekday = new Date(year, month, 1).getDay()
 
-  const cells: Array<Date | null> = [...Array(startWeekday).fill(null), ...Array.from({ length: daysInMonth }, (_, index) => new Date(year, month, index + 1))]
+  const cells: Array<Date | null> = [
+    ...Array(startWeekday).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, index) => new Date(year, month, index + 1)),
+  ]
   while (cells.length % 7 !== 0) cells.push(null)
 
   const currentYear = new Date().getFullYear()
   const earliestYear = minDate ? minDate.getFullYear() : currentYear - 120
   const latestYear = maxDate ? maxDate.getFullYear() : currentYear + 10
   const years: number[] = []
-  for (let candidateYear = latestYear; candidateYear >= earliestYear; candidateYear--) years.push(candidateYear)
+  for (let candidateYear = latestYear; candidateYear >= earliestYear; candidateYear--)
+    years.push(candidateYear)
 
   function selectDate(date: Date) {
     if (isDisabled(date)) return
@@ -149,7 +180,11 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
     const masked = maskDateInput(event.target.value)
     setTextValue(masked)
 
-    if (masked === '') { setLastSyncedValue(''); onChange(''); return }
+    if (masked === '') {
+      setLastSyncedValue('')
+      onChange('')
+      return
+    }
 
     const typedDate = parseTypedDate(masked)
     if (typedDate && !isDisabled(typedDate)) {
@@ -161,7 +196,11 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
 
   return (
     <div className="relative" ref={containerRef}>
-      {label ? <label className="mb-1.5 block text-sm font-bold text-muted-strong" htmlFor={inputId}>{label}</label> : null}
+      {label ? (
+        <label className="mb-1.5 block text-sm font-bold text-muted-strong" htmlFor={inputId}>
+          {label}
+        </label>
+      ) : null}
       <div className="relative">
         <input
           className={cx(className, 'pr-11')}
@@ -184,9 +223,17 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
         </button>
       </div>
       {isOpen ? (
-        <div className="absolute z-20 mt-2 w-80 rounded-2xl border border-line bg-white p-4 shadow-[5px_5px_0_rgba(187,202,196,0.55)]" role="dialog">
+        <div
+          className="absolute z-20 mt-2 w-80 rounded-2xl border border-line bg-white p-4 shadow-[5px_5px_0_rgba(187,202,196,0.55)]"
+          role="dialog"
+        >
           <div className="flex items-center gap-2">
-            <button aria-label="Mês anterior" className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft" onClick={() => setViewDate(new Date(year, month - 1, 1))} type="button">
+            <button
+              aria-label="Mês anterior"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft"
+              onClick={() => setViewDate(new Date(year, month - 1, 1))}
+              type="button"
+            >
               <ChevronLeft size={16} />
             </button>
             <div className="flex flex-1 items-stretch rounded-lg border border-line bg-white">
@@ -194,7 +241,10 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
                 <button
                   aria-expanded={isMonthMenuOpen}
                   className="flex w-full items-center justify-center gap-1 rounded-l-lg px-2 py-1.5 text-xs font-bold text-admin-text transition hover:bg-surface-soft"
-                  onClick={() => { setIsMonthMenuOpen((open) => !open); setIsYearMenuOpen(false) }}
+                  onClick={() => {
+                    setIsMonthMenuOpen((open) => !open)
+                    setIsYearMenuOpen(false)
+                  }}
                   type="button"
                 >
                   {monthLabels[month]}
@@ -206,10 +256,15 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
                       <button
                         className={cx(
                           'block w-full rounded-lg px-2 py-1.5 text-left text-xs',
-                          index === month ? 'bg-brand-teal font-bold text-white' : 'text-admin-text hover:bg-surface-mint',
+                          index === month
+                            ? 'bg-brand-teal font-bold text-white'
+                            : 'text-admin-text hover:bg-surface-mint',
                         )}
                         key={monthLabel}
-                        onClick={() => { setViewDate(new Date(year, index, 1)); setIsMonthMenuOpen(false) }}
+                        onClick={() => {
+                          setViewDate(new Date(year, index, 1))
+                          setIsMonthMenuOpen(false)
+                        }}
                         type="button"
                       >
                         {monthLabel}
@@ -223,50 +278,72 @@ export function DatePicker({ id, label, value, onChange, placeholder = 'dd/mm/aa
                 <button
                   aria-expanded={isYearMenuOpen}
                   className="flex items-center justify-center gap-1 rounded-r-lg px-2 py-1.5 text-xs font-bold text-admin-text transition hover:bg-surface-soft"
-                  onClick={() => { setIsYearMenuOpen((open) => !open); setIsMonthMenuOpen(false) }}
+                  onClick={() => {
+                    setIsYearMenuOpen((open) => !open)
+                    setIsMonthMenuOpen(false)
+                  }}
                   type="button"
                 >
                   {year}
                   <ChevronDown className="text-muted" size={12} />
                 </button>
                 {isYearMenuOpen ? (
-                  <div className="absolute right-0 top-full z-30 mt-1 max-h-48 w-20 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-[3px_3px_0_rgba(187,202,196,0.55)]" ref={yearListRef}>
-                  {years.map((yearOption) => (
-                    <button
-                      className={cx(
-                        'block w-full rounded-lg px-2 py-1.5 text-left text-xs',
-                        yearOption === year ? 'bg-brand-teal font-bold text-white' : 'text-admin-text hover:bg-surface-mint',
-                      )}
-                      data-selected={yearOption === year}
-                      key={yearOption}
-                      onClick={() => { setViewDate(new Date(yearOption, month, 1)); setIsYearMenuOpen(false) }}
-                      type="button"
-                    >
-                      {yearOption}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+                  <div
+                    className="absolute right-0 top-full z-30 mt-1 max-h-48 w-20 overflow-y-auto rounded-xl border border-line bg-white p-1 shadow-[3px_3px_0_rgba(187,202,196,0.55)]"
+                    ref={yearListRef}
+                  >
+                    {years.map((yearOption) => (
+                      <button
+                        className={cx(
+                          'block w-full rounded-lg px-2 py-1.5 text-left text-xs',
+                          yearOption === year
+                            ? 'bg-brand-teal font-bold text-white'
+                            : 'text-admin-text hover:bg-surface-mint',
+                        )}
+                        data-selected={yearOption === year}
+                        key={yearOption}
+                        onClick={() => {
+                          setViewDate(new Date(yearOption, month, 1))
+                          setIsYearMenuOpen(false)
+                        }}
+                        type="button"
+                      >
+                        {yearOption}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
-            <button aria-label="Próximo mês" className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft" onClick={() => setViewDate(new Date(year, month + 1, 1))} type="button">
+            <button
+              aria-label="Próximo mês"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft"
+              onClick={() => setViewDate(new Date(year, month + 1, 1))}
+              type="button"
+            >
               <ChevronRight size={16} />
             </button>
           </div>
           <div className="mt-3 grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted">
-            {weekDayLabels.map((weekDay, index) => <span key={`${weekDay}-${index}`}>{weekDay}</span>)}
+            {weekDayLabels.map((weekDay, index) => (
+              <span key={`${weekDay}-${index}`}>{weekDay}</span>
+            ))}
           </div>
           <div className="mt-1 grid grid-cols-7 gap-1">
             {cells.map((date, index) => {
               if (!date) return <span key={index} />
               const disabled = isDisabled(date)
-              const isSelected = Boolean(selectedDate && toIsoDate(date) === toIsoDate(selectedDate))
+              const isSelected = Boolean(
+                selectedDate && toIsoDate(date) === toIsoDate(selectedDate),
+              )
 
               return (
                 <button
                   className={cx(
                     'h-8 w-8 rounded-full text-sm transition',
-                    isSelected ? 'bg-brand-teal font-bold text-white' : 'text-admin-text hover:bg-surface-mint',
+                    isSelected
+                      ? 'bg-brand-teal font-bold text-white'
+                      : 'text-admin-text hover:bg-surface-mint',
                     disabled ? 'cursor-not-allowed opacity-30 hover:bg-transparent' : undefined,
                   )}
                   disabled={disabled}

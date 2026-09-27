@@ -3,7 +3,18 @@ import TiptapImage from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { Bold, Heading1, Heading2, Image, Italic, Link, List, ListOrdered, Quote, Underline } from 'lucide-react'
+import {
+  Bold,
+  Heading1,
+  Heading2,
+  Image,
+  Italic,
+  Link,
+  List,
+  ListOrdered,
+  Quote,
+  Underline,
+} from 'lucide-react'
 import { cx } from '../../../lib/cx'
 
 type RichTextEditorProps = {
@@ -37,7 +48,8 @@ export function RichTextEditor({ onChange, value }: RichTextEditorProps) {
     content: value,
     editorProps: {
       attributes: {
-        class: 'article-rich-text-editor min-h-[350px] px-6 py-5 text-base leading-[26px] text-admin-text outline-none',
+        class:
+          'article-rich-text-editor min-h-[350px] px-6 py-5 text-base leading-[26px] text-admin-text outline-none',
       },
     },
     extensions: [
@@ -167,7 +179,10 @@ export function RichTextEditor({ onChange, value }: RichTextEditorProps) {
     <div className="overflow-hidden rounded-3xl bg-white shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[#bbcac4]/15 bg-surface-soft px-3 py-3">
         {toolbarGroups.map((group, index) => (
-          <div className="flex items-center gap-1 rounded-xl bg-white p-1 shadow-[inset_1px_1px_2px_rgba(215,219,218,0.5)]" key={index}>
+          <div
+            className="flex items-center gap-1 rounded-xl bg-white p-1 shadow-[inset_1px_1px_2px_rgba(215,219,218,0.5)]"
+            key={index}
+          >
             {group.map((item) => {
               const Icon = item.icon
               const active = isActive(item.action)

@@ -27,7 +27,10 @@ export function ResetPasswordPage() {
       showAdminBadge
       variant="illustrated"
     >
-      <ResetPasswordCard resetToken={resetToken} onSuccess={() => navigate('/senha-atualizada', { replace: true })} />
+      <ResetPasswordCard
+        resetToken={resetToken}
+        onSuccess={() => navigate('/senha-atualizada', { replace: true })}
+      />
     </AuthShell>
   )
 }

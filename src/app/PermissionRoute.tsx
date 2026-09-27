@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getStoredAccessToken, getStoredUser } from '../features/auth/model/authSession'
-import { hasAdministrativePermission, type AdministrativePermission } from '../features/auth/model/administrativePermissions'
+import {
+  hasAdministrativePermission,
+  type AdministrativePermission,
+} from '../features/auth/model/administrativePermissions'
 
 type PermissionRouteProps = {
   children: ReactNode

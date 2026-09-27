@@ -11,7 +11,9 @@ export function BrandLogo({ variant = 'light' }: BrandLogoProps) {
 
   return (
     <Link
-      className={cx('relative z-10 inline-flex w-fit items-center gap-4 rounded-xl focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand-mint')}
+      className={cx(
+        'relative z-10 inline-flex w-fit items-center gap-4 rounded-xl focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-brand-mint',
+      )}
       to="/login"
       aria-label="Ir para login"
     >
@@ -22,9 +24,18 @@ export function BrandLogo({ variant = 'light' }: BrandLogoProps) {
         )}
         aria-hidden="true"
       >
-        <img className="h-4 w-5.5" src={isLight ? authAssets.logoWaveDark : authAssets.logoWaveTeal} alt="" />
+        <img
+          className="h-4 w-5.5"
+          src={isLight ? authAssets.logoWaveDark : authAssets.logoWaveTeal}
+          alt=""
+        />
       </span>
-      <span className={cx('font-serif text-2xl leading-none', isLight ? 'text-white' : 'text-brand-mint')}>
+      <span
+        className={cx(
+          'font-serif text-2xl leading-none',
+          isLight ? 'text-white' : 'text-brand-mint',
+        )}
+      >
         OnCoopera
       </span>
     </Link>

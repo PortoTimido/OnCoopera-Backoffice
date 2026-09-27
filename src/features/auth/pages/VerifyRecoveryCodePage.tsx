@@ -69,9 +69,12 @@ export function VerifyRecoveryCodePage() {
       <AuthCard className="space-y-8" variant="recovery">
         <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink-strong">Verificar código</h2>
+            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink-strong">
+              Verificar código
+            </h2>
             <p className="text-base leading-6 text-muted-strong">
-              Digite o código de 6 dígitos enviado para <strong className="text-ink-strong">{email}</strong>.
+              Digite o código de 6 dígitos enviado para{' '}
+              <strong className="text-ink-strong">{email}</strong>.
             </p>
           </div>
 
@@ -90,7 +93,11 @@ export function VerifyRecoveryCodePage() {
             value={code}
           />
 
-          <Button disabled={isSubmitting || code.length !== 6} icon={authAssets.arrowDark} type="submit">
+          <Button
+            disabled={isSubmitting || code.length !== 6}
+            icon={authAssets.arrowDark}
+            type="submit"
+          >
             {isSubmitting ? 'Verificando...' : 'Verificar código'}
           </Button>
 
@@ -103,7 +110,10 @@ export function VerifyRecoveryCodePage() {
             {isResending ? 'Reenviando...' : 'Reenviar código'}
           </button>
 
-          <Link className="block text-center text-sm font-bold text-muted-strong hover:underline" to="/recuperar-senha">
+          <Link
+            className="block text-center text-sm font-bold text-muted-strong hover:underline"
+            to="/recuperar-senha"
+          >
             Voltar
           </Link>
         </form>

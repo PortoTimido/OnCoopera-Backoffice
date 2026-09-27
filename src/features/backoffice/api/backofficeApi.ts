@@ -9,8 +9,10 @@ export type PaginatedUsuarios = {
   totalPages: number
 }
 
-export type AdminProfile = 'TOTAL' | 'MODERADOR_DE_CONTEUDO' | 'GERENTE_DE_APOIOS' | 'ANALISTA_DE_INTERACOES'
-export type AdministrativePermission = 'TOTAL' | 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
+export type AdminProfile =
+  'TOTAL' | 'MODERADOR_DE_CONTEUDO' | 'GERENTE_DE_APOIOS' | 'ANALISTA_DE_INTERACOES'
+export type AdministrativePermission =
+  'TOTAL' | 'GERENCIAR_USUARIOS' | 'GESTAO_CONTEUDOS' | 'GESTAO_RADAR_APOIO'
 
 export type CreateAdministratorPayload = {
   nome: string
@@ -53,13 +55,22 @@ export async function getBackofficeUsuario(id: string) {
 }
 
 export async function createBackofficeAdministrator(payload: CreateAdministratorPayload) {
-  const { data } = await httpClient.post<AdministratorDetails>('/backoffice/administradores', payload)
+  const { data } = await httpClient.post<AdministratorDetails>(
+    '/backoffice/administradores',
+    payload,
+  )
 
   return data
 }
 
-export async function updateBackofficeAdministrator(id: string, payload: UpdateAdministratorPayload) {
-  const { data } = await httpClient.patch<AdministratorDetails>(`/backoffice/administradores/${id}`, payload)
+export async function updateBackofficeAdministrator(
+  id: string,
+  payload: UpdateAdministratorPayload,
+) {
+  const { data } = await httpClient.patch<AdministratorDetails>(
+    `/backoffice/administradores/${id}`,
+    payload,
+  )
 
   return data
 }

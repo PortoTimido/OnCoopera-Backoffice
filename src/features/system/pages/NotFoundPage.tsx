@@ -11,13 +11,19 @@ export function NotFoundPage() {
         </div>
 
         <p className="mt-8 text-sm font-bold uppercase text-brand-teal">Erro 404</p>
-        <h1 className="mt-2 font-serif text-[40px] font-semibold leading-tight text-ink">Página não encontrada</h1>
+        <h1 className="mt-2 font-serif text-[40px] font-semibold leading-tight text-ink">
+          Página não encontrada
+        </h1>
         <p className="mx-auto mt-3 max-w-[380px] text-base leading-7 text-muted-strong">
           A rota acessada não existe ou foi movida dentro do painel administrativo.
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <LinkButton icon={<Home size={18} strokeWidth={2.1} />} iconPosition="left" to="/dashboard">
+          <LinkButton
+            icon={<Home size={18} strokeWidth={2.1} />}
+            iconPosition="left"
+            to="/dashboard"
+          >
             Ir para início
           </LinkButton>
           <Link

@@ -1,13 +1,7 @@
 import type { ReactNode } from 'react'
 import { cx } from '../../../lib/cx'
 
-export function SettingsCard({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+export function SettingsCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <section
       className={cx(

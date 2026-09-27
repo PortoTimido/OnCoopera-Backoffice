@@ -16,11 +16,16 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const [remember, setRemember] = useState(true)
   const [status, setStatus] = useState(() =>
-    searchParams.get('sessionExpired') === '1' ? 'Sua sessão expirou. Entre novamente para continuar.' : '',
+    searchParams.get('sessionExpired') === '1'
+      ? 'Sua sessão expirou. Entre novamente para continuar.'
+      : '',
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [temporaryPasswordChange, setTemporaryPasswordChange] = useState<{ identificador: string; senhaTemporaria: string } | null>(null)
+  const [temporaryPasswordChange, setTemporaryPasswordChange] = useState<{
+    identificador: string
+    senhaTemporaria: string
+  } | null>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -55,7 +60,10 @@ export function LoginPage() {
       return
     }
 
-    const session = await login({ identificador: temporaryPasswordChange.identificador, senha: newPassword })
+    const session = await login({
+      identificador: temporaryPasswordChange.identificador,
+      senha: newPassword,
+    })
     storeAuthSession(session.accessToken, session.usuario)
     navigate('/dashboard', { replace: true })
   }
@@ -78,7 +86,9 @@ export function LoginPage() {
       <AuthCard variant="login">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="mb-8 text-center">
-            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink">Bem-vindo</h2>
+            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink">
+              Bem-vindo
+            </h2>
             <p className="mt-2 text-base leading-6 text-muted">Acesse sua conta para continuar.</p>
           </div>
 
@@ -100,7 +110,13 @@ export function LoginPage() {
             onRightIconClick={() => setIsPasswordVisible((current) => !current)}
             placeholder="Digite sua senha"
             required
-            rightIcon={isPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIcon={
+              isPasswordVisible ? (
+                <EyeOff size={18} strokeWidth={1.8} />
+              ) : (
+                <Eye size={18} strokeWidth={1.8} />
+              )
+            }
             rightIconButtonLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
             type={isPasswordVisible ? 'text' : 'password'}
           />
@@ -120,14 +136,31 @@ export function LoginPage() {
             </Link>
           </div>
 
-          <Button className="h-15 rounded-3xl" disabled={isSubmitting} icon={<LogIn size={20} strokeWidth={2.2} />} type="submit">
+          <Button
+            className="h-15 rounded-3xl"
+            disabled={isSubmitting}
+            icon={<LogIn size={20} strokeWidth={2.2} />}
+            type="submit"
+          >
             {isSubmitting ? 'Acessando...' : 'Acessar painel'}
           </Button>
 
-          {status ? <p className="pt-1 text-center text-sm font-semibold text-red-700" role="alert">{status}</p> : null}
+          {status ? (
+            <p className="pt-1 text-center text-sm font-semibold text-red-700" role="alert">
+              {status}
+            </p>
+          ) : null}
         </form>
       </AuthCard>
-      {temporaryPasswordChange ? <RequiredPasswordChangeModal identifier={temporaryPasswordChange.identificador} mode="temporary" temporaryPassword={temporaryPasswordChange.senhaTemporaria} onClose={handleTemporaryPasswordChangeClose} onCompleted={handleTemporaryPasswordChanged} /> : null}
+      {temporaryPasswordChange ? (
+        <RequiredPasswordChangeModal
+          identifier={temporaryPasswordChange.identificador}
+          mode="temporary"
+          temporaryPassword={temporaryPasswordChange.senhaTemporaria}
+          onClose={handleTemporaryPasswordChangeClose}
+          onCompleted={handleTemporaryPasswordChanged}
+        />
+      ) : null}
     </AuthShell>
   )
 }

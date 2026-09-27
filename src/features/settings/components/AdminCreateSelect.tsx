@@ -79,9 +79,20 @@ export function AdminCreateSelect<TValue extends string>({
         role="combobox"
         type="button"
       >
-        {leftElement ? <span className="pointer-events-none absolute left-3.5 top-1/2 grid -translate-y-1/2 place-items-center text-muted-strong">{leftElement}</span> : null}
+        {leftElement ? (
+          <span className="pointer-events-none absolute left-3.5 top-1/2 grid -translate-y-1/2 place-items-center text-muted-strong">
+            {leftElement}
+          </span>
+        ) : null}
         <span className="truncate">{selectedOption.label}</span>
-        <ChevronDown className={cx('shrink-0 text-muted transition', isOpen ? 'rotate-180 text-brand-teal' : undefined)} size={isAdminField ? 16 : 20} strokeWidth={2} />
+        <ChevronDown
+          className={cx(
+            'shrink-0 text-muted transition',
+            isOpen ? 'rotate-180 text-brand-teal' : undefined,
+          )}
+          size={isAdminField ? 16 : 20}
+          strokeWidth={2}
+        />
       </button>
 
       {isOpen ? (
@@ -103,7 +114,9 @@ export function AdminCreateSelect<TValue extends string>({
                 className={cx(
                   'flex min-h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-left text-sm transition',
                   optionClassName,
-                  isSelected ? 'bg-brand-mint/25 font-bold text-brand-teal' : 'text-admin-text hover:bg-surface-mint',
+                  isSelected
+                    ? 'bg-brand-mint/25 font-bold text-brand-teal'
+                    : 'text-admin-text hover:bg-surface-mint',
                 )}
                 key={option.value}
                 onClick={() => selectOption(option.value)}

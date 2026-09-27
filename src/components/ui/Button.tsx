@@ -5,12 +5,9 @@ import { cx } from '../../lib/cx'
 type ButtonTone = 'teal' | 'dark' | 'soft'
 
 const toneClassName: Record<ButtonTone, string> = {
-  teal:
-    'bg-brand-mint text-brand-teal-deep shadow-clay-teal-strong hover:-translate-y-0.5 hover:shadow-[5px_5px_0_rgba(0,107,90,0.2)]',
-  dark:
-    'bg-brand-teal text-white shadow-button-dark hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#005143]',
-  soft:
-    'border-2 border-line bg-white text-ink shadow-[3px_3px_0_#bbcac4] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#bbcac4]',
+  teal: 'bg-brand-mint text-brand-teal-deep shadow-clay-teal-strong hover:-translate-y-0.5 hover:shadow-[5px_5px_0_rgba(0,107,90,0.2)]',
+  dark: 'bg-brand-teal text-white shadow-button-dark hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#005143]',
+  soft: 'border-2 border-line bg-white text-ink shadow-[3px_3px_0_#bbcac4] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#bbcac4]',
 }
 
 type ButtonContentProps = {
@@ -43,7 +40,15 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
     tone?: ButtonTone
   }
 
-export function Button({ children, className, icon, iconPosition, tone = 'teal', type = 'button', ...props }: ButtonProps) {
+export function Button({
+  children,
+  className,
+  icon,
+  iconPosition,
+  tone = 'teal',
+  type = 'button',
+  ...props
+}: ButtonProps) {
   return (
     <button
       className={cx(
@@ -66,7 +71,14 @@ type LinkButtonProps = LinkProps &
     tone?: ButtonTone
   }
 
-export function LinkButton({ children, className, icon, iconPosition, tone = 'teal', ...props }: LinkButtonProps) {
+export function LinkButton({
+  children,
+  className,
+  icon,
+  iconPosition,
+  tone = 'teal',
+  ...props
+}: LinkButtonProps) {
   return (
     <Link
       className={cx(

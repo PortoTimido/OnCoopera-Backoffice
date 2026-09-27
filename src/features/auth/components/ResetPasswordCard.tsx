@@ -17,7 +17,11 @@ type ResetPasswordCardProps = {
   onSuccess?: () => void
 }
 
-export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess }: ResetPasswordCardProps) {
+export function ResetPasswordCard({
+  mode = 'interactive',
+  resetToken,
+  onSuccess,
+}: ResetPasswordCardProps) {
   const isPreview = mode === 'preview'
   const toast = useToast()
   const [password, setPassword] = useState('')
@@ -56,7 +60,9 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
     }
 
     if (!resetToken) {
-      toast.alert('Código de recuperação não encontrado. Solicite a recuperação de senha novamente.')
+      toast.alert(
+        'Código de recuperação não encontrado. Solicite a recuperação de senha novamente.',
+      )
       return
     }
 
@@ -77,14 +83,19 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
   }
 
   return (
-    <AuthCard className={cx('space-y-8', isPreview && 'pointer-events-none select-none')} variant="reset">
+    <AuthCard
+      className={cx('space-y-8', isPreview && 'pointer-events-none select-none')}
+      variant="reset"
+    >
       <form className="space-y-8" onSubmit={handleSubmit}>
         <div className="grid justify-items-center gap-4 text-center">
           <div className="grid h-16 w-16 place-items-center rounded-full bg-surface-soft shadow-input-inset">
             <img className="h-8 w-8" src={authAssets.resetIcon} alt="" aria-hidden="true" />
           </div>
           <div className="space-y-2">
-            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink">Redefinir Senha</h2>
+            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink">
+              Redefinir Senha
+            </h2>
             <p className="mx-auto max-w-[342px] text-sm leading-6 text-muted-strong">
               Crie uma nova senha de acesso forte e exclusiva para sua conta.
             </p>
@@ -100,7 +111,13 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
             onChange={(event) => setPassword(event.target.value)}
             onRightIconClick={() => setIsPasswordVisible((current) => !current)}
             placeholder="Digite sua nova senha"
-            rightIcon={isPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIcon={
+              isPasswordVisible ? (
+                <EyeOff size={18} strokeWidth={1.8} />
+              ) : (
+                <Eye size={18} strokeWidth={1.8} />
+              )
+            }
             rightIconButtonLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
             surface="mint"
             type={isPasswordVisible ? 'text' : 'password'}
@@ -114,7 +131,13 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
             onChange={(event) => setConfirmPassword(event.target.value)}
             onRightIconClick={() => setIsConfirmPasswordVisible((current) => !current)}
             placeholder="Repita a senha"
-            rightIcon={isConfirmPasswordVisible ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
+            rightIcon={
+              isConfirmPasswordVisible ? (
+                <EyeOff size={18} strokeWidth={1.8} />
+              ) : (
+                <Eye size={18} strokeWidth={1.8} />
+              )
+            }
             rightIconButtonLabel={isConfirmPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
             surface="mint"
             type={isConfirmPasswordVisible ? 'text' : 'password'}
@@ -124,7 +147,13 @@ export function ResetPasswordCard({ mode = 'interactive', resetToken, onSuccess 
 
         <PasswordStrength criteria={criteria} score={score} />
 
-        <Button className="h-16 rounded-[20px]" disabled={isPreview || isSubmitting} icon={authAssets.arrowWhite} tone="dark" type="submit">
+        <Button
+          className="h-16 rounded-[20px]"
+          disabled={isPreview || isSubmitting}
+          icon={authAssets.arrowWhite}
+          tone="dark"
+          type="submit"
+        >
           {isSubmitting ? 'Salvando...' : 'Salvar nova senha'}
         </Button>
       </form>

@@ -12,8 +12,15 @@ type ToastItem = {
 
 const TOAST_DURATION_MS = 5000
 
-const variantConfig: Record<ToastVariant, { icon: typeof CheckCircle2; iconClassName: string; role: 'status' | 'alert' }> = {
-  success: { icon: CheckCircle2, iconClassName: 'bg-brand-mint/20 text-brand-teal', role: 'status' },
+const variantConfig: Record<
+  ToastVariant,
+  { icon: typeof CheckCircle2; iconClassName: string; role: 'status' | 'alert' }
+> = {
+  success: {
+    icon: CheckCircle2,
+    iconClassName: 'bg-brand-mint/20 text-brand-teal',
+    role: 'status',
+  },
   alert: { icon: AlertTriangle, iconClassName: 'bg-amber-100 text-amber-700', role: 'status' },
   error: { icon: XCircle, iconClassName: 'bg-red-100 text-red-700', role: 'alert' },
 }

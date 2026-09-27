@@ -47,7 +47,9 @@ export function RecoverPasswordPage() {
       <AuthCard className="space-y-8" variant="recovery">
         <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink-strong">Recuperar acesso</h2>
+            <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-ink-strong">
+              Recuperar acesso
+            </h2>
             <p className="text-base leading-6 text-muted-strong">
               Informe seu e-mail corporativo para receber o código de redefinição de senha.
             </p>
@@ -66,12 +68,23 @@ export function RecoverPasswordPage() {
             value={email}
           />
 
-          <div className="flex gap-3 rounded-2xl border border-security-blue/20 bg-security-blue/10 p-4 shadow-[2px_2px_0_rgba(110,181,255,0.15)]" role="status">
-            <img className="mt-0.5 h-5 w-5 shrink-0" src={authAssets.mailBlue} alt="" aria-hidden="true" />
+          <div
+            className="flex gap-3 rounded-2xl border border-security-blue/20 bg-security-blue/10 p-4 shadow-[2px_2px_0_rgba(110,181,255,0.15)]"
+            role="status"
+          >
+            <img
+              className="mt-0.5 h-5 w-5 shrink-0"
+              src={authAssets.mailBlue}
+              alt=""
+              aria-hidden="true"
+            />
             <div className="space-y-1">
-              <strong className="block text-sm font-bold text-[#275d97]">Enviaremos um código</strong>
+              <strong className="block text-sm font-bold text-[#275d97]">
+                Enviaremos um código
+              </strong>
               <p className="text-sm leading-5 text-[#275d97]">
-                Se o e-mail estiver cadastrado, você receberá um código de 6 dígitos para redefinir sua senha.
+                Se o e-mail estiver cadastrado, você receberá um código de 6 dígitos para redefinir
+                sua senha.
               </p>
             </div>
           </div>
@@ -80,7 +93,10 @@ export function RecoverPasswordPage() {
             {isSubmitting ? 'Enviando...' : 'Enviar código de recuperação'}
           </Button>
 
-          <Link className="block text-center text-sm font-bold text-brand-teal hover:underline" to="/login">
+          <Link
+            className="block text-center text-sm font-bold text-brand-teal hover:underline"
+            to="/login"
+          >
             Voltar para login
           </Link>
         </form>

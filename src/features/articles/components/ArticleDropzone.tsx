@@ -10,7 +10,12 @@ type ArticleDropzoneProps = {
   onRemoveImage: () => void
 }
 
-export function ArticleDropzone({ file, imageUrl, onFileChange, onRemoveImage }: ArticleDropzoneProps) {
+export function ArticleDropzone({
+  file,
+  imageUrl,
+  onFileChange,
+  onRemoveImage,
+}: ArticleDropzoneProps) {
   const localPreviewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
   const previewUrl = localPreviewUrl || imageUrl || ''
 
@@ -56,9 +61,16 @@ export function ArticleDropzone({ file, imageUrl, onFileChange, onRemoveImage }:
 
       {previewUrl ? (
         <div className="grid w-full gap-3">
-          <img className="max-h-[180px] w-full rounded-xl object-cover" src={previewUrl} alt="" aria-hidden="true" />
+          <img
+            className="max-h-[180px] w-full rounded-xl object-cover"
+            src={previewUrl}
+            alt=""
+            aria-hidden="true"
+          />
           <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-2 text-left shadow-[2px_2px_0_rgba(187,202,196,0.2)]">
-            <span className="min-w-0 truncate text-sm text-admin-text">{file?.name ?? 'Imagem de capa atual'}</span>
+            <span className="min-w-0 truncate text-sm text-admin-text">
+              {file?.name ?? 'Imagem de capa atual'}
+            </span>
             <button
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-soft hover:text-admin-text"
               onClick={(event) => {
@@ -82,7 +94,9 @@ export function ArticleDropzone({ file, imageUrl, onFileChange, onRemoveImage }:
           <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-[#e0e3e2] text-muted-strong shadow-[4px_4px_0_rgba(187,202,196,0.2)] transition group-hover:-translate-y-0.5">
             <ImageUp size={18} strokeWidth={2} />
           </span>
-          <p className="text-sm leading-5 text-admin-text">{isDragActive ? 'Solte a imagem aqui' : 'Clique para carregar ou arraste e solte'}</p>
+          <p className="text-sm leading-5 text-admin-text">
+            {isDragActive ? 'Solte a imagem aqui' : 'Clique para carregar ou arraste e solte'}
+          </p>
           <p className="text-xs leading-4 text-muted">SVG, PNG, JPG or GIF (max. 800x400px)</p>
         </div>
       )}

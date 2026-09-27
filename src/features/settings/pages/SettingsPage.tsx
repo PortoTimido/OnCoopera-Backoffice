@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { deleteOwnImage, getCurrentUser, updateOwnProfile, uploadOwnImage } from '../../auth/api/authApi'
+import {
+  deleteOwnImage,
+  getCurrentUser,
+  updateOwnProfile,
+  uploadOwnImage,
+} from '../../auth/api/authApi'
 import { getStoredAccessToken, getStoredUser, storeAuthSession } from '../../auth/model/authSession'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
 import { clearCachedUserImage } from '../../auth/model/userImageCache'
@@ -169,7 +174,9 @@ export function SettingsPage() {
           </header>
 
           <SettingsCard className="!overflow-visible">
-            <h2 className="border-b border-[#bbcac4]/15 pb-3.5 font-serif text-[22px] leading-7 text-admin-text">Minha conta</h2>
+            <h2 className="border-b border-[#bbcac4]/15 pb-3.5 font-serif text-[22px] leading-7 text-admin-text">
+              Minha conta
+            </h2>
 
             <form className="mt-4 grid gap-6 lg:grid-cols-[230px_1fr]" onSubmit={handleSaveAccount}>
               <div className="grid justify-items-center gap-3">
@@ -192,7 +199,12 @@ export function SettingsPage() {
                     type="button"
                     aria-label="Alterar avatar"
                   >
-                    <img className="h-[10.5px] w-[11.667px]" src={settingsAssets.camera} alt="" aria-hidden="true" />
+                    <img
+                      className="h-[10.5px] w-[11.667px]"
+                      src={settingsAssets.camera}
+                      alt=""
+                      aria-hidden="true"
+                    />
                   </button>
                 </div>
                 <p className="pt-1 text-center text-xs leading-4 text-muted-strong">
@@ -212,8 +224,17 @@ export function SettingsPage() {
 
               <div className="grid content-start gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <SettingsInput label="Nome completo" onChange={(event) => setName(event.target.value)} value={name} />
-                  <SettingsInput label="Endereço e-mail" onChange={(event) => setEmail(event.target.value)} type="email" value={email} />
+                  <SettingsInput
+                    label="Nome completo"
+                    onChange={(event) => setName(event.target.value)}
+                    value={name}
+                  />
+                  <SettingsInput
+                    label="Endereço e-mail"
+                    onChange={(event) => setEmail(event.target.value)}
+                    type="email"
+                    value={email}
+                  />
                   <SettingsInput
                     inputMode="tel"
                     label="Telefone"
@@ -223,7 +244,12 @@ export function SettingsPage() {
                   />
                   <label className="grid gap-1 text-xs font-normal uppercase tracking-[0.6px] text-muted-strong">
                     <span>Data de nascimento</span>
-                    <DatePicker className={datePickerInputClass} max={todayIsoDate} onChange={setBirthDate} value={birthDate} />
+                    <DatePicker
+                      className={datePickerInputClass}
+                      max={todayIsoDate}
+                      onChange={setBirthDate}
+                      value={birthDate}
+                    />
                   </label>
                 </div>
                 <div className="flex justify-end pt-1">

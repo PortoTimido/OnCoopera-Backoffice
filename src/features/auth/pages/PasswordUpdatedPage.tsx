@@ -32,7 +32,10 @@ export function PasswordUpdatedPage() {
           </div>
 
           <div className="mt-4 max-w-[350px] space-y-2">
-            <h2 className="font-serif text-2xl font-medium leading-[1.2] text-ink" id="password-updated-title">
+            <h2
+              className="font-serif text-2xl font-medium leading-[1.2] text-ink"
+              id="password-updated-title"
+            >
               Senha atualizada
             </h2>
             <p className="text-sm leading-6 text-muted-strong">
@@ -40,7 +43,12 @@ export function PasswordUpdatedPage() {
             </p>
           </div>
 
-          <LinkButton className="mt-6 max-w-[261px]" icon={authAssets.arrowTeal} to="/login" tone="soft">
+          <LinkButton
+            className="mt-6 max-w-[261px]"
+            icon={authAssets.arrowTeal}
+            to="/login"
+            tone="soft"
+          >
             Ir para login
           </LinkButton>
         </section>

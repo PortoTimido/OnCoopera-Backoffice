@@ -40,7 +40,9 @@ export function AuthShell({
     <main
       className={cx(
         'grid min-h-svh overflow-hidden',
-        shouldUseLoginSideSize ? 'lg:grid-cols-[minmax(480px,46.78%)_1fr]' : 'lg:grid-cols-[634px_1fr]',
+        shouldUseLoginSideSize
+          ? 'lg:grid-cols-[minmax(480px,46.78%)_1fr]'
+          : 'lg:grid-cols-[634px_1fr]',
         isLogin ? 'bg-surface-mint' : 'bg-surface-clay',
       )}
       data-figma-node-id={dataNodeId}
@@ -48,7 +50,12 @@ export function AuthShell({
       {isLogin ? (
         <LoginPanel copy={copy} />
       ) : (
-        <IllustratedPanel copy={copy} image={image} imagePresentation={imagePresentation} showAdminBadge={showAdminBadge} />
+        <IllustratedPanel
+          copy={copy}
+          image={image}
+          imagePresentation={imagePresentation}
+          showAdminBadge={showAdminBadge}
+        />
       )}
 
       <section
@@ -77,11 +84,15 @@ function LoginPanel({ copy }: { copy: SideCopy }) {
       <BrandLogo variant="light" />
 
       <div className="relative z-10 max-w-[496px]">
-        <h1 className="font-serif text-5xl font-semibold leading-[1.08] text-white">{copy.title}</h1>
+        <h1 className="font-serif text-5xl font-semibold leading-[1.08] text-white">
+          {copy.title}
+        </h1>
         <p className="mt-6 max-w-[492px] text-lg leading-[1.7] text-white/90">{copy.description}</p>
       </div>
 
-      <p className="relative z-10 text-xs text-white/70">© 2026 OnCoopera. Todos os direitos reservados.</p>
+      <p className="relative z-10 text-xs text-white/70">
+        © 2026 OnCoopera. Todos os direitos reservados.
+      </p>
     </section>
   )
 }
@@ -125,7 +136,12 @@ function IllustratedPanel({
             <span className="text-sm font-bold text-brand-teal">Acesso Administrativo</span>
           </div>
         ) : null}
-        <h1 className={cx('font-serif text-5xl leading-[1.08] text-ink-strong', showAdminBadge ? 'font-semibold' : 'font-normal')}>
+        <h1
+          className={cx(
+            'font-serif text-5xl leading-[1.08] text-ink-strong',
+            showAdminBadge ? 'font-semibold' : 'font-normal',
+          )}
+        >
           {copy.title}
         </h1>
         <p className="mt-6 text-lg leading-[1.7] text-muted-strong">{copy.description}</p>

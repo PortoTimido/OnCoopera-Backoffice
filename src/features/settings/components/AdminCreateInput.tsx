@@ -22,7 +22,9 @@ export function AdminCreateInput({
           {...props}
         />
         {rightElement ? (
-          <span className="absolute right-4 top-1/2 grid h-5 w-[22px] -translate-y-1/2 place-items-center">{rightElement}</span>
+          <span className="absolute right-4 top-1/2 grid h-5 w-[22px] -translate-y-1/2 place-items-center">
+            {rightElement}
+          </span>
         ) : null}
       </span>
     </label>

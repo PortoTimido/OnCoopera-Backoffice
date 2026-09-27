@@ -32,7 +32,10 @@ export function getStoredArticlePreview() {
   }
 }
 
-export function createArticlePreviewFromArticle(article: Article, summary = article.resumo ?? ''): ArticlePreviewData {
+export function createArticlePreviewFromArticle(
+  article: Article,
+  summary = article.resumo ?? '',
+): ArticlePreviewData {
   return {
     categories: article.categorias.map((category) => category.nome),
     contentHtml: article.conteudo,

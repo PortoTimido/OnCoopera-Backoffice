@@ -45,7 +45,10 @@ export function TextField({
       <label htmlFor={inputId}>{label}</label>
       <span className="relative block">
         {leftIcon ? (
-          <span className="pointer-events-none absolute left-5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center text-muted" aria-hidden="true">
+          <span
+            className="pointer-events-none absolute left-5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center text-muted"
+            aria-hidden="true"
+          >
             {renderIcon(leftIcon)}
           </span>
         ) : null}
@@ -70,7 +73,10 @@ export function TextField({
             {renderIcon(rightIcon)}
           </button>
         ) : rightIcon ? (
-          <span className="pointer-events-none absolute right-5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center text-muted" aria-hidden="true">
+          <span
+            className="pointer-events-none absolute right-5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center text-muted"
+            aria-hidden="true"
+          >
             {renderIcon(rightIcon)}
           </span>
         ) : null}

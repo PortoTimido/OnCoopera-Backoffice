@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Calendar, CheckCircle2, Clock3, Eye, FileText, Lightbulb, MessageSquareQuote, Save, Send, X } from 'lucide-react'
+import {
+  Calendar,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  FileText,
+  Lightbulb,
+  MessageSquareQuote,
+  Save,
+  Send,
+  X,
+} from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { useToast } from '../../../components/ui/useToast'
@@ -25,7 +36,11 @@ import {
 } from '../api/articlesApi'
 import { ArticleDropzone } from '../components/ArticleDropzone'
 import { RichTextEditor } from '../components/RichTextEditor'
-import { createArticlePreviewFromArticle, storeArticlePreview, type ArticlePreviewData } from '../model/articlePreview'
+import {
+  createArticlePreviewFromArticle,
+  storeArticlePreview,
+  type ArticlePreviewData,
+} from '../model/articlePreview'
 
 type HelpModal = 'tip' | 'ask' | null
 
@@ -37,7 +52,14 @@ const statusOptions: Array<{ label: string; value: ArticleStatus }> = [
   { label: 'Desativado', value: 'DESATIVADO' },
 ]
 
-const fixedArticleCategories = ['Saúde', 'Tratamento', 'Nutrição', 'Bem-estar', 'Prevenção', 'Cuidadores'] as const
+const fixedArticleCategories = [
+  'Saúde',
+  'Tratamento',
+  'Nutrição',
+  'Bem-estar',
+  'Prevenção',
+  'Cuidadores',
+] as const
 
 const fixedCategoryPrefix = 'fixed-category:'
 
@@ -55,10 +77,20 @@ function getFixedCategoryId(name: string) {
 }
 
 function mergeFixedCategories(apiCategories: ArticleTaxonomy[]) {
-  const categoriesByName = new Map(apiCategories.map((category) => [normalizeTaxonomyName(category.nome), category]))
-  const fixedCategories = fixedArticleCategories.map((name) => categoriesByName.get(normalizeTaxonomyName(name)) ?? { id: getFixedCategoryId(name), nome: name })
+  const categoriesByName = new Map(
+    apiCategories.map((category) => [normalizeTaxonomyName(category.nome), category]),
+  )
+  const fixedCategories = fixedArticleCategories.map(
+    (name) =>
+      categoriesByName.get(normalizeTaxonomyName(name)) ?? {
+        id: getFixedCategoryId(name),
+        nome: name,
+      },
+  )
   const fixedNames = new Set(fixedArticleCategories.map(normalizeTaxonomyName))
-  const remainingApiCategories = apiCategories.filter((category) => !fixedNames.has(normalizeTaxonomyName(category.nome)))
+  const remainingApiCategories = apiCategories.filter(
+    (category) => !fixedNames.has(normalizeTaxonomyName(category.nome)),
+  )
 
   return [...fixedCategories, ...remainingApiCategories]
 }
@@ -68,7 +100,10 @@ function isFixedCategoryId(categoryId: string) {
 }
 
 function stripHtml(html: string) {
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function estimateReadingTime(html: string) {
@@ -78,7 +113,9 @@ function estimateReadingTime(html: string) {
 }
 
 function getSelectedTags(options: ArticleTaxonomy[], selectedIds: string[]) {
-  return selectedIds.map((id) => options.find((option) => option.id === id)).filter((tag): tag is ArticleTaxonomy => Boolean(tag))
+  return selectedIds
+    .map((id) => options.find((option) => option.id === id))
+    .filter((tag): tag is ArticleTaxonomy => Boolean(tag))
 }
 
 function getFileDataUrl(file: File) {
@@ -130,7 +167,9 @@ export function ArticleEditorPage() {
   useEffect(() => {
     if (!hasImageSaveError) return
 
-    toast.alert('Artigo salvo, mas não foi possível persistir a imagem. Selecione-a novamente para tentar de novo.')
+    toast.alert(
+      'Artigo salvo, mas não foi possível persistir a imagem. Selecione-a novamente para tentar de novo.',
+    )
     navigate(location.pathname, { replace: true })
   }, [hasImageSaveError, location.pathname, navigate, toast])
 
@@ -161,7 +200,13 @@ export function ArticleEditorPage() {
           setSummary(articleResult.resumo ?? '')
           setBody(articleResult.conteudo || initialBody)
           setStatus(articleResult.status)
-          setCustomReadingTime(Math.max(1, articleResult.tempoLeituraMinutos || estimateReadingTime(articleResult.conteudo || initialBody)))
+          setCustomReadingTime(
+            Math.max(
+              1,
+              articleResult.tempoLeituraMinutos ||
+                estimateReadingTime(articleResult.conteudo || initialBody),
+            ),
+          )
           setImageUrl(articleResult.imagemUrl ?? '')
           setIsImageRemovalRequested(false)
           setSelectedCategoryId(articleResult.categorias[0]?.id ?? mergedCategories[0]?.id ?? '')
@@ -203,10 +248,19 @@ export function ArticleEditorPage() {
     }
 
     const existingCategories = await listBackofficeArticleCategories(selectedCategory.nome)
-    const existingCategory = existingCategories.find((category) => normalizeTaxonomyName(category.nome) === normalizeTaxonomyName(selectedCategory.nome))
-    const resolvedCategory = existingCategory ?? (await createBackofficeArticleCategory(selectedCategory.nome))
+    const existingCategory = existingCategories.find(
+      (category) =>
+        normalizeTaxonomyName(category.nome) === normalizeTaxonomyName(selectedCategory.nome),
+    )
+    const resolvedCategory =
+      existingCategory ?? (await createBackofficeArticleCategory(selectedCategory.nome))
 
-    setCategories((current) => mergeFixedCategories([...current.filter((category) => category.id !== selectedCategory.id), resolvedCategory]))
+    setCategories((current) =>
+      mergeFixedCategories([
+        ...current.filter((category) => category.id !== selectedCategory.id),
+        resolvedCategory,
+      ]),
+    )
     setSelectedCategoryId(resolvedCategory.id)
 
     return resolvedCategory.id
@@ -292,7 +346,9 @@ export function ArticleEditorPage() {
         return
       }
 
-      savedArticle = articleId ? await updateBackofficeArticle(articleId, payload) : await createBackofficeArticle(payload)
+      savedArticle = articleId
+        ? await updateBackofficeArticle(articleId, payload)
+        : await createBackofficeArticle(payload)
 
       if (featuredImage) {
         savedArticle = await uploadBackofficeArticleImage(savedArticle.id, featuredImage)
@@ -301,7 +357,11 @@ export function ArticleEditorPage() {
         savedArticle = { ...savedArticle, imagemUrl: null }
       }
 
-      toast.success(nextStatus === 'PUBLICADO' ? 'Artigo publicado com sucesso.' : 'Rascunho salvo com sucesso.')
+      toast.success(
+        nextStatus === 'PUBLICADO'
+          ? 'Artigo publicado com sucesso.'
+          : 'Rascunho salvo com sucesso.',
+      )
       setStatus(savedArticle.status)
       setImageUrl(savedArticle.imagemUrl ?? '')
       setFeaturedImage(null)
@@ -337,7 +397,9 @@ export function ArticleEditorPage() {
     try {
       const createdTag = await createBackofficeArticleTag(trimmedName)
       setTags((current) => [...current.filter((tag) => tag.id !== createdTag.id), createdTag])
-      setSelectedTagIds((current) => (current.includes(createdTag.id) ? current : [...current, createdTag.id]))
+      setSelectedTagIds((current) =>
+        current.includes(createdTag.id) ? current : [...current, createdTag.id],
+      )
     } catch (tagError) {
       toast.error(getApiErrorMessage(tagError))
     }
@@ -352,7 +414,10 @@ export function ArticleEditorPage() {
 
     try {
       const createdCategory = await createBackofficeArticleCategory(trimmedName)
-      setCategories((current) => [...current.filter((category) => category.id !== createdCategory.id), createdCategory])
+      setCategories((current) => [
+        ...current.filter((category) => category.id !== createdCategory.id),
+        createdCategory,
+      ])
       setSelectedCategoryId(createdCategory.id)
     } catch (categoryError) {
       toast.error(getApiErrorMessage(categoryError))
@@ -361,7 +426,10 @@ export function ArticleEditorPage() {
 
   return (
     <AppLayout activeItem="Artigos" user={user}>
-      <main className="min-h-0 flex-1 overflow-auto bg-admin-canvas p-6 sm:p-10 lg:p-12" data-figma-node-id="327:1136">
+      <main
+        className="min-h-0 flex-1 overflow-auto bg-admin-canvas p-6 sm:p-10 lg:p-12"
+        data-figma-node-id="327:1136"
+      >
         <div className="mx-auto grid w-full gap-8">
           <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid gap-2">
@@ -372,9 +440,13 @@ export function ArticleEditorPage() {
                 <span className="text-muted" aria-hidden="true">
                   ›
                 </span>
-                <span className="font-bold text-brand-teal">{isEditing ? 'Editar artigo' : 'Criar novo'}</span>
+                <span className="font-bold text-brand-teal">
+                  {isEditing ? 'Editar artigo' : 'Criar novo'}
+                </span>
               </nav>
-              <h1 className="font-serif text-[length:var(--admin-page-title-size)] font-semibold leading-[var(--admin-page-title-line-height)] text-admin-text">Artigo de rascunho</h1>
+              <h1 className="font-serif text-[length:var(--admin-page-title-size)] font-semibold leading-[var(--admin-page-title-line-height)] text-admin-text">
+                Artigo de rascunho
+              </h1>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -393,7 +465,9 @@ export function ArticleEditorPage() {
           </header>
 
           {isLoading ? (
-            <div className="rounded-3xl bg-white p-8 text-sm text-muted shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">Carregando artigo...</div>
+            <div className="rounded-3xl bg-white p-8 text-sm text-muted shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">
+              Carregando artigo...
+            </div>
           ) : (
             <div className="grid items-start gap-7 lg:pr-12 lg:grid-cols-[minmax(0,1fr)_var(--admin-side-panel-width)] lg:gap-x-14">
               <section className="grid min-w-0 gap-6" aria-label="Conteúdo do artigo">
@@ -473,9 +547,15 @@ export function ArticleEditorPage() {
                   />
 
                   <label className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">Tempo médio de leitura (min.)</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">
+                      Tempo médio de leitura (min.)
+                    </span>
                     <span className="relative block">
-                      <Clock3 className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-strong" size={16} strokeWidth={2} />
+                      <Clock3
+                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-strong"
+                        size={16}
+                        strokeWidth={2}
+                      />
                       <input
                         className="h-11 w-full rounded-xl border-0 bg-[#e6e9e8] px-10 text-sm text-admin-text shadow-[inset_2px_2px_4px_rgba(215,219,218,0.8)] outline-none placeholder:text-muted focus:ring-4 focus:ring-brand-mint/20"
                         min={1}
@@ -512,16 +592,30 @@ export function ArticleEditorPage() {
                     />
                   </div>
 
-                  <FieldShell icon={Calendar} label="Data de publicação" value="Automática ao publicar" />
+                  <FieldShell
+                    icon={Calendar}
+                    label="Data de publicação"
+                    value="Automática ao publicar"
+                  />
 
                   <div className="grid gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">Tags</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">
+                      Tags
+                    </span>
                     <div className="grid gap-2 rounded-xl bg-[#e6e9e8] p-2 shadow-[inset_2px_2px_4px_rgba(215,219,218,0.8)]">
                       <div className="flex flex-wrap gap-2">
                         {selectedTags.map((tag) => (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-muted-strong shadow-[2px_2px_0_rgba(187,202,196,0.2)]" key={tag.id}>
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-muted-strong shadow-[2px_2px_0_rgba(187,202,196,0.2)]"
+                            key={tag.id}
+                          >
                             {tag.nome}
-                            <button className="grid h-4 w-4 place-items-center rounded-full hover:bg-surface-soft" onClick={() => removeTag(tag.id)} type="button" aria-label={`Remover tag ${tag.nome}`}>
+                            <button
+                              className="grid h-4 w-4 place-items-center rounded-full hover:bg-surface-soft"
+                              onClick={() => removeTag(tag.id)}
+                              type="button"
+                              aria-label={`Remover tag ${tag.nome}`}
+                            >
                               <X size={10} strokeWidth={2.5} />
                             </button>
                           </span>
@@ -533,7 +627,9 @@ export function ArticleEditorPage() {
                           const value = event.target.value
 
                           if (value) {
-                            setSelectedTagIds((current) => (current.includes(value) ? current : [...current, value]))
+                            setSelectedTagIds((current) =>
+                              current.includes(value) ? current : [...current, value],
+                            )
                             event.target.value = ''
                           }
                         }}
@@ -587,13 +683,23 @@ export function ArticleEditorPage() {
           )}
         </div>
 
-        {helpModal ? <ArticleHelpModal modal={helpModal} onClose={() => setHelpModal(null)} /> : null}
+        {helpModal ? (
+          <ArticleHelpModal modal={helpModal} onClose={() => setHelpModal(null)} />
+        ) : null}
       </main>
     </AppLayout>
   )
 }
 
-function FieldShell({ icon: Icon, label, value }: { icon: typeof Clock3; label: string; value: string }) {
+function FieldShell({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Clock3
+  label: string
+  value: string
+}) {
   return (
     <div className="grid gap-2">
       <span className="text-xs font-bold uppercase tracking-[0.6px] text-muted">{label}</span>
@@ -605,28 +711,56 @@ function FieldShell({ icon: Icon, label, value }: { icon: typeof Clock3; label: 
   )
 }
 
-function ArticleHelpModal({ modal, onClose }: { modal: Exclude<HelpModal, null>; onClose: () => void }) {
+function ArticleHelpModal({
+  modal,
+  onClose,
+}: {
+  modal: Exclude<HelpModal, null>
+  onClose: () => void
+}) {
   const isTip = modal === 'tip'
   const markerTitle = isTip ? '## Dica ##' : '## Pergunta ##'
   const markerContent = isTip ? '[sessão de dica no artigo]' : '[sessão de pergunta no artigo]'
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] grid place-items-center bg-admin-text/40 px-6" role="dialog" aria-modal="true" aria-labelledby="article-help-title">
+    <div
+      className="fixed inset-0 z-[100] grid place-items-center bg-admin-text/40 px-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="article-help-title"
+    >
       <div className="grid w-full max-w-md gap-5 rounded-3xl bg-white p-6 shadow-[8px_8px_0_rgba(0,107,90,0.12)]">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="font-serif text-2xl font-semibold leading-8 text-admin-text" id="article-help-title">
+          <h2
+            className="font-serif text-2xl font-semibold leading-8 text-admin-text"
+            id="article-help-title"
+          >
             {isTip ? 'Para adicionar o bloco de Dica' : 'Para adicionar o bloco de Pergunta'}
           </h2>
-          <button className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-surface-soft" onClick={onClose} type="button" aria-label="Fechar modal">
+          <button
+            className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-surface-soft"
+            onClick={onClose}
+            type="button"
+            aria-label="Fechar modal"
+          >
             <X size={18} strokeWidth={2} />
           </button>
         </div>
-        <div className={cx('rounded-2xl p-4 text-sm leading-6', isTip ? 'bg-brand-mint/10 text-brand-teal' : 'bg-[#fff4e1] text-[#754b00]')}>
+        <div
+          className={cx(
+            'rounded-2xl p-4 text-sm leading-6',
+            isTip ? 'bg-brand-mint/10 text-brand-teal' : 'bg-[#fff4e1] text-[#754b00]',
+          )}
+        >
           <p className="font-bold">{markerTitle}</p>
           <p>{markerContent}</p>
           <p>##</p>
         </div>
-        <button className="h-11 rounded-xl bg-brand-teal px-5 text-sm text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]" onClick={onClose} type="button">
+        <button
+          className="h-11 rounded-xl bg-brand-teal px-5 text-sm text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]"
+          onClick={onClose}
+          type="button"
+        >
           OK
         </button>
       </div>

@@ -11,7 +11,12 @@ export function SettingsInput({
   rightElement?: ReactNode
 }) {
   return (
-    <label className={cx('grid gap-1 text-xs font-normal uppercase tracking-[0.6px] text-muted-strong', className)}>
+    <label
+      className={cx(
+        'grid gap-1 text-xs font-normal uppercase tracking-[0.6px] text-muted-strong',
+        className,
+      )}
+    >
       <span>{label}</span>
       <span className="relative block">
         <input
@@ -22,7 +27,9 @@ export function SettingsInput({
           {...props}
         />
         {rightElement ? (
-          <span className="absolute right-4 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center">{rightElement}</span>
+          <span className="absolute right-4 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center">
+            {rightElement}
+          </span>
         ) : null}
       </span>
     </label>

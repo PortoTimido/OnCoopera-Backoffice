@@ -1,7 +1,12 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { AuthenticatedUser } from '../../auth/model/authTypes'
-import { clearAuthSession, getStoredAccessToken, getStoredUser, storeAuthSession } from '../../auth/model/authSession'
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  getStoredUser,
+  storeAuthSession,
+} from '../../auth/model/authSession'
 import { RequiredPasswordChangeModal } from '../../auth/components/RequiredPasswordChangeModal'
 import { SideNav } from './SideNav'
 import { TopBar } from './TopBar'
@@ -18,7 +23,9 @@ export function AppLayout({
   user: AuthenticatedUser | null
 }) {
   const navigate = useNavigate()
-  const [requiresPasswordChange, setRequiresPasswordChange] = useState(() => (user ?? getStoredUser())?.trocaSenhaObrigatoria === true)
+  const [requiresPasswordChange, setRequiresPasswordChange] = useState(
+    () => (user ?? getStoredUser())?.trocaSenhaObrigatoria === true,
+  )
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const storedValue = window.sessionStorage.getItem(sidebarStateKey)
     return storedValue === null ? window.innerWidth < 1280 : storedValue === 'true'
@@ -66,15 +73,29 @@ export function AppLayout({
   }
 
   return (
-    <div className="min-h-svh bg-admin-canvas font-backoffice text-admin-text" data-layout="backoffice" style={layoutStyle}>
+    <div
+      className="min-h-svh bg-admin-canvas font-backoffice text-admin-text"
+      data-layout="backoffice"
+      style={layoutStyle}
+    >
       <div inert={requiresPasswordChange}>
-        <SideNav activeItem={activeItem} isCollapsed={isSidebarCollapsed} onToggle={toggleSidebar} user={user} />
+        <SideNav
+          activeItem={activeItem}
+          isCollapsed={isSidebarCollapsed}
+          onToggle={toggleSidebar}
+          user={user}
+        />
         <div className="relative z-1 flex min-h-svh min-w-0 flex-col overflow-hidden bg-admin-canvas pl-[var(--backoffice-current-sidebar-width)] transition-[padding] duration-200">
           <TopBar />
           {children}
         </div>
       </div>
-      {requiresPasswordChange ? <RequiredPasswordChangeModal onClose={handleRequiredPasswordChangeClose} onCompleted={handlePasswordChangeCompleted} /> : null}
+      {requiresPasswordChange ? (
+        <RequiredPasswordChangeModal
+          onClose={handleRequiredPasswordChangeClose}
+          onCompleted={handlePasswordChangeCompleted}
+        />
+      ) : null}
     </div>
   )
 }

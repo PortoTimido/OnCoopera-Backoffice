@@ -12,7 +12,12 @@ type SupportPhotoUploadProps = {
   onRemoveImage: () => void
 }
 
-export function SupportPhotoUpload({ existingImage, file, onFileChange, onRemoveImage }: SupportPhotoUploadProps) {
+export function SupportPhotoUpload({
+  existingImage,
+  file,
+  onFileChange,
+  onRemoveImage,
+}: SupportPhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const localPreviewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ''), [file])
@@ -53,24 +58,63 @@ export function SupportPhotoUpload({ existingImage, file, onFileChange, onRemove
 
   return (
     <div className="grid gap-3">
-      <input accept="image/jpeg,image/png" className="sr-only" onChange={(event) => handleFile(event.target.files?.[0])} ref={inputRef} type="file" />
+      <input
+        accept="image/jpeg,image/png"
+        className="sr-only"
+        onChange={(event) => handleFile(event.target.files?.[0])}
+        ref={inputRef}
+        type="file"
+      />
       {previewUrl ? (
         <div className="grid gap-3 rounded-2xl border border-[#bbcac4]/35 bg-surface-mint p-3">
-          <img alt="Foto do local" className="h-52 w-full rounded-xl object-cover" src={previewUrl} />
+          <img
+            alt="Foto do local"
+            className="h-52 w-full rounded-xl object-cover"
+            src={previewUrl}
+          />
           <div className="flex items-center justify-between gap-3">
-            <span className="min-w-0 truncate text-sm text-admin-text">{file?.name ?? 'Foto atual do local'}</span>
-            <button className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-white hover:text-admin-text" onClick={handleRemove} type="button" aria-label="Remover foto">
+            <span className="min-w-0 truncate text-sm text-admin-text">
+              {file?.name ?? 'Foto atual do local'}
+            </span>
+            <button
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-white hover:text-admin-text"
+              onClick={handleRemove}
+              type="button"
+              aria-label="Remover foto"
+            >
               <X size={16} strokeWidth={2} />
             </button>
           </div>
-          <button className="text-left text-sm font-bold text-brand-teal" onClick={() => inputRef.current?.click()} type="button">Trocar foto</button>
+          <button
+            className="text-left text-sm font-bold text-brand-teal"
+            onClick={() => inputRef.current?.click()}
+            type="button"
+          >
+            Trocar foto
+          </button>
         </div>
       ) : (
-        <button className="grid min-h-52 place-items-center rounded-2xl border-2 border-dashed border-[#bbcac4]/60 bg-surface-mint px-5 py-7 text-center transition hover:border-brand-mint focus-visible:outline-2 focus-visible:outline-brand-mint" onClick={() => inputRef.current?.click()} type="button">
-          <span className="grid gap-3 justify-items-center"><span className="grid h-16 w-16 place-items-center rounded-full bg-brand-mint/20 text-brand-teal"><UploadCloud size={29} /></span><span className="text-sm font-bold text-admin-text">Clique para fazer upload</span><span className="-mt-2 text-sm text-muted">ou arraste uma imagem aqui</span><span className="text-xs text-muted">JPG ou PNG (Máx 5MB)</span></span>
+        <button
+          className="grid min-h-52 place-items-center rounded-2xl border-2 border-dashed border-[#bbcac4]/60 bg-surface-mint px-5 py-7 text-center transition hover:border-brand-mint focus-visible:outline-2 focus-visible:outline-brand-mint"
+          onClick={() => inputRef.current?.click()}
+          type="button"
+        >
+          <span className="grid gap-3 justify-items-center">
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-brand-mint/20 text-brand-teal">
+              <UploadCloud size={29} />
+            </span>
+            <span className="text-sm font-bold text-admin-text">Clique para fazer upload</span>
+            <span className="-mt-2 text-sm text-muted">ou arraste uma imagem aqui</span>
+            <span className="text-xs text-muted">JPG ou PNG (Máx 5MB)</span>
+          </span>
         </button>
       )}
-      {file ? <p className="inline-flex items-center gap-2 text-sm text-brand-teal"><ImageUp size={16} />{file.name}</p> : null}
+      {file ? (
+        <p className="inline-flex items-center gap-2 text-sm text-brand-teal">
+          <ImageUp size={16} />
+          {file.name}
+        </p>
+      ) : null}
     </div>
   )
 }

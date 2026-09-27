@@ -90,7 +90,15 @@ const styles = StyleSheet.create({
 
 function parseHtmlBlocks(html: string): PdfBlock[] {
   if (typeof document === 'undefined') {
-    return [{ text: html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(), type: 'paragraph' }]
+    return [
+      {
+        text: html
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim(),
+        type: 'paragraph',
+      },
+    ]
   }
 
   const template = document.createElement('template')
@@ -149,7 +157,9 @@ export function ArticlePdfDocument({ article }: ArticlePdfDocumentProps) {
           <Text style={styles.meta}>
             {article.readingTimeMinutes} min de leitura · {article.status}
           </Text>
-          {article.summary ? <Text style={[styles.paragraph, { marginTop: 18 }]}>{article.summary}</Text> : null}
+          {article.summary ? (
+            <Text style={[styles.paragraph, { marginTop: 18 }]}>{article.summary}</Text>
+          ) : null}
           {article.imageUrl ? <Image src={article.imageUrl} style={styles.coverImage} /> : null}
         </View>
 

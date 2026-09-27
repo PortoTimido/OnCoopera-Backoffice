@@ -14,9 +14,12 @@ export function useToast() {
   if (!context) throw new Error('useToast deve ser usado dentro de um ToastProvider')
 
   const { showToast } = context
-  return useMemo(() => ({
-    success: (message: string) => showToast('success', message),
-    alert: (message: string) => showToast('alert', message),
-    error: (message: string) => showToast('error', message),
-  }), [showToast])
+  return useMemo(
+    () => ({
+      success: (message: string) => showToast('success', message),
+      alert: (message: string) => showToast('alert', message),
+      error: (message: string) => showToast('error', message),
+    }),
+    [showToast],
+  )
 }
