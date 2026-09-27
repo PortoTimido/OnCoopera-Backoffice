@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Calendar, CheckCircle2, Clock3, Eye, FileText, Lightbulb, MessageSquareQuote, Save, Send, X } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
@@ -606,9 +607,11 @@ function FieldShell({ icon: Icon, label, value }: { icon: typeof Clock3; label: 
 
 function ArticleHelpModal({ modal, onClose }: { modal: Exclude<HelpModal, null>; onClose: () => void }) {
   const isTip = modal === 'tip'
+  const markerTitle = isTip ? '## Dica ##' : '## Pergunta ##'
+  const markerContent = isTip ? '[sessão de dica no artigo]' : '[sessão de pergunta no artigo]'
 
-  return (
-    <div className="fixed inset-0 z-20 grid place-items-center bg-admin-text/40 px-6" role="dialog" aria-modal="true" aria-labelledby="article-help-title">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] grid place-items-center bg-admin-text/40 px-6" role="dialog" aria-modal="true" aria-labelledby="article-help-title">
       <div className="grid w-full max-w-md gap-5 rounded-3xl bg-white p-6 shadow-[8px_8px_0_rgba(0,107,90,0.12)]">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-serif text-2xl font-semibold leading-8 text-admin-text" id="article-help-title">
@@ -619,13 +622,15 @@ function ArticleHelpModal({ modal, onClose }: { modal: Exclude<HelpModal, null>;
           </button>
         </div>
         <div className={cx('rounded-2xl p-4 text-sm leading-6', isTip ? 'bg-brand-mint/10 text-brand-teal' : 'bg-[#fff4e1] text-[#754b00]')}>
-          <p className="font-bold">{isTip ? '## Dica ##' : '## Pergunta ##'}</p>
-          <p>{isTip ? 'Use esse marcador no corpo do texto para destacar uma orientação curta.' : 'Use esse marcador para inserir perguntas que o paciente pode levar para a consulta.'}</p>
+          <p className="font-bold">{markerTitle}</p>
+          <p>{markerContent}</p>
+          <p>##</p>
         </div>
         <button className="h-11 rounded-xl bg-brand-teal px-5 text-sm text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]" onClick={onClose} type="button">
           OK
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
