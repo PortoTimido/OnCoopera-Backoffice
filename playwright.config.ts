@@ -12,6 +12,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run dev -- --host localhost --port 5176',
+    env: { ...process.env, VITE_GOOGLE_MAPS_API_KEY: 'playwright-google-maps-key' },
     reuseExistingServer: !process.env.CI,
     url: 'http://localhost:5176/login',
   },

@@ -13,6 +13,8 @@ COPY . .
 # Baked into the static bundle at build time, since Vite reads import.meta.env at build.
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 
 RUN npm run build
 
