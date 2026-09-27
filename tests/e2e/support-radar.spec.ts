@@ -15,6 +15,8 @@ async function mockSupportApi(page: Page) {
     window.localStorage.setItem('oncoopera.user', JSON.stringify(user))
   }, radarManager)
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: radarManager }))
+  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/js/, (route) => route.fulfill({ contentType: 'application/javascript', body: `window.google={maps:{Map:function(){this.panTo=function(){}},Marker:function(options){this.position=options.position;this.addListener=function(name,listener){this.dragListener=listener};this.setMap=function(){};this.setPosition=function(position){this.position=position};this.getPosition=function(){return {lat:()=>this.position.lat,lng:()=>this.position.lng}};window.__supportMapMarker=this}}};` }))
+  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/geocode\/json/, (route) => route.fulfill({ json: { status: 'OK', results: [{ geometry: { location: { lat: -23.55052, lng: -46.633308 } } }] } }))
   await page.route(/\/api\/backoffice\/apoios\/[^/?]+\/imagens(?:\/[^/?]+)?(?:\?.*)?$/, async (route) => {
     if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
     await route.fulfill({ json: support })
@@ -81,6 +83,31 @@ test('cria apoio usando o payload estruturado do backend', async ({ page }) => {
   expect(payload).toMatchObject({ telefone: '(11) 3333-4444', horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '12:00' }, { diaSemana: 1, horarioInicio: '13:00', horarioFim: '18:00' }] })
   expect((await imageRequest).postData()).toContain('name="imagem"')
   await expect(page).toHaveURL(/\/radar-de-apoio$/)
+})
+
+test('geocodifica o endereço e atualiza as coordenadas ao arrastar o marcador', async ({ page }) => {
+  await mockSupportApi(page)
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByLabel('CEP *').fill('01001000')
+  await expect(page.getByLabel('Logradouro *')).toHaveValue('Praça da Sé')
+  await page.getByLabel('Número *').fill('1')
+  await expect(page.getByRole('application', { name: 'Mapa da localização do estabelecimento' })).toBeVisible()
+  await page.evaluate(() => {
+    const marker = (window as unknown as { __supportMapMarker: { position: { lat: number; lng: number }; dragListener: () => void } }).__supportMapMarker
+    marker.position = { lat: -23.551, lng: -46.634 }
+    marker.dragListener()
+  })
+  await expect(page.getByText('Arraste o marcador para ajustar a localização exata.')).toHaveCount(0)
+})
+
+test('mantém o formulário disponível quando o endereço não é encontrado', async ({ page }) => {
+  await mockSupportApi(page)
+  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/geocode\/json/, (route) => route.fulfill({ json: { status: 'ZERO_RESULTS', results: [] } }))
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByLabel('CEP *').fill('01001000')
+  await page.getByLabel('Número *').fill('99999')
+  await expect(page.getByText('Endereço não encontrado. Revise os dados informados.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Salvar cadastro' })).toBeEnabled()
 })
 
 test('valida intervalo de horário e permite removê-lo', async ({ page }) => {

@@ -110,19 +110,23 @@ npm install
 
 ## Configuração do ambiente
 
-Não há arquivo `.env.example` neste repositório.
+Use `.env.example` como referência para criar o seu arquivo `.env` local.
 
 O cliente HTTP utiliza a variável `VITE_API_BASE_URL` quando ela estiver definida. Caso contrário, utiliza `/api` como base padrão. Em desenvolvimento, o Vite também possui proxy configurado para encaminhar chamadas de `/api` para `http://localhost:3000`.
 
 | Variável | Descrição |
 | -------- | --------- |
 | `VITE_API_BASE_URL` | URL base opcional da API consumida pelo backoffice |
+| `VITE_GOOGLE_MAPS_API_KEY` | Chave pública usada para exibir e geocodificar o endereço no Radar de Apoio |
 
 Exemplo de arquivo `.env` local:
 
 ```bash
 VITE_API_BASE_URL=/api
+VITE_GOOGLE_MAPS_API_KEY=
 ```
+
+Para o Radar de Apoio, habilite **Maps JavaScript API** e **Geocoding API** no projeto Google Cloud da chave. Restrinja a chave por HTTP referrer aos domínios autorizados do backoffice. A chave é incorporada ao bundle pelo Vite, portanto não deve ser tratada como segredo.
 
 Não versionar credenciais, tokens ou secrets em arquivos de ambiente.
 
