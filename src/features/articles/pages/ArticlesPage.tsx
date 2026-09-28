@@ -17,6 +17,7 @@ import { cx } from '../../../lib/cx'
 import { useToast } from '../../../components/ui/useToast'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
+import { listBackofficeUsuarios } from '../../backoffice/api/backofficeApi'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import {
   SearchFilterBar,
@@ -106,6 +107,7 @@ export function ArticlesPage() {
   const toast = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const [articlesResult, setArticlesResult] = useState<PaginatedArticles>(emptyPagination)
+  const [authorNames, setAuthorNames] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '')
   const [articleToDeactivate, setArticleToDeactivate] = useState<Article | null>(null)
@@ -114,6 +116,38 @@ export function ArticlesPage() {
   const activeStatus = getValidStatus(searchParams.get('status'))
   const currentPage = Number(searchParams.get('page') ?? '1') || 1
   const search = searchParams.get('search') ?? ''
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadAuthorNames() {
+      try {
+        const firstPage = await listBackofficeUsuarios({ page: 1, pageSize: 100 })
+        const pages = await Promise.all(
+          Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) =>
+            listBackofficeUsuarios({ page: index + 2, pageSize: 100 }),
+          ),
+        )
+        const users = [firstPage, ...pages].flatMap((page) => page.data)
+
+        if (isMounted) {
+          setAuthorNames(
+            Object.fromEntries(
+              users.map((administrator) => [administrator.id, administrator.nome]),
+            ),
+          )
+        }
+      } catch {
+        // A falha no carregamento dos nomes não deve impedir a listagem de artigos.
+      }
+    }
+
+    void loadAuthorNames()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const updateSearchParams = useCallback(
     (updates: Record<string, string | number | null>) => {
@@ -317,7 +351,7 @@ export function ArticlesPage() {
                               </span>
                             </td>
                             <td className="max-w-[var(--admin-table-author-max)] px-4 py-4 text-sm leading-5 text-admin-text">
-                              {article.autorId.slice(0, 8)}
+                              {authorNames[article.autorId] ?? article.autorId.slice(0, 8)}
                             </td>
                             <td className="px-4 py-4 text-sm leading-5 text-muted-strong">
                               {formatDate(article.dataPublicacao)}
