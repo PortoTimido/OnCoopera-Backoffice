@@ -16,7 +16,7 @@ async function mockSupportApi(page: Page) {
   }, radarManager)
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: radarManager }))
   await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/js/, (route) => route.fulfill({ contentType: 'application/javascript', body: `window.google={maps:{Map:function(){this.panTo=function(){}},Marker:function(options){this.position=options.position;this.addListener=function(name,listener){this.dragListener=listener};this.setMap=function(){};this.setPosition=function(position){this.position=position};this.getPosition=function(){return {lat:()=>this.position.lat,lng:()=>this.position.lng}};window.__supportMapMarker=this}}};` }))
-  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/geocode\/json/, (route) => route.fulfill({ json: { status: 'OK', results: [{ geometry: { location: { lat: -23.55052, lng: -46.633308 } } }] } }))
+  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) => route.fulfill({ json: { places: [{ location: { latitude: -23.55052, longitude: -46.633308 } }] } }))
   await page.route(/\/api\/backoffice\/apoios\/[^/?]+\/imagens(?:\/[^/?]+)?(?:\?.*)?$/, async (route) => {
     if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
     await route.fulfill({ json: support })
@@ -102,7 +102,7 @@ test('geocodifica o endereço e atualiza as coordenadas ao arrastar o marcador',
 
 test('mantém o formulário disponível quando o endereço não é encontrado', async ({ page }) => {
   await mockSupportApi(page)
-  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/geocode\/json/, (route) => route.fulfill({ json: { status: 'ZERO_RESULTS', results: [] } }))
+  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) => route.fulfill({ json: { places: [] } }))
   await page.goto('/radar-de-apoio/novo')
   await page.getByLabel('CEP *').fill('01001000')
   await page.getByLabel('Número *').fill('99999')

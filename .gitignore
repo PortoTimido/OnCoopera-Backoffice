@@ -13,7 +13,11 @@ dist-ssr
 playwright-report
 test-results
 *.local
-/.env
+
+# Arquivos locais de ambiente (preserve apenas o modelo versionado).
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*

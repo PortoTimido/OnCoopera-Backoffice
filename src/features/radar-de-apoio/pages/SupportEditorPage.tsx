@@ -128,7 +128,7 @@ function getGeocodingMessage(error: unknown) {
   if (error instanceof GoogleGeocodingError && error.code === 'ZERO_RESULTS')
     return 'Endereço não encontrado. Revise os dados informados.'
   if (error instanceof GoogleGeocodingError && error.code === 'MISSING_API_KEY')
-    return 'Configure a chave do Google Maps para localizar o endereço.'
+    return 'Configure a chave da Google Places API (New) para localizar o endereço.'
   return 'Não foi possível localizar o endereço. As coordenadas atuais foram mantidas.'
 }
 

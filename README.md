@@ -117,16 +117,18 @@ O cliente HTTP utiliza a variável `VITE_API_BASE_URL` quando ela estiver defini
 | Variável | Descrição |
 | -------- | --------- |
 | `VITE_API_BASE_URL` | URL base opcional da API consumida pelo backoffice |
-| `VITE_GOOGLE_MAPS_API_KEY` | Chave pública usada para exibir e geocodificar o endereço no Radar de Apoio |
+| `VITE_GOOGLE_MAPS_API_KEY` | Chave pública usada para exibir o mapa no Radar de Apoio |
+| `VITE_GOOGLE_PLACES_API_KEY` | Chave da Google Places API (New), usada para localizar as coordenadas do endereço |
 
 Exemplo de arquivo `.env` local:
 
 ```bash
 VITE_API_BASE_URL=/api
 VITE_GOOGLE_MAPS_API_KEY=
+VITE_GOOGLE_PLACES_API_KEY=
 ```
 
-Para o Radar de Apoio, habilite **Maps JavaScript API** e **Geocoding API** no projeto Google Cloud da chave. Restrinja a chave por HTTP referrer aos domínios autorizados do backoffice. A chave é incorporada ao bundle pelo Vite, portanto não deve ser tratada como segredo.
+Para o Radar de Apoio, habilite **Maps JavaScript API** para a chave do mapa e **Places API (New)** para a chave de geocodificação. Restrinja ambas por HTTP referrer aos domínios autorizados do backoffice. As chaves são incorporadas ao bundle pelo Vite, portanto não devem ser tratadas como segredo.
 
 Não versionar credenciais, tokens ou secrets em arquivos de ambiente.
 

@@ -1,6 +1,7 @@
 import type { Coordinates } from '../model/supportTypes'
 
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.trim()
+const googlePlacesApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY?.trim()
 
 export class GoogleGeocodingError extends Error {
   readonly code: string
@@ -43,27 +44,30 @@ export async function geocodeSupportAddress(
   address: GeocodingAddress,
   signal?: AbortSignal,
 ): Promise<Coordinates> {
-  if (!googleMapsApiKey) throw new GoogleGeocodingError('MISSING_API_KEY')
+  if (!googlePlacesApiKey) throw new GoogleGeocodingError('MISSING_API_KEY')
 
-  const query = new URLSearchParams({
-    address: buildGeocodingAddress(address),
-    key: googleMapsApiKey,
-    language: 'pt-BR',
-    region: 'BR',
-  })
-  const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${query}`, {
+  const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
     signal,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': googlePlacesApiKey,
+      'X-Goog-FieldMask': 'places.location',
+    },
+    body: JSON.stringify({
+      textQuery: buildGeocodingAddress(address),
+      languageCode: 'pt-BR',
+      regionCode: 'BR',
+    }),
   })
   if (!response.ok) throw new GoogleGeocodingError('NETWORK_ERROR')
 
   const payload = (await response.json()) as {
-    status?: string
-    results?: Array<{ geometry?: { location?: { lat?: number; lng?: number } } }>
+    places?: Array<{ location?: { latitude?: number; longitude?: number } }>
   }
-  if (payload.status !== 'OK') throw new GoogleGeocodingError(payload.status ?? 'UNKNOWN_ERROR')
 
-  const location = payload.results?.[0]?.geometry?.location
-  if (typeof location?.lat !== 'number' || typeof location.lng !== 'number')
+  const location = payload.places?.[0]?.location
+  if (typeof location?.latitude !== 'number' || typeof location.longitude !== 'number')
     throw new GoogleGeocodingError('ZERO_RESULTS')
-  return { latitude: location.lat, longitude: location.lng }
+  return { latitude: location.latitude, longitude: location.longitude }
 }
