@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Mail } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
@@ -58,7 +59,7 @@ export function RecoverPasswordPage() {
           <TextField
             autoComplete="email"
             label="E-mail corporativo"
-            leftIcon={authAssets.mail}
+            leftIcon={<Mail size={20} strokeWidth={1.8} />}
             name="email"
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Digite seu e-mail"
@@ -72,12 +73,7 @@ export function RecoverPasswordPage() {
             className="flex gap-3 rounded-2xl border border-security-blue/20 bg-security-blue/10 p-4 shadow-[2px_2px_0_rgba(110,181,255,0.15)]"
             role="status"
           >
-            <img
-              className="mt-0.5 h-5 w-5 shrink-0"
-              src={authAssets.mailBlue}
-              alt=""
-              aria-hidden="true"
-            />
+            <Mail className="mt-0.5 shrink-0" size={20} strokeWidth={1.8} aria-hidden="true" />
             <div className="space-y-1">
               <strong className="block text-sm font-bold text-[#275d97]">
                 Enviaremos um código

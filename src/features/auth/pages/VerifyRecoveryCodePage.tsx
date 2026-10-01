@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Lock } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { TextField } from '../../../components/ui/TextField'
@@ -82,7 +83,7 @@ export function VerifyRecoveryCodePage() {
             autoComplete="one-time-code"
             inputMode="numeric"
             label="Código de verificação"
-            leftIcon={authAssets.lock}
+            leftIcon={<Lock size={20} strokeWidth={1.8} />}
             maxLength={6}
             name="code"
             onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
