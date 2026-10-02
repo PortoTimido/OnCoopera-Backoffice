@@ -22,7 +22,7 @@ export function MetricCard({
   value: string
 }) {
   return (
-    <article className="relative h-[175px] overflow-hidden rounded-3xl bg-white px-6 pb-[27px] pt-6 shadow-admin-card">
+    <article className="relative min-h-[154px] overflow-hidden rounded-3xl bg-white px-5 py-5 shadow-admin-card sm:px-6 sm:py-6">
       <div className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_2px_2px_4px_rgba(0,0,0,0.02),inset_-2px_-2px_4px_rgba(0,0,0,0.02)]" />
       <div
         className={cx(
@@ -32,7 +32,7 @@ export function MetricCard({
       >
         <img className={iconClassName} src={icon} alt="" aria-hidden="true" />
       </div>
-      <p className="mt-5 text-sm leading-5 text-muted-strong">{label}</p>
+      <p className="mt-4 text-sm leading-5 text-muted-strong">{label}</p>
       <p className="mt-1 font-display text-[30px] leading-9 text-admin-text">{value}</p>
     </article>
   )
