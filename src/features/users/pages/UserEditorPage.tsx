@@ -286,13 +286,21 @@ export function UserEditorPage() {
       <main className="min-h-0 flex-1 overflow-auto bg-admin-canvas p-6 sm:p-9 lg:p-10">
         <form className="grid w-full gap-5" onSubmit={handleSubmit}>
           <header>
-            <Link
-              className="inline-flex items-center gap-2 text-sm text-muted hover:text-brand-teal"
-              to="/usuarios"
-            >
-              <ArrowLeft size={16} />
-              Voltar para usuários
-            </Link>
+            <nav className="flex items-center gap-3 text-sm text-muted" aria-label="Navegação da página">
+              <Link
+                className="inline-flex items-center gap-2 hover:text-brand-teal"
+                to="/usuarios"
+              >
+                <ArrowLeft size={16} strokeWidth={2} />
+                Voltar
+              </Link>
+              <span className="h-5 w-px bg-line" aria-hidden="true" />
+              <span>Usuários</span>
+              <span aria-hidden="true">›</span>
+              <span className="font-semibold text-brand-teal">
+                {isEditing ? 'Editar administrador' : 'Novo administrador'}
+              </span>
+            </nav>
             <h1 className="mt-2 font-serif text-4xl text-admin-text">
               {isEditing ? 'Editar administrador' : 'Novo administrador'}
             </h1>

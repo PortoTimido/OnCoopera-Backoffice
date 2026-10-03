@@ -7,7 +7,7 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react'
-import { Image, Info, MapPinned, Save, X } from 'lucide-react'
+import { ArrowLeft, Image, Info, MapPinned, Save, X } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
@@ -371,10 +371,13 @@ export function SupportEditorPage() {
   return (
     <AppLayout activeItem="Radar de Apoio" user={user}>
       <main className="flex min-h-0 flex-1 flex-col overflow-auto p-6 sm:p-10 lg:p-10">
-        <nav aria-label="Breadcrumb" className="mb-5 text-base text-muted">
-          <Link className="hover:text-brand-teal" to="/radar-de-apoio">
-            Radar de Apoio
+        <nav aria-label="Navegação da página" className="mb-5 flex items-center gap-3 text-base text-muted">
+          <Link className="inline-flex items-center gap-2 hover:text-brand-teal" to="/radar-de-apoio">
+            <ArrowLeft size={18} strokeWidth={2} />
+            Voltar
           </Link>
+          <span className="h-5 w-px bg-line" aria-hidden="true" />
+          <span>Radar de Apoio</span>
           <span aria-hidden="true" className="px-2">
             ›
           </span>
