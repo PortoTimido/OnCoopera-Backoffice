@@ -4,6 +4,7 @@ import { useId, useState } from 'react'
 import { cx } from '../../../lib/cx'
 
 export type AdminCreateSelectOption<TValue extends string> = {
+  indicatorColor?: string
   label: string
   value: TValue
 }
@@ -16,8 +17,10 @@ export function AdminCreateSelect<TValue extends string>({
   leftElement,
   menuClassName,
   onChange,
+  optionLeadingElement,
   optionClassName,
   options,
+  selectedTrailingElement,
   tone = 'settings',
   value,
 }: {
@@ -28,8 +31,10 @@ export function AdminCreateSelect<TValue extends string>({
   leftElement?: ReactNode
   menuClassName?: string
   onChange: (value: TValue) => void
+  optionLeadingElement?: (option: AdminCreateSelectOption<TValue>) => ReactNode
   optionClassName?: string
   options: Array<AdminCreateSelectOption<TValue>>
+  selectedTrailingElement?: ReactNode
   tone?: 'settings' | 'adminField'
   value: TValue
 }) {
@@ -85,14 +90,17 @@ export function AdminCreateSelect<TValue extends string>({
           </span>
         ) : null}
         <span className="truncate">{selectedOption.label}</span>
-        <ChevronDown
-          className={cx(
-            'shrink-0 text-muted transition',
-            isOpen ? 'rotate-180 text-brand-teal' : undefined,
-          )}
-          size={isAdminField ? 16 : 20}
-          strokeWidth={2}
-        />
+        <span className="flex shrink-0 items-center gap-3">
+          {selectedTrailingElement}
+          <ChevronDown
+            className={cx(
+              'text-muted transition',
+              isOpen ? 'rotate-180 text-brand-teal' : undefined,
+            )}
+            size={isAdminField ? 16 : 20}
+            strokeWidth={2}
+          />
+        </span>
       </button>
 
       {isOpen ? (
@@ -123,7 +131,10 @@ export function AdminCreateSelect<TValue extends string>({
                 role="option"
                 type="button"
               >
-                <span>{option.label}</span>
+                <span className="flex min-w-0 items-center gap-3">
+                  {optionLeadingElement ? optionLeadingElement(option) : null}
+                  <span className="truncate">{option.label}</span>
+                </span>
                 {isSelected ? <Check size={18} strokeWidth={2.4} /> : null}
               </button>
             )

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
+  ArrowLeft,
   Calendar,
   CheckCircle2,
   Clock3,
@@ -41,6 +42,7 @@ import {
   storeArticlePreview,
   type ArticlePreviewData,
 } from '../model/articlePreview'
+import { getArticleCategoryCardColor } from '../model/articleCategoryAppearance'
 
 type HelpModal = 'tip' | 'ask' | null
 
@@ -156,6 +158,7 @@ export function ArticleEditorPage() {
     () => [
       { label: 'Selecione', value: '' },
       ...categories.map((category) => ({
+        indicatorColor: getArticleCategoryCardColor(category.nome),
         label: category.nome,
         value: category.id,
       })),
@@ -163,6 +166,11 @@ export function ArticleEditorPage() {
     [categories],
   )
   const selectedTags = useMemo(() => getSelectedTags(tags, selectedTagIds), [selectedTagIds, tags])
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === selectedCategoryId),
+    [categories, selectedCategoryId],
+  )
+  const selectedCategoryColor = getArticleCategoryCardColor(selectedCategory?.nome)
 
   useEffect(() => {
     if (!hasImageSaveError) return
@@ -433,10 +441,16 @@ export function ArticleEditorPage() {
         <div className="mx-auto grid w-full gap-8">
           <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid gap-2">
-              <nav className="flex items-center gap-2 text-sm leading-5" aria-label="Breadcrumb">
-                <Link className="text-muted transition hover:text-brand-teal" to="/artigos">
-                  Artigos
+              <nav className="flex items-center gap-3 text-sm leading-5" aria-label="Navegação da página">
+                <Link
+                  className="inline-flex items-center gap-2 text-muted transition hover:text-brand-teal"
+                  to="/artigos"
+                >
+                  <ArrowLeft size={16} strokeWidth={2} />
+                  Voltar
                 </Link>
+                <span className="h-5 w-px bg-line" aria-hidden="true" />
+                <span className="text-muted">Artigos</span>
                 <span className="text-muted" aria-hidden="true">
                   ›
                 </span>
@@ -575,7 +589,26 @@ export function ArticleEditorPage() {
                       labelClassName="text-xs font-bold uppercase tracking-[0.6px] text-muted"
                       leftElement={<FileText size={16} strokeWidth={2} />}
                       onChange={setSelectedCategoryId}
+                      optionLeadingElement={(option) =>
+                        option.value ? (
+                          <span
+                            aria-hidden="true"
+                            className="h-3 w-3 shrink-0 rounded-full ring-1 ring-black/10"
+                            style={{ backgroundColor: option.indicatorColor }}
+                          />
+                        ) : null
+                      }
                       options={categoryOptions}
+                      selectedTrailingElement={
+                        selectedCategory ? (
+                          <span
+                            aria-label={`Cor do card: ${selectedCategory.nome}`}
+                            className="h-3 w-3 shrink-0 rounded-full ring-1 ring-black/10"
+                            role="img"
+                            style={{ backgroundColor: selectedCategoryColor }}
+                          />
+                        ) : null
+                      }
                       tone="adminField"
                       value={selectedCategoryId}
                     />

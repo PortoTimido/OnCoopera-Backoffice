@@ -65,6 +65,26 @@ test('persists the article introduction on create and restores it on edit', asyn
   await expect(page.getByPlaceholder(/breve resumo ou introdução/i)).toHaveValue('Article introduction')
 })
 
+test('updates the article-card color indicator when the category changes', async ({ page }) => {
+  await mockArticleApi(page)
+  await page.goto('/artigos/novo')
+
+  const indicator = page.getByRole('img', { name: /cor do card/i })
+  await expect(indicator).toHaveAttribute('aria-label', 'Cor do card: Saúde')
+  await expect(indicator).toHaveCSS('background-color', 'rgb(194, 165, 232)')
+
+  await page.getByRole('combobox', { name: 'Categoria' }).click()
+  const nutritionOption = page.getByRole('option', { name: 'Nutrição' })
+  await expect(nutritionOption.locator('span[aria-hidden="true"]')).toHaveCSS(
+    'background-color',
+    'rgb(61, 204, 181)',
+  )
+  await nutritionOption.click()
+
+  await expect(indicator).toHaveAttribute('aria-label', 'Cor do card: Nutrição')
+  await expect(indicator).toHaveCSS('background-color', 'rgb(61, 204, 181)')
+})
+
 test('deletes a persisted article cover when it is removed', async ({ page }) => {
   await mockArticleApi(page)
   await page.goto('/artigos/article-1/editar')
