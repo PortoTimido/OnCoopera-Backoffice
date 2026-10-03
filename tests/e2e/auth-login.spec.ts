@@ -4,6 +4,23 @@ const newAdministrator = {
   id: 'admin-new', nome: 'Novo Admin', email: 'novo@oncoopera.com', login: 'novo.admin', telefone: '11999999999', dataNascimento: '1990-01-01', status: 'ATIVO', tipo: 'ADMINISTRADOR', perfisAdministrativos: ['TOTAL'], permissoesAdministrativas: ['GERENCIAR_USUARIOS'], trocaSenhaObrigatoria: true, ultimoAcesso: null,
 }
 
+test('exibe no toast a mensagem da API quando a recuperação é solicitada por não administrador', async ({
+  page,
+}) => {
+  const message = 'A recuperação de senha está disponível apenas para administradores.'
+
+  await page.route(/\/api\/auth\/password-recovery\/request$/, (route) =>
+    route.fulfill({ status: 403, json: { message, statusCode: 403 } }),
+  )
+  await page.goto('/recuperar-senha')
+
+  await page.getByLabel('E-mail corporativo').fill('usuario@oncoopera.com')
+  await page.getByRole('button', { name: 'Enviar código de recuperação' }).click()
+
+  await expect(page.getByRole('alert')).toContainText(message)
+  await expect(page).toHaveURL(/\/recuperar-senha$/)
+})
+
 test('exibe erro real da API ao tentar login com credenciais inválidas', async ({ page }) => {
   await page.goto('/login')
 
