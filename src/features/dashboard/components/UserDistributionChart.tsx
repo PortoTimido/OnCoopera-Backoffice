@@ -1,4 +1,5 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { useBackofficeScale } from '../../backoffice/hooks/useBackofficeScale'
 import { DashboardChartCard } from './DashboardChartCard'
 
 export type UserDistribution = {
@@ -18,6 +19,7 @@ function formatNumber(value: number) {
 }
 
 export function UserDistributionChart({ distribution }: { distribution: UserDistribution }) {
+  const scale = useBackofficeScale()
   const valuesAvailable = Object.values(distribution).every((value) => value !== null)
   const data = statuses.map((status) => ({
     ...status,
@@ -28,17 +30,17 @@ export function UserDistributionChart({ distribution }: { distribution: UserDist
   return (
     <DashboardChartCard title="Distribuição de usuários">
       {!valuesAvailable ? (
-        <div className="grid min-h-[230px] place-items-center text-center text-sm text-muted">
+        <div className="grid min-h-[var(--dashboard-chart-height,230px)] place-items-center text-center text-sm text-muted">
           Não foi possível carregar a distribuição de usuários.
         </div>
       ) : total === 0 ? (
-        <div className="grid min-h-[230px] place-items-center text-center text-sm text-muted">
+        <div className="grid min-h-[var(--dashboard-chart-height,230px)] place-items-center text-center text-sm text-muted">
           Ainda não há usuários cadastrados.
         </div>
       ) : (
-        <div className="flex min-h-[230px] flex-col items-center gap-4 sm:flex-row sm:justify-between">
+        <div className="flex min-h-[var(--dashboard-chart-height,230px)] flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div
-            className="relative h-[190px] w-[190px] shrink-0"
+            className="relative h-[var(--dashboard-distribution-size,190px)] w-[var(--dashboard-distribution-size,190px)] shrink-0"
             role="img"
             aria-label={`Distribuição de ${total} usuários`}
           >
@@ -51,9 +53,9 @@ export function UserDistributionChart({ distribution }: { distribution: UserDist
                   data={data}
                   dataKey="value"
                   endAngle={-270}
-                  innerRadius={58}
-                  outerRadius={82}
-                  paddingAngle={3}
+                  innerRadius={58 * scale}
+                  outerRadius={82 * scale}
+                  paddingAngle={3 * scale}
                   startAngle={90}
                   stroke="none"
                 >
@@ -75,7 +77,7 @@ export function UserDistributionChart({ distribution }: { distribution: UserDist
           <ul className="grid w-full gap-3 sm:w-auto">
             {data.map((status) => (
               <li
-                className="flex min-w-[130px] items-center justify-between gap-6 text-sm"
+                className="flex min-w-[var(--dashboard-distribution-list-min-width,130px)] items-center justify-between gap-6 text-sm"
                 key={status.key}
               >
                 <span className="flex items-center gap-2 text-muted-strong">

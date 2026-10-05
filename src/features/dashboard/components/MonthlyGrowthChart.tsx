@@ -9,6 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
+import { useBackofficeScale } from '../../backoffice/hooks/useBackofficeScale'
 import {
   getDashboardMonthlyGrowth,
   type DashboardPeriod,
@@ -90,6 +91,7 @@ function ChartLegend({ visibleSeries }: { visibleSeries: (typeof series)[number]
 }
 
 export function MonthlyGrowthChart() {
+  const scale = useBackofficeScale()
   const [period, setPeriod] = useState<DashboardPeriod>(6)
   const [points, setPoints] = useState<MonthlyGrowthPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -145,10 +147,10 @@ export function MonthlyGrowthChart() {
       {isLoading ? (
         <div
           aria-label="Carregando crescimento mensal"
-          className="data-grid-skeleton-block h-[230px]"
+          className="data-grid-skeleton-block h-[var(--dashboard-chart-height,230px)]"
         />
       ) : error ? (
-        <div className="grid min-h-[230px] place-items-center text-center text-sm text-muted">
+        <div className="grid min-h-[var(--dashboard-chart-height,230px)] place-items-center text-center text-sm text-muted">
           <div>
             <p>Não foi possível carregar o crescimento mensal.</p>
             <button
@@ -161,18 +163,21 @@ export function MonthlyGrowthChart() {
           </div>
         </div>
       ) : points.length === 0 ? (
-        <div className="grid min-h-[230px] place-items-center text-center text-sm text-muted">
+        <div className="grid min-h-[var(--dashboard-chart-height,230px)] place-items-center text-center text-sm text-muted">
           Ainda não há dados suficientes para este período.
         </div>
       ) : (
         <>
           <div
-            className="h-[230px] min-w-[360px]"
+            className="h-[var(--dashboard-chart-height,230px)] min-w-[var(--dashboard-chart-min-width,360px)]"
             role="img"
             aria-label="Gráfico de crescimento mensal"
           >
             <ResponsiveContainer height="100%" width="100%">
-              <AreaChart data={points} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+              <AreaChart
+                data={points}
+                margin={{ top: 8 * scale, right: 4 * scale, left: -20 * scale, bottom: 0 }}
+              >
                 <defs>
                   {visibleSeries.map((item) => (
                     <linearGradient
@@ -188,23 +193,27 @@ export function MonthlyGrowthChart() {
                     </linearGradient>
                   ))}
                 </defs>
-                <CartesianGrid stroke="#dde4e0" strokeDasharray="3 4" vertical={false} />
+                <CartesianGrid
+                  stroke="#dde4e0"
+                  strokeDasharray={`${3 * scale} ${4 * scale}`}
+                  vertical={false}
+                />
                 <XAxis
                   axisLine={false}
                   dataKey="month"
-                  tick={{ fill: '#6c7a75', fontSize: 11 }}
+                  tick={{ fill: '#6c7a75', fontSize: 11 * scale }}
                   tickFormatter={formatMonth}
                   tickLine={false}
                 />
                 <YAxis
                   axisLine={false}
-                  tick={{ fill: '#6c7a75', fontSize: 11 }}
+                  tick={{ fill: '#6c7a75', fontSize: 11 * scale }}
                   tickLine={false}
-                  width={34}
+                  width={34 * scale}
                 />
                 <Tooltip
                   content={<GrowthTooltip visibleSeries={visibleSeries} />}
-                  cursor={{ stroke: '#bbcac4', strokeDasharray: '3 3' }}
+                  cursor={{ stroke: '#bbcac4', strokeDasharray: `${3 * scale} ${3 * scale}` }}
                 />
                 {visibleSeries.map((item) => (
                   <Area
@@ -213,7 +222,7 @@ export function MonthlyGrowthChart() {
                     key={item.dataKey}
                     name={item.label}
                     stroke={item.color}
-                    strokeWidth={2}
+                    strokeWidth={2 * scale}
                     type="monotone"
                   />
                 ))}

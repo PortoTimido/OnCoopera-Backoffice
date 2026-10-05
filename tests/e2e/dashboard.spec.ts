@@ -75,6 +75,48 @@ test('renderiza a tela inicial do backoffice', async ({ page }) => {
   await expect(page.getByText('Painel Administrativo')).toBeVisible()
 })
 
+test('escala o shell proporcionalmente em resoluções 2K e 4K', async ({ page }) => {
+  await mockDashboardApi(page)
+
+  for (const [width, expectedScale] of [
+    [1920, 1],
+    [2560, 2560 / 1920],
+    [3840, 2],
+  ]) {
+    await page.setViewportSize({ width, height: 1440 })
+    await page.goto('/dashboard')
+    await expect(page.getByRole('heading', { name: 'Início' })).toBeVisible()
+
+    const measurements = await page.evaluate(() => {
+      const sidebar = document.querySelector('aside')
+      const topbar = document.querySelector('header')
+      const main = document.querySelector('main')
+      const navItem = Array.from(document.querySelectorAll('a')).find(
+        (link) => link.textContent?.trim() === 'Início',
+      )
+      const metricLabel = Array.from(document.querySelectorAll('p')).find(
+        (paragraph) => paragraph.textContent === 'Artigos publicados',
+      )
+
+      return {
+        sidebarWidth: sidebar?.getBoundingClientRect().width ?? 0,
+        topbarHeight: topbar?.getBoundingClientRect().height ?? 0,
+        navFontSize: Number.parseFloat(navItem ? getComputedStyle(navItem).fontSize : '0'),
+        metricLabelFontSize: Number.parseFloat(
+          metricLabel ? getComputedStyle(metricLabel).fontSize : '0',
+        ),
+        hasHorizontalOverflow: (main?.scrollWidth ?? 0) > (main?.clientWidth ?? 0),
+      }
+    })
+
+    expect(measurements.sidebarWidth).toBeCloseTo(200 * expectedScale, 0)
+    expect(measurements.topbarHeight).toBeCloseTo(77 * expectedScale, 0)
+    expect(measurements.navFontSize).toBeCloseTo(13 * expectedScale, 0)
+    expect(measurements.metricLabelFontSize).toBeCloseTo(13 * expectedScale, 0)
+    expect(measurements.hasHorizontalOverflow).toBe(false)
+  }
+})
+
 test('altera o período do gráfico de crescimento', async ({ page }) => {
   const growthRequests: string[] = []
   await mockDashboardApi(page)

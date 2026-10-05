@@ -122,6 +122,78 @@
   }
 }
 
+/*
+ * The Figma desktop canvas is 1280px, but the implemented backoffice uses a
+ * compact desktop scale. Keep that scale through Full HD and progressively
+ * restore its physical presence on larger displays. These tokens are scoped
+ * to the authenticated shell so authentication pages retain their current UI.
+ */
+@media (min-width: 1920px) {
+  [data-layout='backoffice'] {
+    --spacing: clamp(3px, 0.15625vw, 6px);
+    --text-xs: clamp(11px, 0.572917vw, 22px);
+    --text-xs--line-height: clamp(15px, 0.78125vw, 30px);
+    --text-sm: clamp(13px, 0.677083vw, 26px);
+    --text-sm--line-height: clamp(17px, 0.885417vw, 34px);
+    --text-base: clamp(14px, 0.729167vw, 28px);
+    --text-base--line-height: clamp(20px, 1.041667vw, 40px);
+    --text-lg: clamp(16px, 0.833333vw, 32px);
+    --text-lg--line-height: clamp(22px, 1.145833vw, 44px);
+    --text-xl: clamp(18px, 0.9375vw, 36px);
+    --text-xl--line-height: clamp(24px, 1.25vw, 48px);
+    --text-2xl: clamp(20px, 1.041667vw, 40px);
+    --text-2xl--line-height: clamp(28px, 1.458333vw, 56px);
+    --text-3xl: clamp(24px, 1.25vw, 48px);
+    --text-3xl--line-height: clamp(32px, 1.666667vw, 64px);
+    --text-4xl: clamp(28px, 1.458333vw, 56px);
+    --text-4xl--line-height: clamp(36px, 1.875vw, 72px);
+    --radius-lg: clamp(6px, 0.3125vw, 12px);
+    --radius-xl: clamp(9px, 0.46875vw, 18px);
+    --radius-2xl: clamp(12px, 0.625vw, 24px);
+    --radius-3xl: clamp(18px, 0.9375vw, 36px);
+
+    --backoffice-sidebar-width: clamp(200px, 10.416667vw, 400px);
+    --backoffice-sidebar-collapsed-width: clamp(64px, 3.333333vw, 128px);
+    --backoffice-topbar-height: clamp(77px, 4vw, 154px);
+    --backoffice-topbar-control-size: clamp(48px, 2.5vw, 96px);
+    --backoffice-topbar-padding: clamp(39px, 2.03125vw, 78px);
+    --backoffice-nav-brand-size: clamp(21px, 1.09375vw, 42px);
+    --backoffice-nav-meta-size: clamp(12px, 0.625vw, 24px);
+    --backoffice-nav-label-size: clamp(13px, 0.677083vw, 26px);
+    --backoffice-nav-user-size: clamp(11px, 0.572917vw, 22px);
+    --backoffice-nav-user-email-size: clamp(9px, 0.46875vw, 18px);
+
+    --admin-content-max: clamp(825px, 42.96875vw, 1650px);
+    --admin-preview-content-max: clamp(840px, 43.75vw, 1680px);
+    --admin-side-panel-width: clamp(219px, 11.40625vw, 438px);
+    --admin-page-title-size: clamp(24px, 1.25vw, 48px);
+    --admin-page-title-line-height: clamp(32px, 1.666667vw, 64px);
+    --admin-field-title-size: clamp(24px, 1.25vw, 48px);
+    --admin-dropzone-min-height: clamp(108px, 5.625vw, 216px);
+    --admin-list-title-size: clamp(24px, 1.25vw, 48px);
+    --admin-list-title-line-height: clamp(30px, 1.5625vw, 60px);
+    --admin-search-max: clamp(288px, 15vw, 576px);
+    --admin-table-min-width: clamp(630px, 32.8125vw, 1260px);
+    --admin-table-title-max: clamp(218px, 11.354167vw, 436px);
+    --admin-table-author-max: clamp(105px, 5.46875vw, 210px);
+    --admin-preview-min-height: clamp(570px, 29.6875vw, 1140px);
+    --admin-pdf-preview-min-height: clamp(465px, 24.21875vw, 930px);
+    --admin-pdf-page-width: clamp(570px, 29.6875vw, 1140px);
+    --article-rich-heading-1-size: clamp(24px, 1.25vw, 48px);
+    --article-rich-heading-2-size: clamp(19px, 0.989583vw, 38px);
+    --article-rich-block-gap: clamp(11px, 0.572917vw, 22px);
+    --article-rich-list-indent: clamp(18px, 0.9375vw, 36px);
+    --article-rich-quote-indent: clamp(11px, 0.572917vw, 22px);
+
+    --dashboard-metric-card-min-height: clamp(154px, 8.020833vw, 308px);
+    --dashboard-metric-value-size: clamp(30px, 1.5625vw, 60px);
+    --dashboard-chart-height: clamp(230px, 11.979167vw, 460px);
+    --dashboard-chart-min-width: clamp(360px, 18.75vw, 720px);
+    --dashboard-distribution-size: clamp(190px, 9.895833vw, 380px);
+    --dashboard-distribution-list-min-width: clamp(130px, 6.770833vw, 260px);
+  }
+}
+
 * {
   box-sizing: border-box;
 }

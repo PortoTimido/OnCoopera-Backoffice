@@ -26,11 +26,15 @@ export function ArticlePdfPreview({ article }: ArticlePdfPreviewProps) {
     }
 
     const observer = new ResizeObserver(([entry]) => {
-      const maxPageWidth =
-        Number.parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--admin-pdf-page-width'),
-          10,
-        ) || 760
+      const configuredPageWidth = Number.parseInt(
+        getComputedStyle(container).getPropertyValue('--admin-pdf-page-width'),
+        10,
+      )
+      // High-resolution tokens use clamp(), which cannot be parsed as a bare
+      // pixel value. Mirror its 570px-at-Full-HD baseline for the PDF canvas.
+      const maxPageWidth = Number.isNaN(configuredPageWidth)
+        ? 570 * Math.min(2, Math.max(1, window.innerWidth / 1920))
+        : configuredPageWidth
       setPageWidth(Math.min(maxPageWidth, Math.max(280, entry.contentRect.width - 16)))
     })
 

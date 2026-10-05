@@ -109,7 +109,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
                 onClick={onToggle}
                 type="button"
               >
-                <PanelLeftOpen size={18} />
+                <PanelLeftOpen className="h-6 w-6" />
               </button>
               <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-30 w-max -translate-y-1/2 rounded-md bg-admin-text px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                 Abrir barra lateral
@@ -130,7 +130,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
                 />
               </Link>
               <Link
-                className="font-serif text-[21px] font-semibold leading-[1.1] text-brand-admin"
+                className="font-serif text-[length:var(--backoffice-nav-brand-size,21px)] font-semibold leading-[1.1] text-brand-admin"
                 to="/dashboard"
               >
                 OnCoopera
@@ -138,7 +138,9 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
             </div>
           )}
           {!isCollapsed ? (
-            <p className="ml-7 mt-1 text-[12px] leading-[1.2] text-muted">Painel Administrativo</p>
+            <p className="ml-7 mt-1 text-[length:var(--backoffice-nav-meta-size,12px)] leading-[1.2] text-muted">
+              Painel Administrativo
+            </p>
           ) : null}
           {!isCollapsed ? (
             <div className="absolute right-[8px] top-0">
@@ -148,7 +150,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
                 onClick={onToggle}
                 type="button"
               >
-                {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+                {isCollapsed ? <PanelLeftOpen className="h-6 w-6" /> : <PanelLeftClose className="h-6 w-6" />}
               </button>
             </div>
           ) : null}
@@ -167,7 +169,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
               return (
                 <Link
                   className={cx(
-                    'group relative flex h-10 items-center text-[13px] leading-[1.5] transition',
+                    'group relative flex h-10 items-center text-[length:var(--backoffice-nav-label-size,13px)] leading-[1.5] transition',
                     isCollapsed ? 'justify-center rounded-xl px-2' : 'gap-3 rounded-l-full px-3',
                     isActive
                       ? 'bg-white text-brand-admin shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05)]'
@@ -207,7 +209,7 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
               onClick={handleLogout}
               type="button"
             >
-              <LogOut size={17} strokeWidth={2} />
+              <LogOut className="h-6 w-6" strokeWidth={2} />
               <span>{isLoggingOut ? 'Saindo...' : 'Sair do sistema'}</span>
             </button>
           </div>
@@ -230,10 +232,12 @@ export function SideNav({ activeItem, isCollapsed, onToggle, user }: SideNavProp
             user={user}
           />
           <span className={cx('min-w-0', isCollapsed && 'sr-only')}>
-            <span className="block truncate text-[11px] leading-[1.25] text-admin-text">
+            <span className="block truncate text-[length:var(--backoffice-nav-user-size,11px)] leading-[1.25] text-admin-text">
               {userName}
             </span>
-            <span className="block truncate text-[9px] leading-[1.25] text-muted">{userEmail}</span>
+            <span className="block truncate text-[length:var(--backoffice-nav-user-email-size,9px)] leading-[1.25] text-muted">
+              {userEmail}
+            </span>
           </span>
         </button>
       </div>
