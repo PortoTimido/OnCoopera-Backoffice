@@ -115,7 +115,7 @@ export function SupportMap({
   return (
     <div className="grid gap-3 rounded-2xl border border-[#bbcac4]/35 bg-surface-mint p-4">
       <div
-        className="relative h-56 overflow-hidden rounded-xl bg-[#dbe8e4]"
+        className="relative h-[336px] overflow-hidden rounded-xl bg-[#dbe8e4]"
         aria-label="Mapa da localização do estabelecimento"
         ref={elementRef}
         role="application"

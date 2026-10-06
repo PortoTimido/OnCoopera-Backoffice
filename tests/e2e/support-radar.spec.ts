@@ -34,6 +34,72 @@ async function mockSupportApi(page: Page) {
   })
 }
 
+test('permite preencher bairro e logradouro quando o ViaCEP retorna CEP unico', async ({ page }) => {
+  await mockSupportApi(page)
+  await page.route(/https:\/\/viacep\.com\.br\/ws\/11900000\/json\/$/, (route) =>
+    route.fulfill({
+      json: { cep: '11900-000', logradouro: '', bairro: '', localidade: 'Registro', uf: 'SP' },
+    }),
+  )
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByLabel('CEP *').fill('11900000')
+
+  const neighborhood = page.getByLabel('Bairro *')
+  const street = page.getByLabel('Logradouro *')
+  await expect(neighborhood).not.toHaveAttribute('readonly', '')
+  await expect(street).not.toHaveAttribute('readonly', '')
+  await neighborhood.fill('Centro')
+  await street.fill('Rua Principal')
+  await expect(neighborhood).toHaveValue('Centro')
+  await expect(street).toHaveValue('Rua Principal')
+  await page.locator('input').nth(7).fill('1')
+  await expect(page.getByRole('application')).toHaveCSS('height', '336px')
+})
+
+test('aguarda a geocodificacao antes de salvar as coordenadas do apoio', async ({ page }) => {
+  await mockSupportApi(page)
+  let releaseGeocoding!: () => void
+  let markGeocodingRequested!: () => void
+  const geocodingRequested = new Promise<void>((resolve) => {
+    markGeocodingRequested = resolve
+  })
+  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, async (route) => {
+    markGeocodingRequested()
+    await new Promise<void>((resolve) => {
+      releaseGeocoding = resolve
+    })
+    await route.fulfill({
+      json: { places: [{ location: { latitude: -23.561, longitude: -46.656 } }] },
+    })
+  })
+
+  let supportPostCount = 0
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && request.url().endsWith('/api/backoffice/apoios'))
+      supportPostCount += 1
+  })
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByLabel('Nome do Local *').fill('Casa geocodificada')
+  await page.getByLabel('Telefone *').fill('1133334444')
+  await page.getByLabel('CEP *').fill('01001000')
+  await expect(page.getByLabel('Logradouro *')).toHaveAttribute('readonly', '')
+  await page.locator('input').nth(7).fill('1')
+
+  const saveButton = page.locator('button[type="submit"]')
+  await expect(saveButton).toBeDisabled()
+  await geocodingRequested
+  expect(supportPostCount).toBe(0)
+
+  const saveRequest = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/apoios'),
+  )
+  releaseGeocoding()
+  await expect(saveButton).toBeEnabled()
+  await saveButton.click()
+  const payload = (await saveRequest).postDataJSON()
+  expect(payload.endereco).toMatchObject({ latitude: -23.561, longitude: -46.656 })
+})
+
 test('lista apoios e envia busca e filtro para a API', async ({ page }) => {
   await mockSupportApi(page)
   await page.goto('/radar-de-apoio')

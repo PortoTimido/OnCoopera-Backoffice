@@ -143,9 +143,14 @@ export function SupportEditorPage() {
   const [isLoading, setIsLoading] = useState(Boolean(supportId))
   const [isSaving, setIsSaving] = useState(false)
   const [isAddressLocked, setIsAddressLocked] = useState(false)
+  const [isNeighborhoodLocked, setIsNeighborhoodLocked] = useState(false)
+  const [isStreetLocked, setIsStreetLocked] = useState(false)
   const [isLookingUpCep, setIsLookingUpCep] = useState(false)
   const [cepLookupMessage, setCepLookupMessage] = useState('')
   const [isGeocoding, setIsGeocoding] = useState(false)
+  const [settledGeocodingSignature, setSettledGeocodingSignature] = useState<string | null>(
+    null,
+  )
   const [geocodingMessage, setGeocodingMessage] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [isPhotoRemovalRequested, setIsPhotoRemovalRequested] = useState(false)
@@ -178,6 +183,10 @@ export function SupportEditorPage() {
     [geocodingAddress],
   )
   const initialAddressSignature = useRef<string | null>(null)
+  const requiresGeocoding =
+    hasCompleteAddress && (!isEditing || addressSignature !== initialAddressSignature.current)
+  const isGeocodingPending =
+    requiresGeocoding && settledGeocodingSignature !== addressSignature
 
   useEffect(() => {
     if (new URLSearchParams(location.search).has('imageUploadFailed')) {
@@ -218,6 +227,8 @@ export function SupportEditorPage() {
     const cepDigits = values.cep.replace(/\D/g, '')
     if (cepDigits.length !== 8) {
       setIsAddressLocked(false)
+      setIsNeighborhoodLocked(false)
+      setIsStreetLocked(false)
       setIsLookingUpCep(false)
       setCepLookupMessage('')
       return
@@ -226,6 +237,8 @@ export function SupportEditorPage() {
     async function lookupCep() {
       setIsLookingUpCep(true)
       setIsAddressLocked(false)
+      setIsNeighborhoodLocked(false)
+      setIsStreetLocked(false)
       setCepLookupMessage('')
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, {
@@ -249,6 +262,8 @@ export function SupportEditorPage() {
             : current,
         )
         setIsAddressLocked(true)
+        setIsNeighborhoodLocked(Boolean(address.bairro.trim()))
+        setIsStreetLocked(Boolean(address.logradouro.trim()))
       } catch (lookupError) {
         if (!(lookupError instanceof DOMException && lookupError.name === 'AbortError'))
           setCepLookupMessage('Não foi possível consultar o CEP. Preencha o endereço manualmente.')
@@ -261,23 +276,27 @@ export function SupportEditorPage() {
   }, [values.cep])
 
   useEffect(() => {
-    if (!hasCompleteAddress || (isEditing && addressSignature === initialAddressSignature.current))
-      return
+    if (!requiresGeocoding) return
     const controller = new AbortController()
     const timeout = window.setTimeout(() => {
       setIsGeocoding(true)
       setGeocodingMessage('')
       void geocodeSupportAddress(geocodingAddress, controller.signal)
         .then((coordinates) => {
-          if (!controller.signal.aborted)
+          if (!controller.signal.aborted) {
             setValues((current) =>
               getAddressSignature(current) === addressSignature
                 ? { ...current, coordinates }
                 : current,
             )
+            setSettledGeocodingSignature(addressSignature)
+          }
         })
         .catch((error: unknown) => {
-          if (!controller.signal.aborted) setGeocodingMessage(getGeocodingMessage(error))
+          if (!controller.signal.aborted) {
+            setGeocodingMessage(getGeocodingMessage(error))
+            setSettledGeocodingSignature(addressSignature)
+          }
         })
         .finally(() => {
           if (!controller.signal.aborted) setIsGeocoding(false)
@@ -287,7 +306,7 @@ export function SupportEditorPage() {
       window.clearTimeout(timeout)
       controller.abort()
     }
-  }, [addressSignature, geocodingAddress, hasCompleteAddress, isEditing])
+  }, [addressSignature, geocodingAddress, requiresGeocoding])
 
   function setField(field: FieldName, value: string) {
     setIsGeocoding(false)
@@ -297,6 +316,8 @@ export function SupportEditorPage() {
   }
   function setCep(value: string) {
     setIsAddressLocked(false)
+    setIsNeighborhoodLocked(false)
+    setIsStreetLocked(false)
     setCepLookupMessage('')
     setField('cep', formatCep(value))
   }
@@ -322,6 +343,7 @@ export function SupportEditorPage() {
   }
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isGeocodingPending) return
     if (!validate()) {
       toast.error('Revise os campos obrigatórios antes de salvar.')
       return
@@ -482,7 +504,7 @@ export function SupportEditorPage() {
                       label="Bairro *"
                       onChange={(value) => setField('neighborhood', value)}
                       placeholder="Bairro"
-                      readOnly={isAddressLocked}
+                      readOnly={isNeighborhoodLocked}
                       value={values.neighborhood}
                     />
                   </div>
@@ -492,7 +514,7 @@ export function SupportEditorPage() {
                       label="Logradouro *"
                       onChange={(value) => setField('street', value)}
                       placeholder="Rua, avenida..."
-                      readOnly={isAddressLocked}
+                      readOnly={isStreetLocked}
                       value={values.street}
                     />
                     <TextInput
@@ -547,11 +569,15 @@ export function SupportEditorPage() {
               </button>
               <button
                 className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-brand-teal px-8 text-base font-bold text-white disabled:opacity-60"
-                disabled={isSaving}
+                disabled={isSaving || isGeocodingPending}
                 type="submit"
               >
                 <Save size={17} />
-                {isSaving ? 'Salvando...' : 'Salvar cadastro'}
+                {isSaving
+                  ? 'Salvando...'
+                  : isGeocodingPending
+                    ? 'Localizando endereço...'
+                    : 'Salvar cadastro'}
               </button>
             </footer>
           </form>
