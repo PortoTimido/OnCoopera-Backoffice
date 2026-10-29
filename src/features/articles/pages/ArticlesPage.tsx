@@ -363,17 +363,11 @@ export function ArticlesPage() {
                                   className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint"
                                   onClick={() =>
                                     storeArticlePreview(
-                                      createArticlePreviewFromArticle(
-                                        article,
-                                        getArticleDescription(article),
-                                      ),
+                                      createArticlePreviewFromArticle(article),
                                     )
                                   }
                                   state={{
-                                    preview: createArticlePreviewFromArticle(
-                                      article,
-                                      getArticleDescription(article),
-                                    ),
+                                    preview: createArticlePreviewFromArticle(article),
                                   }}
                                   to="/artigos/preview"
                                 >
