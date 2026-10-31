@@ -2,11 +2,42 @@ import { expect, test, type Page } from '@playwright/test'
 
 const support = {
   imagens: [{ id: 'foto-inca', url: 'https://cdn.example.com/inca.png', ordem: 0 }],
-  id: 'inca', nome: 'INCA', tipoApoio: 'CLINICA', telefone: '(21) 93207-1000', descricao: 'Instituto Nacional de Câncer.', status: 'ATIVO', endereco: { cep: '20230-130', logradouro: 'Praça da Cruz Vermelha', numero: '23', bairro: 'Centro', cidade: 'Rio de Janeiro', estado: 'RJ', latitude: -22.909, longitude: -43.179 }, horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '18:00' }], imagensUrl: [], estaAbertoAgora: true, dataCriacao: '2026-01-01T00:00:00.000Z', dataAtualizacao: '2026-01-01T00:00:00.000Z',
+  id: 'inca',
+  nome: 'INCA',
+  tipoApoio: 'CLINICA',
+  telefone: '(21) 93207-1000',
+  descricao: 'Instituto Nacional de Câncer.',
+  status: 'ATIVO',
+  endereco: {
+    cep: '20230-130',
+    logradouro: 'Praça da Cruz Vermelha',
+    numero: '23',
+    bairro: 'Centro',
+    cidade: 'Rio de Janeiro',
+    estado: 'RJ',
+    latitude: -22.909,
+    longitude: -43.179,
+  },
+  horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '18:00' }],
+  imagensUrl: [],
+  estaAbertoAgora: true,
+  dataCriacao: '2026-01-01T00:00:00.000Z',
+  dataAtualizacao: '2026-01-01T00:00:00.000Z',
 }
 
 const radarManager = {
-  id: 'radar-1', nome: 'Radar manager', email: 'radar@example.com', login: 'radar', telefone: '11999998888', dataNascimento: '1990-01-01', status: 'ATIVO', tipo: 'ADMINISTRADOR', perfisAdministrativos: ['GESTAO_RADAR_APOIO'], permissoesAdministrativas: ['GESTAO_RADAR_APOIO'], trocaSenhaObrigatoria: false, ultimoAcesso: null,
+  id: 'radar-1',
+  nome: 'Radar manager',
+  email: 'radar@example.com',
+  login: 'radar',
+  telefone: '11999998888',
+  dataNascimento: '1990-01-01',
+  status: 'ATIVO',
+  tipo: 'ADMINISTRADOR',
+  perfisAdministrativos: ['GESTAO_RADAR_APOIO'],
+  permissoesAdministrativas: ['GESTAO_RADAR_APOIO'],
+  trocaSenhaObrigatoria: false,
+  ultimoAcesso: null,
 }
 
 async function mockSupportApi(page: Page) {
@@ -15,26 +46,81 @@ async function mockSupportApi(page: Page) {
     window.localStorage.setItem('oncoopera.user', JSON.stringify(user))
   }, radarManager)
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: radarManager }))
-  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/js/, (route) => route.fulfill({ contentType: 'application/javascript', body: `window.google={maps:{Map:function(){this.panTo=function(){}},Marker:function(options){this.position=options.position;this.addListener=function(name,listener){this.dragListener=listener};this.setMap=function(){};this.setPosition=function(position){this.position=position};this.getPosition=function(){return {lat:()=>this.position.lat,lng:()=>this.position.lng}};window.__supportMapMarker=this}}};` }))
-  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) => route.fulfill({ json: { places: [{ location: { latitude: -23.55052, longitude: -46.633308 } }] } }))
-  await page.route(/\/api\/backoffice\/apoios\/[^/?]+\/imagens(?:\/[^/?]+)?(?:\?.*)?$/, async (route) => {
-    if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
-    await route.fulfill({ json: support })
-  })
-  await page.route(/https:\/\/viacep\.com\.br\/ws\/01001000\/json\/$/, (route) => route.fulfill({ json: { cep: '01001-000', logradouro: 'Praça da Sé', bairro: 'Sé', localidade: 'São Paulo', uf: 'SP' } }))
+  await page.route(/https:\/\/maps\.googleapis\.com\/maps\/api\/js/, (route) =>
+    route.fulfill({
+      contentType: 'application/javascript',
+      body: `window.google={maps:{Map:function(){this.panTo=function(){}},Marker:function(options){this.position=options.position;this.addListener=function(name,listener){this.dragListener=listener};this.setMap=function(){};this.setPosition=function(position){this.position=position};this.getPosition=function(){return {lat:()=>this.position.lat,lng:()=>this.position.lng}};window.__supportMapMarker=this}}};`,
+    }),
+  )
+  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) =>
+    route.fulfill({
+      json: { places: [{ location: { latitude: -23.55052, longitude: -46.633308 } }] },
+    }),
+  )
+  await page.route(
+    /\/api\/backoffice\/apoios\/[^/?]+\/imagens(?:\/[^/?]+)?(?:\?.*)?$/,
+    async (route) => {
+      if (route.request().method() === 'DELETE') {
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ json: support })
+    },
+  )
+  await page.route(/https:\/\/viacep\.com\.br\/ws\/01001000\/json\/$/, (route) =>
+    route.fulfill({
+      json: {
+        cep: '01001-000',
+        logradouro: 'Praça da Sé',
+        bairro: 'Sé',
+        localidade: 'São Paulo',
+        uf: 'SP',
+      },
+    }),
+  )
+  await page.route(/https:\/\/viacep\.com\.br\/ws\/20230130\/json\/$/, (route) =>
+    route.fulfill({
+      json: {
+        cep: '20230-130',
+        logradouro: 'Praça da Cruz Vermelha',
+        bairro: 'Centro',
+        localidade: 'Rio de Janeiro',
+        uf: 'RJ',
+      },
+    }),
+  )
   await page.route(/\/api\/backoffice\/apoios(?:\?.*)?$/, async (route) => {
-    if (route.request().method() === 'GET') { await route.fulfill({ json: { data: [support], page: 1, pageSize: 10, total: 1, totalPages: 1 } }); return }
-    if (route.request().method() === 'POST') { await route.fulfill({ status: 201, json: { ...support, ...route.request().postDataJSON(), id: 'novo-apoio' } }); return }
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        json: { data: [support], page: 1, pageSize: 10, total: 1, totalPages: 1 },
+      })
+      return
+    }
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 201,
+        json: { ...support, ...route.request().postDataJSON(), id: 'novo-apoio' },
+      })
+      return
+    }
     await route.fallback()
   })
   await page.route(/\/api\/backoffice\/apoios\/[^/?]+(?:\?.*)?$/, async (route) => {
-    if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
-    if (route.request().method() === 'PATCH') { await route.fulfill({ json: { ...support, ...route.request().postDataJSON() } }); return }
+    if (route.request().method() === 'DELETE') {
+      await route.fulfill({ status: 204 })
+      return
+    }
+    if (route.request().method() === 'PATCH') {
+      await route.fulfill({ json: { ...support, ...route.request().postDataJSON() } })
+      return
+    }
     await route.fulfill({ json: support })
   })
 }
 
-test('permite preencher bairro e logradouro quando o ViaCEP retorna CEP unico', async ({ page }) => {
+test('permite preencher bairro e logradouro quando o ViaCEP retorna CEP unico', async ({
+  page,
+}) => {
   await mockSupportApi(page)
   await page.route(/https:\/\/viacep\.com\.br\/ws\/11900000\/json\/$/, (route) =>
     route.fulfill({
@@ -54,6 +140,25 @@ test('permite preencher bairro e logradouro quando o ViaCEP retorna CEP unico', 
   await expect(street).toHaveValue('Rua Principal')
   await page.locator('input').nth(7).fill('1')
   await expect(page.getByRole('application')).toHaveCSS('height', '336px')
+})
+
+test('desbloqueia o endereço quando o CEP deixa de estar completo', async ({ page }) => {
+  await mockSupportApi(page)
+  await page.goto('/radar-de-apoio/novo')
+  await page.getByLabel('CEP *').fill('01001000')
+
+  await expect(page.getByLabel('Logradouro *')).toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Bairro *')).toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Cidade *')).toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Estado *')).toHaveAttribute('readonly', '')
+
+  await page.getByLabel('CEP *').fill('0100100')
+
+  await expect(page.getByText('Buscando CEP...')).toHaveCount(0)
+  await expect(page.getByLabel('Logradouro *')).not.toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Bairro *')).not.toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Cidade *')).not.toHaveAttribute('readonly', '')
+  await expect(page.getByLabel('Estado *')).not.toHaveAttribute('readonly', '')
 })
 
 test('aguarda a geocodificacao antes de salvar as coordenadas do apoio', async ({ page }) => {
@@ -141,34 +246,62 @@ test('cria apoio usando o payload estruturado do backend', async ({ page }) => {
   await page.getByRole('combobox', { name: 'Fim' }).click()
   await page.getByRole('option', { name: '18:00' }).click()
   await page.getByRole('button', { name: 'Adicionar horário' }).click()
-  const saveRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/apoios'))
-  const imageRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().includes('/api/backoffice/apoios/novo-apoio/imagens'))
-  await page.locator('input[type="file"]').setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: Buffer.from('imagem valida') })
+  const saveRequest = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/apoios'),
+  )
+  const imageRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'POST' &&
+      request.url().includes('/api/backoffice/apoios/novo-apoio/imagens'),
+  )
+  await page.locator('input[type="file"]').setInputFiles({
+    name: 'foto.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('imagem valida'),
+  })
   await page.getByRole('button', { name: 'Salvar cadastro' }).click()
   const payload = (await saveRequest).postDataJSON()
-  expect(payload).toMatchObject({ telefone: '(11) 3333-4444', horarios: [{ diaSemana: 1, horarioInicio: '08:00', horarioFim: '12:00' }, { diaSemana: 1, horarioInicio: '13:00', horarioFim: '18:00' }] })
+  expect(payload).toMatchObject({
+    telefone: '(11) 3333-4444',
+    horarios: [
+      { diaSemana: 1, horarioInicio: '08:00', horarioFim: '12:00' },
+      { diaSemana: 1, horarioInicio: '13:00', horarioFim: '18:00' },
+    ],
+  })
   expect((await imageRequest).postData()).toContain('name="imagem"')
   await expect(page).toHaveURL(/\/radar-de-apoio$/)
 })
 
-test('geocodifica o endereço e atualiza as coordenadas ao arrastar o marcador', async ({ page }) => {
+test('geocodifica o endereço e atualiza as coordenadas ao arrastar o marcador', async ({
+  page,
+}) => {
   await mockSupportApi(page)
   await page.goto('/radar-de-apoio/novo')
   await page.getByLabel('CEP *').fill('01001000')
   await expect(page.getByLabel('Logradouro *')).toHaveValue('Praça da Sé')
   await page.getByLabel('Número *').fill('1')
-  await expect(page.getByRole('application', { name: 'Mapa da localização do estabelecimento' })).toBeVisible()
+  await expect(
+    page.getByRole('application', { name: 'Mapa da localização do estabelecimento' }),
+  ).toBeVisible()
   await page.evaluate(() => {
-    const marker = (window as unknown as { __supportMapMarker: { position: { lat: number; lng: number }; dragListener: () => void } }).__supportMapMarker
+    const marker = (
+      window as unknown as {
+        __supportMapMarker: { position: { lat: number; lng: number }; dragListener: () => void }
+      }
+    ).__supportMapMarker
     marker.position = { lat: -23.551, lng: -46.634 }
     marker.dragListener()
   })
-  await expect(page.getByText('Arraste o marcador para ajustar a localização exata.')).toHaveCount(0)
+  await expect(page.getByText('Arraste o marcador para ajustar a localização exata.')).toHaveCount(
+    0,
+  )
 })
 
 test('mantém o formulário disponível quando o endereço não é encontrado', async ({ page }) => {
   await mockSupportApi(page)
-  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) => route.fulfill({ json: { places: [] } }))
+  await page.route(/https:\/\/places\.googleapis\.com\/v1\/places:searchText/, (route) =>
+    route.fulfill({ json: { places: [] } }),
+  )
   await page.goto('/radar-de-apoio/novo')
   await page.getByLabel('CEP *').fill('01001000')
   await page.getByLabel('Número *').fill('99999')
@@ -214,19 +347,64 @@ test('duplica um horário para outros dias da semana', async ({ page }) => {
 
 test('carrega e atualiza um apoio existente', async ({ page }) => {
   await mockSupportApi(page)
+  let geocodingRequestCount = 0
+  page.on('request', (request) => {
+    if (request.url().includes('places.googleapis.com/v1/places:searchText'))
+      geocodingRequestCount += 1
+  })
   await page.goto('/radar-de-apoio/inca/editar')
   await expect(page.getByLabel('Nome do Local *')).toHaveValue('INCA')
   await page.getByLabel('Nome do Local *').fill('INCA atualizado')
   await page.getByRole('button', { name: 'Salvar cadastro' }).click()
   await expect(page).toHaveURL(/\/radar-de-apoio$/)
+  expect(geocodingRequestCount).toBe(0)
+})
+
+test('geocodifica uma única vez ao alterar o endereço de um apoio existente', async ({ page }) => {
+  await mockSupportApi(page)
+  let geocodingRequestCount = 0
+  page.on('request', (request) => {
+    if (request.url().includes('places.googleapis.com/v1/places:searchText'))
+      geocodingRequestCount += 1
+  })
+  await page.goto('/radar-de-apoio/inca/editar')
+  await expect(page.getByLabel('Número *')).toHaveValue('23')
+
+  const geocodingRequest = page.waitForRequest((request) =>
+    request.url().includes('places.googleapis.com/v1/places:searchText'),
+  )
+  await page.getByLabel('Número *').fill('24')
+  await geocodingRequest
+  await expect(page.getByRole('button', { name: 'Salvar cadastro' })).toBeEnabled()
+
+  const updateRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'PATCH' && request.url().includes('/api/backoffice/apoios/inca'),
+  )
+  await page.getByRole('button', { name: 'Salvar cadastro' }).click()
+  const payload = (await updateRequest).postDataJSON()
+  expect(payload.endereco).toMatchObject({
+    numero: '24',
+    latitude: -23.55052,
+    longitude: -46.633308,
+  })
+  expect(geocodingRequestCount).toBe(1)
 })
 
 test('rejeita imagem em formato inválido ou acima de 5 MB', async ({ page }) => {
   await mockSupportApi(page)
   await page.goto('/radar-de-apoio/novo')
   const fileInput = page.locator('input[type="file"]')
-  await fileInput.setInputFiles({ name: 'foto.gif', mimeType: 'image/gif', buffer: Buffer.from('imagem inválida') })
+  await fileInput.setInputFiles({
+    name: 'foto.gif',
+    mimeType: 'image/gif',
+    buffer: Buffer.from('imagem inválida'),
+  })
   await expect(page.getByText('Envie uma imagem JPG ou PNG.')).toBeVisible()
-  await fileInput.setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) })
+  await fileInput.setInputFiles({
+    name: 'foto.png',
+    mimeType: 'image/png',
+    buffer: Buffer.alloc(5 * 1024 * 1024 + 1),
+  })
   await expect(page.getByText('A imagem deve ter no máximo 5 MB.')).toBeVisible()
 })

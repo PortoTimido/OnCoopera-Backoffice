@@ -1,7 +1,6 @@
 import {
   useEffect,
   useMemo,
-  useRef,
   useState,
   type FormEvent,
   type InputHTMLAttributes,
@@ -47,6 +46,11 @@ type ViaCepAddress = {
   uf: string
   erro?: boolean
 }
+type CepLookupState =
+  | { status: 'idle' }
+  | { status: 'loading'; cepDigits: string }
+  | { status: 'success'; cepDigits: string; address: ViaCepAddress }
+  | { status: 'error'; cepDigits: string; message: string }
 const emptyValues: SupportFormValues = {
   name: '',
   category: 'CLINICA',
@@ -142,15 +146,9 @@ export function SupportEditorPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(Boolean(supportId))
   const [isSaving, setIsSaving] = useState(false)
-  const [isAddressLocked, setIsAddressLocked] = useState(false)
-  const [isNeighborhoodLocked, setIsNeighborhoodLocked] = useState(false)
-  const [isStreetLocked, setIsStreetLocked] = useState(false)
-  const [isLookingUpCep, setIsLookingUpCep] = useState(false)
-  const [cepLookupMessage, setCepLookupMessage] = useState('')
+  const [cepLookupState, setCepLookupState] = useState<CepLookupState>({ status: 'idle' })
   const [isGeocoding, setIsGeocoding] = useState(false)
-  const [settledGeocodingSignature, setSettledGeocodingSignature] = useState<string | null>(
-    null,
-  )
+  const [settledGeocodingSignature, setSettledGeocodingSignature] = useState<string | null>(null)
   const [geocodingMessage, setGeocodingMessage] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [isPhotoRemovalRequested, setIsPhotoRemovalRequested] = useState(false)
@@ -182,11 +180,29 @@ export function SupportEditorPage() {
     () => Object.values(geocodingAddress).every((value) => value.trim().length > 0),
     [geocodingAddress],
   )
-  const initialAddressSignature = useRef<string | null>(null)
+  const initialAddressSignature = useMemo(
+    () => (support ? getAddressSignature(mapSupportToForm(support)) : null),
+    [support],
+  )
   const requiresGeocoding =
-    hasCompleteAddress && (!isEditing || addressSignature !== initialAddressSignature.current)
-  const isGeocodingPending =
-    requiresGeocoding && settledGeocodingSignature !== addressSignature
+    hasCompleteAddress &&
+    (!isEditing ||
+      (initialAddressSignature !== null && addressSignature !== initialAddressSignature))
+  const isGeocodingPending = requiresGeocoding && settledGeocodingSignature !== addressSignature
+  const cepDigits = values.cep.replace(/\D/g, '')
+  const successfulCepLookup =
+    cepLookupState.status === 'success' && cepLookupState.cepDigits === cepDigits
+      ? cepLookupState
+      : null
+  const isLookingUpCep =
+    cepLookupState.status === 'loading' && cepLookupState.cepDigits === cepDigits
+  const cepLookupMessage =
+    cepLookupState.status === 'error' && cepLookupState.cepDigits === cepDigits
+      ? cepLookupState.message
+      : ''
+  const isAddressLocked = successfulCepLookup !== null
+  const isNeighborhoodLocked = Boolean(successfulCepLookup?.address.bairro.trim())
+  const isStreetLocked = Boolean(successfulCepLookup?.address.logradouro.trim())
 
   useEffect(() => {
     if (new URLSearchParams(location.search).has('imageUploadFailed')) {
@@ -206,9 +222,14 @@ export function SupportEditorPage() {
         const result = await getBackofficeSupport(id)
         if (active) {
           const formValues = mapSupportToForm(result)
-          initialAddressSignature.current = getAddressSignature(formValues)
+          const loadedCepDigits = formValues.cep.replace(/\D/g, '')
           setSupport(result)
           setValues(formValues)
+          setCepLookupState(
+            loadedCepDigits.length === 8
+              ? { status: 'loading', cepDigits: loadedCepDigits }
+              : { status: 'idle' },
+          )
           setIsPhotoRemovalRequested(false)
         }
       } catch (loadError) {
@@ -225,21 +246,9 @@ export function SupportEditorPage() {
 
   useEffect(() => {
     const cepDigits = values.cep.replace(/\D/g, '')
-    if (cepDigits.length !== 8) {
-      setIsAddressLocked(false)
-      setIsNeighborhoodLocked(false)
-      setIsStreetLocked(false)
-      setIsLookingUpCep(false)
-      setCepLookupMessage('')
-      return
-    }
+    if (cepDigits.length !== 8) return
     const controller = new AbortController()
     async function lookupCep() {
-      setIsLookingUpCep(true)
-      setIsAddressLocked(false)
-      setIsNeighborhoodLocked(false)
-      setIsStreetLocked(false)
-      setCepLookupMessage('')
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, {
           signal: controller.signal,
@@ -247,7 +256,11 @@ export function SupportEditorPage() {
         if (!response.ok) throw new Error('CEP não encontrado')
         const address = (await response.json()) as ViaCepAddress
         if (address.erro) {
-          setCepLookupMessage('CEP não encontrado. Preencha o endereço manualmente.')
+          setCepLookupState({
+            status: 'error',
+            cepDigits,
+            message: 'CEP não encontrado. Preencha o endereço manualmente.',
+          })
           return
         }
         setValues((current) =>
@@ -261,14 +274,14 @@ export function SupportEditorPage() {
               }
             : current,
         )
-        setIsAddressLocked(true)
-        setIsNeighborhoodLocked(Boolean(address.bairro.trim()))
-        setIsStreetLocked(Boolean(address.logradouro.trim()))
+        setCepLookupState({ status: 'success', cepDigits, address })
       } catch (lookupError) {
         if (!(lookupError instanceof DOMException && lookupError.name === 'AbortError'))
-          setCepLookupMessage('Não foi possível consultar o CEP. Preencha o endereço manualmente.')
-      } finally {
-        if (!controller.signal.aborted) setIsLookingUpCep(false)
+          setCepLookupState({
+            status: 'error',
+            cepDigits,
+            message: 'Não foi possível consultar o CEP. Preencha o endereço manualmente.',
+          })
       }
     }
     void lookupCep()
@@ -315,11 +328,14 @@ export function SupportEditorPage() {
     setErrors((current) => ({ ...current, [field]: undefined }))
   }
   function setCep(value: string) {
-    setIsAddressLocked(false)
-    setIsNeighborhoodLocked(false)
-    setIsStreetLocked(false)
-    setCepLookupMessage('')
-    setField('cep', formatCep(value))
+    const formattedCep = formatCep(value)
+    const nextCepDigits = formattedCep.replace(/\D/g, '')
+    setCepLookupState(
+      nextCepDigits.length === 8
+        ? { status: 'loading', cepDigits: nextCepDigits }
+        : { status: 'idle' },
+    )
+    setField('cep', formattedCep)
   }
   function validate() {
     const next: FormErrors = {}
@@ -393,8 +409,14 @@ export function SupportEditorPage() {
   return (
     <AppLayout activeItem="Radar de Apoio" user={user}>
       <main className="flex min-h-0 flex-1 flex-col overflow-auto p-6 sm:p-10 lg:p-10">
-        <nav aria-label="Navegação da página" className="mb-5 flex items-center gap-3 text-base text-muted">
-          <Link className="inline-flex items-center gap-2 hover:text-brand-teal" to="/radar-de-apoio">
+        <nav
+          aria-label="Navegação da página"
+          className="mb-5 flex items-center gap-3 text-base text-muted"
+        >
+          <Link
+            className="inline-flex items-center gap-2 hover:text-brand-teal"
+            to="/radar-de-apoio"
+          >
             <ArrowLeft size={18} strokeWidth={2} />
             Voltar
           </Link>
