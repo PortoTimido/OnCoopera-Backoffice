@@ -6,11 +6,12 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react'
-import { ArrowLeft, Image, Info, MapPinned, Save, X } from 'lucide-react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Image, Info, MapPinned, Save, X } from 'lucide-react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
+import { BackofficeDirectoryHeader } from '../../backoffice/components/BackofficeDirectoryHeader'
 import { AdminCreateSelect } from '../../settings/components/AdminCreateSelect'
 import {
   createBackofficeSupport,
@@ -409,26 +410,13 @@ export function SupportEditorPage() {
   return (
     <AppLayout activeItem="Radar de Apoio" user={user}>
       <main className="flex min-h-0 flex-1 flex-col overflow-auto p-6 sm:p-10 lg:p-10">
-        <nav
-          aria-label="Navegação da página"
-          className="mb-5 flex items-center gap-3 text-base text-muted"
-        >
-          <Link
-            className="inline-flex items-center gap-2 hover:text-brand-teal"
-            to="/radar-de-apoio"
-          >
-            <ArrowLeft size={18} strokeWidth={2} />
-            Voltar
-          </Link>
-          <span className="h-5 w-px bg-line" aria-hidden="true" />
-          <span>Radar de Apoio</span>
-          <span aria-hidden="true" className="px-2">
-            ›
-          </span>
-          <span className="font-semibold text-brand-teal">
-            {isEditing ? 'Editar cadastro' : 'Novo Cadastro'}
-          </span>
-        </nav>
+        <div className="mb-5">
+          <BackofficeDirectoryHeader
+            backTo="/radar-de-apoio"
+            currentPage={isEditing ? 'Editar apoio' : 'Novo apoio'}
+            directory="Radar de Apoio"
+          />
+        </div>
         {isLoading ? (
           <p className="rounded-2xl bg-white p-8 text-center text-sm text-muted">
             Carregando cadastro...

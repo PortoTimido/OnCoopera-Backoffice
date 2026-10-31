@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  Copy,
-  ShieldAlert,
-  ShieldCheck,
-  UserRound,
-} from 'lucide-react'
+import { Check, CheckCircle2, Copy, ShieldAlert, ShieldCheck, UserRound } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import {
@@ -19,6 +11,7 @@ import {
 } from '../../backoffice/api/backofficeApi'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
+import { BackofficeDirectoryHeader } from '../../backoffice/components/BackofficeDirectoryHeader'
 import {
   administrativePermissions,
   createLoginFromName,
@@ -286,21 +279,11 @@ export function UserEditorPage() {
       <main className="min-h-0 flex-1 overflow-auto bg-admin-canvas p-6 sm:p-9 lg:p-10">
         <form className="grid w-full gap-5" onSubmit={handleSubmit}>
           <header>
-            <nav className="flex items-center gap-3 text-sm text-muted" aria-label="Navegação da página">
-              <Link
-                className="inline-flex items-center gap-2 hover:text-brand-teal"
-                to="/usuarios"
-              >
-                <ArrowLeft size={16} strokeWidth={2} />
-                Voltar
-              </Link>
-              <span className="h-5 w-px bg-line" aria-hidden="true" />
-              <span>Usuários</span>
-              <span aria-hidden="true">›</span>
-              <span className="font-semibold text-brand-teal">
-                {isEditing ? 'Editar administrador' : 'Novo administrador'}
-              </span>
-            </nav>
+            <BackofficeDirectoryHeader
+              backTo="/usuarios"
+              currentPage={isEditing ? 'Editar usuário' : 'Novo usuário'}
+              directory="Usuários"
+            />
             <h1 className="mt-2 font-serif text-4xl text-admin-text">
               {isEditing ? 'Editar administrador' : 'Novo administrador'}
             </h1>

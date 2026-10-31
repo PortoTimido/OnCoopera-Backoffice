@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 import { ArticleEditorPage } from '../features/articles/pages/ArticleEditorPage'
+import { ArticleDetailsPage } from '../features/articles/pages/ArticleDetailsPage'
 import { ArticlesPage } from '../features/articles/pages/ArticlesPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { PasswordUpdatedPage } from '../features/auth/pages/PasswordUpdatedPage'
@@ -11,8 +12,10 @@ import { VerifyRecoveryCodePage } from '../features/auth/pages/VerifyRecoveryCod
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { NotFoundPage } from '../features/system/pages/NotFoundPage'
 import { SupportEditorPage } from '../features/radar-de-apoio/pages/SupportEditorPage'
+import { SupportDetailsPage } from '../features/radar-de-apoio/pages/SupportDetailsPage'
 import { SupportListPage } from '../features/radar-de-apoio/pages/SupportListPage'
 import { UserEditorPage } from '../features/users/pages/UserEditorPage'
+import { UserDetailsPage } from '../features/users/pages/UserDetailsPage'
 import { UserListPage } from '../features/users/pages/UserListPage'
 import { PermissionRoute } from './PermissionRoute'
 
@@ -83,6 +86,14 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/artigos/:articleId/consulta"
+        element={
+          <PermissionRoute permission="GESTAO_CONTEUDOS">
+            <ArticleDetailsPage />
+          </PermissionRoute>
+        }
+      />
+      <Route
         path="/radar-de-apoio"
         element={
           <PermissionRoute permission="GESTAO_RADAR_APOIO">
@@ -107,6 +118,14 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/radar-de-apoio/:supportId/consulta"
+        element={
+          <PermissionRoute permission="GESTAO_RADAR_APOIO">
+            <SupportDetailsPage />
+          </PermissionRoute>
+        }
+      />
+      <Route
         path="/usuarios"
         element={
           <PermissionRoute permission="GERENCIAR_USUARIOS">
@@ -127,6 +146,14 @@ export function AppRoutes() {
         element={
           <PermissionRoute permission="GERENCIAR_USUARIOS">
             <UserEditorPage />
+          </PermissionRoute>
+        }
+      />
+      <Route
+        path="/usuarios/:userId/consulta"
+        element={
+          <PermissionRoute permission="GERENCIAR_USUARIOS">
+            <UserDetailsPage />
           </PermissionRoute>
         }
       />

@@ -117,7 +117,7 @@ export function SupportListTable({
                         <Link
                           aria-label={`Visualizar ${resource.nome}`}
                           className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint"
-                          to={`/radar-de-apoio/${resource.id}/editar`}
+                          to={`/radar-de-apoio/${resource.id}/consulta`}
                         >
                           <Eye size={16} />
                         </Link>

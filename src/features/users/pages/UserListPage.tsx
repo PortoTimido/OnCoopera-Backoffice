@@ -268,7 +268,7 @@ function UserTable({
                         <Link
                           aria-label={`Visualizar ${administrator.nome}`}
                           className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong hover:bg-surface-soft"
-                          to={`/usuarios/${administrator.id}/editar`}
+                          to={`/usuarios/${administrator.id}/consulta`}
                         >
                           <Eye size={16} />
                         </Link>

@@ -31,7 +31,6 @@ import {
   type ArticleStatus,
   type PaginatedArticles,
 } from '../api/articlesApi'
-import { createArticlePreviewFromArticle, storeArticlePreview } from '../model/articlePreview'
 import { ConfirmationModal } from '../../../components/ui/ConfirmationModal'
 
 const statusFilters: Array<SearchFilterOption<ArticleStatus>> = [
@@ -361,15 +360,7 @@ export function ArticlesPage() {
                                 <Link
                                   aria-label={`Visualizar ${article.titulo}`}
                                   className="inline-grid h-8 w-8 place-items-center rounded-full text-muted-strong transition hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-brand-mint"
-                                  onClick={() =>
-                                    storeArticlePreview(
-                                      createArticlePreviewFromArticle(article),
-                                    )
-                                  }
-                                  state={{
-                                    preview: createArticlePreviewFromArticle(article),
-                                  }}
-                                  to="/artigos/preview"
+                                  to={`/artigos/${article.id}/consulta`}
                                 >
                                   <Eye size={16} />
                                 </Link>

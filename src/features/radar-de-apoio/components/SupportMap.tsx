@@ -39,7 +39,8 @@ type SupportMapProps = {
   coordinates: Coordinates
   isGeocoding: boolean
   geocodingMessage: string
-  onSelect: (coordinates: Coordinates) => void
+  onSelect?: (coordinates: Coordinates) => void
+  readOnly?: boolean
 }
 
 export function SupportMap({
@@ -47,6 +48,7 @@ export function SupportMap({
   geocodingMessage,
   isGeocoding,
   onSelect,
+  readOnly = false,
 }: SupportMapProps) {
   const elementRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
@@ -77,14 +79,16 @@ export function SupportMap({
           zoom: 16,
         })
         const marker = new google.maps.Marker({
-          draggable: true,
+          draggable: !readOnly,
           map,
           position,
           title: 'Localização do estabelecimento',
         })
         marker.addListener('dragend', () => {
           const position = marker.getPosition()
-          if (position) onSelectRef.current({ latitude: position.lat(), longitude: position.lng() })
+          if (position && !readOnly) {
+            onSelectRef.current?.({ latitude: position.lat(), longitude: position.lng() })
+          }
         })
         mapRef.current = map
         markerRef.current = marker
@@ -103,7 +107,7 @@ export function SupportMap({
       markerRef.current = null
       mapRef.current = null
     }
-  }, [])
+  }, [readOnly])
 
   useEffect(() => {
     const position = { lat: coordinates.latitude, lng: coordinates.longitude }

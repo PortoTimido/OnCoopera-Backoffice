@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  ArrowLeft,
   Calendar,
   CheckCircle2,
   Clock3,
@@ -13,12 +12,13 @@ import {
   Send,
   X,
 } from 'lucide-react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cx } from '../../../lib/cx'
 import { useToast } from '../../../components/ui/useToast'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
+import { BackofficeDirectoryHeader } from '../../backoffice/components/BackofficeDirectoryHeader'
 import { AdminCreateSelect } from '../../settings/components/AdminCreateSelect'
 import {
   createBackofficeArticle,
@@ -441,23 +441,11 @@ export function ArticleEditorPage() {
         <div className="mx-auto grid w-full gap-8">
           <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid gap-2">
-              <nav className="flex items-center gap-3 text-sm leading-5" aria-label="Navegação da página">
-                <Link
-                  className="inline-flex items-center gap-2 text-muted transition hover:text-brand-teal"
-                  to="/artigos"
-                >
-                  <ArrowLeft size={16} strokeWidth={2} />
-                  Voltar
-                </Link>
-                <span className="h-5 w-px bg-line" aria-hidden="true" />
-                <span className="text-muted">Artigos</span>
-                <span className="text-muted" aria-hidden="true">
-                  ›
-                </span>
-                <span className="font-bold text-brand-teal">
-                  {isEditing ? 'Editar artigo' : 'Criar novo'}
-                </span>
-              </nav>
+              <BackofficeDirectoryHeader
+                backTo="/artigos"
+                currentPage={isEditing ? 'Editar artigo' : 'Novo artigo'}
+                directory="Artigos"
+              />
               <h1 className="font-serif text-[length:var(--admin-page-title-size)] font-semibold leading-[var(--admin-page-title-line-height)] text-admin-text">
                 Artigo de rascunho
               </h1>
