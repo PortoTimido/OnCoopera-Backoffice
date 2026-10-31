@@ -1,11 +1,34 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const user = {
-  id: 'content-1', nome: 'Content manager', email: 'content@example.com', login: 'content', telefone: '11999998888', dataNascimento: '1990-01-01', status: 'ATIVO', tipo: 'ADMINISTRADOR', perfisAdministrativos: ['GESTAO_CONTEUDOS'], permissoesAdministrativas: ['GESTAO_CONTEUDOS'], trocaSenhaObrigatoria: false, ultimoAcesso: null,
+  id: 'content-1',
+  nome: 'Content manager',
+  email: 'content@example.com',
+  login: 'content',
+  telefone: '11999998888',
+  dataNascimento: '1990-01-01',
+  status: 'ATIVO',
+  tipo: 'ADMINISTRADOR',
+  perfisAdministrativos: ['GESTAO_CONTEUDOS'],
+  permissoesAdministrativas: ['GESTAO_CONTEUDOS'],
+  trocaSenhaObrigatoria: false,
+  ultimoAcesso: null,
 }
 
 const article = {
-  id: 'article-1', autorId: 'content-1', titulo: 'Article title', resumo: 'Article introduction', conteudo: '<p>Article content</p>', tempoLeituraMinutos: 1, imagemUrl: 'https://cdn.example.com/article.png', status: 'RASCUNHO', categorias: [{ id: 'category-1', nome: 'Category' }], tags: [], dataCriacao: '2026-01-01T00:00:00.000Z', dataAtualizacao: '2026-01-01T00:00:00.000Z', dataPublicacao: null,
+  id: 'article-1',
+  autorId: 'content-1',
+  titulo: 'Article title',
+  resumo: 'Article introduction',
+  conteudo: '<p>Article content</p>',
+  tempoLeituraMinutos: 1,
+  imagemUrl: 'https://cdn.example.com/article.png',
+  status: 'RASCUNHO',
+  categorias: [{ id: 'category-1', nome: 'Category' }],
+  tags: [],
+  dataCriacao: '2026-01-01T00:00:00.000Z',
+  dataAtualizacao: '2026-01-01T00:00:00.000Z',
+  dataPublicacao: null,
 }
 
 async function mockArticleApi(page: Page, shouldFailImageUpload = false) {
@@ -14,19 +37,42 @@ async function mockArticleApi(page: Page, shouldFailImageUpload = false) {
     window.localStorage.setItem('oncoopera.user', JSON.stringify(storedUser))
   }, user)
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: user }))
-  await page.route(/\/api\/backoffice\/artigo-categorias(?:\?.*)?$/, (route) => route.fulfill(route.request().method() === 'POST' ? { status: 201, json: { id: 'category-health', nome: 'Saude' } } : { json: { data: article.categorias } }))
-  await page.route(/\/api\/backoffice\/artigo-tags(?:\?.*)?$/, (route) => route.fulfill({ json: { data: [] } }))
+  await page.route(/\/api\/backoffice\/artigo-categorias(?:\?.*)?$/, (route) =>
+    route.fulfill(
+      route.request().method() === 'POST'
+        ? { status: 201, json: { id: 'category-health', nome: 'Saude' } }
+        : { json: { data: article.categorias } },
+    ),
+  )
+  await page.route(/\/api\/backoffice\/artigo-tags(?:\?.*)?$/, (route) =>
+    route.fulfill({ json: { data: [] } }),
+  )
   await page.route(/\/api\/backoffice\/artigos\/article-1\/imagem$/, async (route) => {
-    if (route.request().method() === 'DELETE') { await route.fulfill({ status: 204 }); return }
-    await route.fulfill(shouldFailImageUpload ? { status: 500, json: { message: 'Upload failed' } } : { json: article })
+    if (route.request().method() === 'DELETE') {
+      await route.fulfill({ status: 204 })
+      return
+    }
+    await route.fulfill(
+      shouldFailImageUpload
+        ? { status: 500, json: { message: 'Upload failed' } }
+        : { json: article },
+    )
   })
   await page.route(/\/api\/backoffice\/artigos\/article-1(?:\?.*)?$/, async (route) => {
-    if (route.request().method() === 'PATCH') { await route.fulfill({ json: article }); return }
+    if (route.request().method() === 'PATCH') {
+      await route.fulfill({ json: article })
+      return
+    }
     await route.fulfill({ json: article })
   })
   await page.route(/\/api\/backoffice\/artigos(?:\?.*)?$/, async (route) => {
-    if (route.request().method() === 'POST') { await route.fulfill({ status: 201, json: article }); return }
-    await route.fulfill({ json: { data: [article], page: 1, pageSize: 20, total: 1, totalPages: 1 } })
+    if (route.request().method() === 'POST') {
+      await route.fulfill({ status: 201, json: article })
+      return
+    }
+    await route.fulfill({
+      json: { data: [article], page: 1, pageSize: 20, total: 1, totalPages: 1 },
+    })
   })
 }
 
@@ -40,10 +86,18 @@ test('uploads an article cover in multipart after creating the article', async (
   await mockArticleApi(page)
   await page.goto('/artigos/novo')
   await fillArticle(page)
-  await page.locator('input[type="file"]').setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: Buffer.from('cover') })
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: Buffer.from('cover') })
 
-  const createRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos'))
-  const imageRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos/article-1/imagem'))
+  const createRequest = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos'),
+  )
+  const imageRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'POST' &&
+      request.url().endsWith('/api/backoffice/artigos/article-1/imagem'),
+  )
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
 
   expect((await createRequest).postDataJSON()).not.toHaveProperty('imagemUrl')
@@ -56,13 +110,17 @@ test('persists the article introduction on create and restores it on edit', asyn
   await page.goto('/artigos/novo')
   await fillArticle(page)
 
-  const createRequest = page.waitForRequest((request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos'))
+  const createRequest = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/api/backoffice/artigos'),
+  )
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
 
   expect((await createRequest).postDataJSON()).toMatchObject({ resumo: 'Article introduction' })
 
   await page.goto('/artigos/article-1/editar')
-  await expect(page.getByPlaceholder(/breve resumo ou introdução/i)).toHaveValue('Article introduction')
+  await expect(page.getByPlaceholder(/breve resumo ou introdução/i)).toHaveValue(
+    'Article introduction',
+  )
 })
 
 test('updates the article-card color indicator when the category changes', async ({ page }) => {
@@ -88,9 +146,16 @@ test('updates the article-card color indicator when the category changes', async
 test('deletes a persisted article cover when it is removed', async ({ page }) => {
   await mockArticleApi(page)
   await page.goto('/artigos/article-1/editar')
-  await expect(page.locator('img[src="https://cdn.example.com/article.png"]')).toHaveAttribute('src', 'https://cdn.example.com/article.png')
+  await expect(page.locator('img[src="https://cdn.example.com/article.png"]')).toHaveAttribute(
+    'src',
+    'https://cdn.example.com/article.png',
+  )
 
-  const deleteRequest = page.waitForRequest((request) => request.method() === 'DELETE' && request.url().endsWith('/api/backoffice/artigos/article-1/imagem'))
+  const deleteRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'DELETE' &&
+      request.url().endsWith('/api/backoffice/artigos/article-1/imagem'),
+  )
   await page.getByRole('button', { name: 'Remover imagem' }).click()
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
   await deleteRequest
@@ -100,9 +165,24 @@ test('keeps a newly created article editable when its cover upload fails', async
   await mockArticleApi(page, true)
   await page.goto('/artigos/novo')
   await fillArticle(page)
-  await page.locator('input[type="file"]').setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: Buffer.from('cover') })
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: Buffer.from('cover') })
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
 
   await expect(page).toHaveURL(/\/artigos\/article-1\/editar\?imageUploadFailed=1$/)
-  await expect(page.getByRole('status')).toContainText('Artigo salvo, mas não foi possível persistir a imagem.')
+  await expect(page.getByRole('status')).toContainText(
+    'Artigo salvo, mas não foi possível persistir a imagem.',
+  )
+})
+
+test('consulta artigo sem permitir edição', async ({ page }) => {
+  await mockArticleApi(page)
+  await page.goto('/artigos/article-1/consulta')
+
+  await expect(page.getByText('Article title')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Conteúdo' })).toBeVisible()
+  await expect(page.getByText('Article content')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Voltar' })).toHaveAttribute('href', '/artigos')
+  await expect(page.getByRole('button', { name: /salvar|publicar/i })).toHaveCount(0)
 })

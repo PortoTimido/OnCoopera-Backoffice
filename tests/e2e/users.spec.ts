@@ -1,12 +1,41 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const administrator = { id: 'admin-1', nome: 'Ana Silva', email: 'ana@oncoopera.com', login: 'ana.silva', telefone: '11999998888', dataNascimento: '1990-05-20T00:00:00.000Z', status: 'ATIVO', tipo: 'ADMINISTRADOR', perfisAdministrativos: ['TOTAL'], permissoesAdministrativas: ['GERENCIAR_USUARIOS'], ultimoAcesso: '2026-09-01T12:00:00.000Z' }
+const administrator = {
+  id: 'admin-1',
+  nome: 'Ana Silva',
+  email: 'ana@oncoopera.com',
+  login: 'ana.silva',
+  telefone: '11999998888',
+  dataNascimento: '1990-05-20T00:00:00.000Z',
+  status: 'ATIVO',
+  tipo: 'ADMINISTRADOR',
+  perfisAdministrativos: ['TOTAL'],
+  permissoesAdministrativas: ['GERENCIAR_USUARIOS'],
+  ultimoAcesso: '2026-09-01T12:00:00.000Z',
+}
 
 async function mockUsersApi(page: Page) {
-  await page.route(/\/api\/backoffice\/usuarios(?:\?.*)?$/, (route) => route.fulfill({ json: { data: [administrator], page: 1, pageSize: 10, total: 1, totalPages: 1 } }))
-  await page.route(/\/api\/backoffice\/usuarios\/[^/?]+(?:\?.*)?$/, (route) => route.fulfill({ json: { usuario: administrator, endereco: null } }))
-  await page.route(/\/api\/backoffice\/administradores$/, (route) => route.request().method() === 'POST' ? route.fulfill({ status: 201, json: { usuario: administrator, endereco: null, senhaTemporaria: 'SenhaTemp!123' } }) : route.fallback())
-  await page.route(/\/api\/backoffice\/administradores\/[^/?]+$/, (route) => route.request().method() === 'DELETE' ? route.fulfill({ status: 204 }) : route.fulfill({ json: { usuario: administrator, endereco: null } }))
+  await page.route(/\/api\/backoffice\/usuarios(?:\?.*)?$/, (route) =>
+    route.fulfill({
+      json: { data: [administrator], page: 1, pageSize: 10, total: 1, totalPages: 1 },
+    }),
+  )
+  await page.route(/\/api\/backoffice\/usuarios\/[^/?]+(?:\?.*)?$/, (route) =>
+    route.fulfill({ json: { usuario: administrator, endereco: null } }),
+  )
+  await page.route(/\/api\/backoffice\/administradores$/, (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({
+          status: 201,
+          json: { usuario: administrator, endereco: null, senhaTemporaria: 'SenhaTemp!123' },
+        })
+      : route.fallback(),
+  )
+  await page.route(/\/api\/backoffice\/administradores\/[^/?]+$/, (route) =>
+    route.request().method() === 'DELETE'
+      ? route.fulfill({ status: 204 })
+      : route.fulfill({ json: { usuario: administrator, endereco: null } }),
+  )
 }
 
 test('lista administradores e aplica busca e filtro', async ({ page }) => {
@@ -47,4 +76,22 @@ test('carrega e atualiza administrador existente', async ({ page }) => {
   await page.getByLabel('Nome completo').fill('Ana Atualizada')
   await page.getByRole('button', { name: 'Salvar alterações' }).click()
   await expect(page).toHaveURL(/\/usuarios$/)
+})
+
+test('consulta administrador sem expor controles de alteração', async ({ page }) => {
+  await page.addInitScript(
+    (storedUser) => {
+      window.localStorage.setItem('oncoopera.accessToken', 'users-token')
+      window.localStorage.setItem('oncoopera.user', JSON.stringify(storedUser))
+    },
+    { ...administrator, id: 'users-manager', permissoesAdministrativas: ['TOTAL'] },
+  )
+  await mockUsersApi(page)
+  await page.goto('/usuarios/admin-1/consulta')
+
+  await expect(page.getByRole('heading', { name: 'Dados pessoais' })).toBeVisible()
+  await expect(page.getByRole('main').getByText('Ana Silva')).toBeVisible()
+  await expect(page.getByText('Acesso administrativo')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Voltar' })).toHaveAttribute('href', '/usuarios')
+  await expect(page.getByRole('button', { name: /salvar/i })).toHaveCount(0)
 })
