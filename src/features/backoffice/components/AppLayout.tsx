@@ -56,7 +56,7 @@ export function AppLayout({
     })
   }
 
-  function handlePasswordChangeCompleted(_newPassword: string) {
+  function handlePasswordChangeCompleted() {
     const currentUser = user ?? getStoredUser()
     const accessToken = getStoredAccessToken()
 
