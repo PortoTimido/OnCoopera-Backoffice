@@ -182,8 +182,8 @@ export function UserListPage() {
         }
         description={
           administratorToDeactivate?.status === 'ATIVO'
-            ? `O administrador \"${administratorToDeactivate.nome}\" perderá o acesso ao sistema.`
-            : `O administrador \"${administratorToDeactivate?.nome ?? ''}\" voltará a ter acesso ao sistema.`
+            ? `O administrador "${administratorToDeactivate.nome}" perderá o acesso ao sistema.`
+            : `O administrador "${administratorToDeactivate?.nome ?? ''}" voltará a ter acesso ao sistema.`
         }
         isConfirming={isDeleting}
         isOpen={Boolean(administratorToDeactivate)}

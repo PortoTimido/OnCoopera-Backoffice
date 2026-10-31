@@ -171,8 +171,8 @@ export function SupportListPage() {
         confirmLabel={supportToDeactivate?.status === 'ATIVO' ? 'Desativar apoio' : 'Ativar apoio'}
         description={
           supportToDeactivate?.status === 'ATIVO'
-            ? `O apoio \"${supportToDeactivate.nome}\" deixará de aparecer para os usuários.`
-            : `O apoio \"${supportToDeactivate?.nome ?? ''}\" voltará a aparecer para os usuários.`
+            ? `O apoio "${supportToDeactivate.nome}" deixará de aparecer para os usuários.`
+            : `O apoio "${supportToDeactivate?.nome ?? ''}" voltará a aparecer para os usuários.`
         }
         isConfirming={isDeleting}
         isOpen={Boolean(supportToDeactivate)}
