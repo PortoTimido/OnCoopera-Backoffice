@@ -35,7 +35,7 @@ export function SettingsPage() {
   const [user, setUser] = useState<AuthenticatedUser | null>(() => getStoredUser())
   const [name, setName] = useState(() => getStoredUser()?.nome || 'Dr. Sarah Chen')
   const [email, setEmail] = useState(() => getStoredUser()?.email || 'admin@oncoopera.com')
-  const [phone, setPhone] = useState(() => getStoredUser()?.telefone || '')
+  const [phone, setPhone] = useState(() => formatPhoneNumber(getStoredUser()?.telefone || ''))
   const [birthDate, setBirthDate] = useState(() => toIsoDateOnly(getStoredUser()?.dataNascimento))
   const toast = useToast()
   const [isSaving, setIsSaving] = useState(false)
@@ -63,7 +63,7 @@ export function SettingsPage() {
         setUser(currentUserResult[0].value)
         setName(currentUserResult[0].value.nome)
         setEmail(currentUserResult[0].value.email)
-        setPhone(currentUserResult[0].value.telefone || '')
+        setPhone(formatPhoneNumber(currentUserResult[0].value.telefone || ''))
         setBirthDate(toIsoDateOnly(currentUserResult[0].value.dataNascimento))
         storeAuthSession(accessToken, currentUserResult[0].value)
       }

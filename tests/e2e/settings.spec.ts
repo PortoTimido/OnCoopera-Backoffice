@@ -12,4 +12,5 @@ test('renderiza configurações da conta administrativa', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Minha conta' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Administradores' })).not.toBeVisible()
+  await expect(page.getByLabel('Telefone')).toHaveValue('(11) 99999-8888')
 })
