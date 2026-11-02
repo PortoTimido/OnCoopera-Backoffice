@@ -19,6 +19,7 @@ import { cx } from '../../../lib/cx'
 
 type RichTextEditorProps = {
   onChange: (html: string) => void
+  placeholder?: string
   value: string
 }
 
@@ -43,7 +44,11 @@ const toolbarGroups = [
   ],
 ] as const
 
-export function RichTextEditor({ onChange, value }: RichTextEditorProps) {
+export function RichTextEditor({
+  onChange,
+  placeholder = 'Comece a escrever o seu artigo aqui...',
+  value,
+}: RichTextEditorProps) {
   const editor = useEditor({
     content: value,
     editorProps: {
@@ -63,7 +68,7 @@ export function RichTextEditor({ onChange, value }: RichTextEditorProps) {
         allowBase64: true,
       }),
       Placeholder.configure({
-        placeholder: 'Comece a escrever o seu artigo aqui...',
+        placeholder,
       }),
     ],
     onUpdate({ editor: currentEditor }) {

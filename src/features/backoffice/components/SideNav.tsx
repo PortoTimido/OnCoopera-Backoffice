@@ -3,6 +3,7 @@ import {
   Cog,
   FileText,
   LayoutDashboard,
+  Scale,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -49,6 +50,13 @@ const navItems = [
     icon: UsersRound,
     iconClassName: 'h-5 w-5',
     permission: 'GERENCIAR_USUARIOS',
+  },
+  {
+    label: 'Documentos legais',
+    href: '/documentos-legais',
+    icon: Scale,
+    iconClassName: 'h-5 w-5',
+    permission: 'TOTAL',
   },
   {
     label: 'Configurações',

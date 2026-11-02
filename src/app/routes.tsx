@@ -10,6 +10,7 @@ import { RecoverPasswordPage } from '../features/auth/pages/RecoverPasswordPage'
 import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
 import { VerifyRecoveryCodePage } from '../features/auth/pages/VerifyRecoveryCodePage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
+import { LegalDocumentsPage } from '../features/legal-documents/pages/LegalDocumentsPage'
 import { NotFoundPage } from '../features/system/pages/NotFoundPage'
 import { SupportEditorPage } from '../features/radar-de-apoio/pages/SupportEditorPage'
 import { SupportDetailsPage } from '../features/radar-de-apoio/pages/SupportDetailsPage'
@@ -167,6 +168,14 @@ export function AppRoutes() {
         element={
           <PermissionRoute>
             <SettingsPage />
+          </PermissionRoute>
+        }
+      />
+      <Route
+        path="/documentos-legais"
+        element={
+          <PermissionRoute permission="TOTAL">
+            <LegalDocumentsPage />
           </PermissionRoute>
         }
       />
