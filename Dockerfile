@@ -1,7 +1,7 @@
 # Production image for the OnCoopera Backoffice (Vite/React SPA).
 # Dockerfile.dev remains the local-development image (bind mount + vite --host).
 
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /usr/src/app
 
