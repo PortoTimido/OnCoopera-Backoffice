@@ -17,6 +17,7 @@ import { cx } from '../../../lib/cx'
 import { useToast } from '../../../components/ui/useToast'
 import { getApiErrorMessage } from '../../../shared/api/httpClient'
 import { getStoredUser } from '../../auth/model/authSession'
+import { getBackofficeUsuario } from '../../backoffice/api/backofficeApi'
 import { AppLayout } from '../../backoffice/components/AppLayout'
 import { BackofficeDirectoryHeader } from '../../backoffice/components/BackofficeDirectoryHeader'
 import { AdminCreateSelect } from '../../settings/components/AdminCreateSelect'
@@ -135,6 +136,7 @@ export function ArticleEditorPage() {
   const location = useLocation()
   const toast = useToast()
   const [body, setBody] = useState(initialBody)
+  const [authorId, setAuthorId] = useState<string | null>(null)
   const [categories, setCategories] = useState<ArticleTaxonomy[]>([])
   const [featuredImage, setFeaturedImage] = useState<File | null>(null)
   const [helpModal, setHelpModal] = useState<HelpModal>(null)
@@ -204,6 +206,7 @@ export function ArticleEditorPage() {
         setTags(tagsResult)
 
         if (articleResult) {
+          setAuthorId(articleResult.autorId)
           setTitle(articleResult.titulo)
           setSummary(articleResult.resumo ?? '')
           setBody(articleResult.conteudo || initialBody)
@@ -306,13 +309,18 @@ export function ArticleEditorPage() {
     }
   }
 
-  function buildPreviewData(previewImageUrl = imageUrl || null): ArticlePreviewData {
+  function buildPreviewData(
+    previewImageUrl = imageUrl || null,
+    authorName: string | null = user?.nome ?? null,
+  ): ArticlePreviewData {
     const selectedCategory = categories.find((category) => category.id === selectedCategoryId)
 
     return {
+      authorName,
       categories: selectedCategory ? [selectedCategory.nome] : [],
       contentHtml: body,
       imageUrl: previewImageUrl,
+      publishedAt: null,
       readingTimeMinutes: readingTime,
       status,
       summary: summary.trim(),
@@ -329,14 +337,18 @@ export function ArticleEditorPage() {
   async function handlePreview() {
     try {
       const previewImageUrl = featuredImage ? await getFileDataUrl(featuredImage) : imageUrl || null
-      openPreview(buildPreviewData(previewImageUrl))
+      openPreview(buildPreviewData(previewImageUrl, await resolveAuthorName(authorId)))
     } catch {
       toast.error('Não foi possível preparar a imagem para pré-visualização.')
     }
   }
 
-  function openPublishedPreview(article: Article) {
-    const preview = createArticlePreviewFromArticle(article, summary.trim())
+  async function openPublishedPreview(article: Article) {
+    const preview = createArticlePreviewFromArticle(
+      article,
+      summary.trim(),
+      await resolveAuthorName(article.autorId),
+    )
 
     storeArticlePreview(preview)
     navigate('/artigos/preview', { state: { preview } })
@@ -376,7 +388,7 @@ export function ArticleEditorPage() {
       setIsImageRemovalRequested(false)
 
       if (shouldOpenPreview) {
-        openPublishedPreview(savedArticle)
+        await openPublishedPreview(savedArticle)
         return
       }
 
@@ -392,6 +404,18 @@ export function ArticleEditorPage() {
       toast.error(getApiErrorMessage(saveError))
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function resolveAuthorName(id: string | null) {
+    if (!id || id === user?.id) {
+      return user?.nome ?? null
+    }
+
+    try {
+      return (await getBackofficeUsuario(id)).usuario.nome
+    } catch {
+      return null
     }
   }
 

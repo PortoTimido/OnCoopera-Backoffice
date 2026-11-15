@@ -1,9 +1,11 @@
 import type { Article } from '../api/articlesApi'
 
 export type ArticlePreviewData = {
+  authorName: string | null
   categories: string[]
   contentHtml: string
   imageUrl: string | null
+  publishedAt: string | null
   readingTimeMinutes: number
   status: string
   summary: string
@@ -35,11 +37,14 @@ export function getStoredArticlePreview() {
 export function createArticlePreviewFromArticle(
   article: Article,
   summary = article.resumo ?? '',
+  authorName: string | null = null,
 ): ArticlePreviewData {
   return {
+    authorName,
     categories: article.categorias.map((category) => category.nome),
     contentHtml: article.conteudo,
     imageUrl: article.imagemUrl,
+    publishedAt: article.dataPublicacao,
     readingTimeMinutes: article.tempoLeituraMinutos,
     status: article.status,
     summary,

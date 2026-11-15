@@ -1,10 +1,8 @@
-import { PDFDownloadLink } from '@react-pdf/renderer'
-import { ArrowLeft, Download } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { getStoredUser } from '../../auth/model/authSession'
 import { AppLayout } from '../../backoffice/components/AppLayout'
-import { ArticlePdfDocument } from '../components/ArticlePdfDocument'
-import { ArticlePdfPreview } from '../components/ArticlePdfPreview'
+import { ArticleHtmlPreview } from '../components/ArticleHtmlPreview'
 import { getStoredArticlePreview, type ArticlePreviewData } from '../model/articlePreview'
 
 type PreviewLocationState = {
@@ -35,26 +33,15 @@ export function ArticlePreviewPage() {
                   Pré-visualização do artigo
                 </h1>
                 <p className="mt-1 text-sm leading-5 text-muted">
-                  PDF gerado para conferência antes da publicação.
+                  Confira como o conteúdo será apresentado para pacientes no aplicativo.
                 </p>
               </div>
             </div>
-
-            {article ? (
-              <PDFDownloadLink
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-teal px-5 text-sm text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)] transition hover:-translate-y-0.5"
-                document={<ArticlePdfDocument article={article} />}
-                fileName={`${article.title || 'artigo'}.pdf`}
-              >
-                <Download size={16} strokeWidth={2.2} />
-                Baixar PDF
-              </PDFDownloadLink>
-            ) : null}
           </header>
 
           {article ? (
-            <section className="overflow-auto rounded-3xl bg-white/70 p-6 shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_rgba(215,219,218,0.5)]">
-              <ArticlePdfPreview article={article} />
+            <section className="overflow-auto rounded-3xl bg-white/70 p-4 shadow-[4px_4px_0_rgba(187,202,196,0.2),inset_2px_2px_4px_rgba(215,219,218,0.5)] sm:p-6">
+              <ArticleHtmlPreview article={article} />
             </section>
           ) : (
             <section className="grid place-items-center rounded-3xl bg-white p-8 text-center shadow-[inset_2px_2px_4px_rgba(215,219,218,0.5)]">
@@ -63,8 +50,8 @@ export function ArticlePreviewPage() {
                   Nenhum preview disponível
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Abra a pré-visualização a partir do cadastro ou publique um artigo para gerar o
-                  PDF.
+                  Abra a pré-visualização a partir do cadastro ou publique um artigo para conferir
+                  seu conteúdo.
                 </p>
               </div>
             </section>
