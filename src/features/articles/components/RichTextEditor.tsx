@@ -212,7 +212,7 @@ export function RichTextEditor({
           </div>
         ))}
       </div>
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} onBlur={() => editor && onChange(editor.getHTML())} />
     </div>
   )
 }

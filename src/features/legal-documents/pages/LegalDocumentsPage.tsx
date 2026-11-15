@@ -141,6 +141,10 @@ export function LegalDocumentsPage() {
   }, [activeType, reloadToken, toast])
 
   function handleContentChange(content: string) {
+    documentsRef.current = {
+      ...documentsRef.current,
+      [activeType]: { ...documentsRef.current[activeType], content },
+    }
     setDocuments((current) => ({
       ...current,
       [activeType]: { ...current[activeType], content },
@@ -148,7 +152,9 @@ export function LegalDocumentsPage() {
   }
 
   async function handleSave() {
-    if (!hasTextContent(activeDocument.content)) {
+    const documentToSave = documentsRef.current[activeType]
+
+    if (!hasTextContent(documentToSave.content)) {
       toast.alert(`Escreva o conteúdo de ${activeTab.label.toLowerCase()} antes de salvar.`)
       return
     }
@@ -156,9 +162,9 @@ export function LegalDocumentsPage() {
     setIsSaving(true)
 
     try {
-      const savedDocument = activeDocument.document
-        ? await updateLegalDocument(activeType, { conteudo: activeDocument.content })
-        : await createLegalDocument({ tipo: activeType, conteudo: activeDocument.content })
+      const savedDocument = documentToSave.document
+        ? await updateLegalDocument(activeType, { conteudo: documentToSave.content })
+        : await createLegalDocument({ tipo: activeType, conteudo: documentToSave.content })
 
       setDocuments((current) => ({
         ...current,

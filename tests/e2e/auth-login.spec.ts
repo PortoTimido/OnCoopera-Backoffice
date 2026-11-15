@@ -90,6 +90,9 @@ test('contorna a exceção de troca obrigatória e autentica após trocar a senh
   })
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: authenticatedAdministrator }))
   await page.route(/\/api\/backoffice\/(artigos|apoios|usuarios)(?:\?.*)?$/, (route) => route.fulfill({ json: { data: [], page: 1, pageSize: 1, total: 0, totalPages: 0 } }))
+  await page.route(/\/api\/v1\/backoffice\/dashboard\/crescimento-mensal(?:\?.*)?$/, (route) =>
+    route.fulfill({ json: { points: [] } }),
+  )
   await page.route(/\/api\/auth\/change-temporary-password$/, (route) => route.fulfill({ status: 204 }))
   await page.goto('/login')
 

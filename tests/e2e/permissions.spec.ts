@@ -11,6 +11,9 @@ async function authenticateContentManager(page: import('@playwright/test').Page)
   }, contentManager)
   await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: contentManager }))
   await page.route(/\/api\/backoffice\/(artigos|apoios|usuarios)(?:\?.*)?$/, (route) => route.fulfill({ json: { data: [], page: 1, pageSize: 1, total: 0, totalPages: 1 } }))
+  await page.route(/\/api\/v1\/backoffice\/dashboard\/crescimento-mensal(?:\?.*)?$/, (route) =>
+    route.fulfill({ json: { points: [] } }),
+  )
 }
 
 test('exibe apenas as telas permitidas na sidebar', async ({ page }) => {

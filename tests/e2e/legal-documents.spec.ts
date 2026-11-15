@@ -91,7 +91,10 @@ test('cria documento inexistente e atualiza-o nos salvamentos seguintes', async 
     route.fulfill(created ? { json: termsDocument } : { status: 404, json: { message: 'Não encontrado' } }),
   )
   await page.route(/\/api\/backoffice\/documentos-legais$/, (route) =>
-    route.fulfill({ status: 201, json: termsDocument }),
+    route.fulfill({
+      status: 201,
+      json: { ...termsDocument, conteudo: route.request().postDataJSON().conteudo },
+    }),
   )
 
   await page.goto('/documentos-legais')

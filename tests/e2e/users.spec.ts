@@ -14,6 +14,23 @@ const administrator = {
   ultimoAcesso: '2026-09-01T12:00:00.000Z',
 }
 
+const usersManager = {
+  ...administrator,
+  id: 'users-manager',
+  nome: 'Gestor de usuários',
+  email: 'gestor@oncoopera.com',
+  login: 'gestor.usuarios',
+  trocaSenhaObrigatoria: false,
+}
+
+async function authenticateUsersManager(page: Page, user = usersManager) {
+  await page.addInitScript((user) => {
+    window.localStorage.setItem('oncoopera.accessToken', 'users-token')
+    window.localStorage.setItem('oncoopera.user', JSON.stringify(user))
+  }, user)
+  await page.route(/\/api\/auth\/me$/, (route) => route.fulfill({ json: user }))
+}
+
 async function mockUsersApi(page: Page) {
   await page.route(/\/api\/backoffice\/usuarios(?:\?.*)?$/, (route) =>
     route.fulfill({
@@ -39,10 +56,11 @@ async function mockUsersApi(page: Page) {
 }
 
 test('lista administradores e aplica busca e filtro', async ({ page }) => {
+  await authenticateUsersManager(page)
   await mockUsersApi(page)
   await page.goto('/usuarios')
   await expect(page.getByRole('heading', { name: 'Usuários' })).toBeVisible()
-  await expect(page.getByText('Ana Silva')).toBeVisible()
+  await expect(page.getByRole('table').getByText('Ana Silva')).toBeVisible()
   await page.getByLabel('Pesquisar administradores').fill('Ana')
   await expect(page).toHaveURL(/search=Ana/)
   await page.getByRole('tab', { name: 'Ativos', exact: true }).click()
@@ -50,13 +68,14 @@ test('lista administradores e aplica busca e filtro', async ({ page }) => {
 })
 
 test('cria administrador e exibe a senha temporária em um popup', async ({ page }) => {
+  await authenticateUsersManager(page)
   await mockUsersApi(page)
   await page.goto('/usuarios/novo')
   await page.getByLabel('Nome completo').fill('Helena Maria Vasconcelos')
   await expect(page.getByText('helena.vasconcelos')).toBeVisible()
   await page.getByLabel('E-mail profissional').fill('helena@oncoopera.com')
   await page.getByLabel('Telefone').fill('(11) 99999-8888')
-  await page.getByLabel('Data de nascimento').fill('1990-05-20')
+  await page.getByLabel('Data de nascimento').fill('20/05/1990')
   await page.getByLabel('Gestão de conteúdos').check()
   await page.getByRole('button', { name: 'Salvar cadastro' }).click()
   const modal = page.getByRole('dialog', { name: 'Usuário criado' })
@@ -69,6 +88,7 @@ test('cria administrador e exibe a senha temporária em um popup', async ({ page
 })
 
 test('carrega e atualiza administrador existente', async ({ page }) => {
+  await authenticateUsersManager(page)
   await mockUsersApi(page)
   await page.goto('/usuarios/admin-1/editar')
   await expect(page.getByLabel('Nome completo')).toHaveValue('Ana Silva')
@@ -79,13 +99,7 @@ test('carrega e atualiza administrador existente', async ({ page }) => {
 })
 
 test('consulta administrador sem expor controles de alteração', async ({ page }) => {
-  await page.addInitScript(
-    (storedUser) => {
-      window.localStorage.setItem('oncoopera.accessToken', 'users-token')
-      window.localStorage.setItem('oncoopera.user', JSON.stringify(storedUser))
-    },
-    { ...administrator, id: 'users-manager', permissoesAdministrativas: ['TOTAL'] },
-  )
+  await authenticateUsersManager(page, { ...usersManager, permissoesAdministrativas: ['TOTAL'] })
   await mockUsersApi(page)
   await page.goto('/usuarios/admin-1/consulta')
 

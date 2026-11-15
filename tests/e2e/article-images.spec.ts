@@ -170,7 +170,7 @@ test('keeps a newly created article editable when its cover upload fails', async
     .setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: Buffer.from('cover') })
   await page.getByRole('button', { name: 'Salve o rascunho' }).click()
 
-  await expect(page).toHaveURL(/\/artigos\/article-1\/editar\?imageUploadFailed=1$/)
+  await expect(page).toHaveURL(/\/artigos\/article-1\/editar$/)
   await expect(page.getByRole('status')).toContainText(
     'Artigo salvo, mas não foi possível persistir a imagem.',
   )
